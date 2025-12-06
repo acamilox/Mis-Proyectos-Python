@@ -6,6 +6,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from openpyxl import load_workbook
+import os
+
+# Obtener directorio del script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+EXCEL_PATH = os.path.join(BASE_DIR, 'datos_iaas.xlsx')
 
 # Inicializar df globalmente
 df = pd.DataFrame()
@@ -13,7 +18,7 @@ df = pd.DataFrame()
 # --- 1. CARGA DE DATOS ---
 try:
     # Leer Excel: la fila 2 (índice 2) contiene los headers
-    df_raw = pd.read_excel('datos_iaas.xlsx', sheet_name='ESTADISTICA', header=2)
+    df_raw = pd.read_excel(EXCEL_PATH, sheet_name='ESTADISTICA', header=2)
     
     # La primera columna contiene los nombres de las filas
     df = df_raw.set_index('DATOS')
@@ -42,7 +47,7 @@ except Exception as e:
 # --- CARGA DE DATOS DE MORBILIDAD ---
 df_morbilidad = pd.DataFrame()
 try:
-    df_morb_raw = pd.read_excel('datos_iaas.xlsx', sheet_name='MORBILIDAD', header=None)
+    df_morb_raw = pd.read_excel(EXCEL_PATH, sheet_name='MORBILIDAD', header=None)
     
     # Procesar datos de morbilidad - extraer totales por diagnóstico
     diagnosticos = ['ACV', 'CARDIOVASCULAR', 'RESPIRATORIO', 'SEPSIS', 'POP', 'DM', 
@@ -75,7 +80,7 @@ except Exception as e:
 # --- CARGA DE DATOS DE GÉRMENES AISLADOS (IAAS) ---
 df_germenes = pd.DataFrame()
 try:
-    df_iaas = pd.read_excel('datos_iaas.xlsx', sheet_name='IAAS', header=None)
+    df_iaas = pd.read_excel(EXCEL_PATH, sheet_name='IAAS', header=None)
     # Columna F (índice 5) contiene los gérmenes
     germenes_raw = df_iaas[5].dropna()
     germenes_raw = germenes_raw[germenes_raw.astype(str).str.strip() != '']
@@ -111,7 +116,7 @@ except Exception as e:
 # --- CARGA DE OTROS EVENTOS ADVERSOS (celdas azules en columna E) ---
 df_eventos_adversos = pd.DataFrame()
 try:
-    wb = load_workbook('datos_iaas.xlsx')
+    wb = load_workbook(EXCEL_PATH)
     ws = wb['EVENTOS ADVERSOS']
     
     eventos_azules = []
