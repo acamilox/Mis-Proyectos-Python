@@ -896,19 +896,19 @@ def render_content(tab):
             if pd.isna(total_neurocirugia): total_neurocirugia = 0
             if pd.isna(total_ortopedia): total_ortopedia = 0
             
-            kpi1 = create_kpi_card("Medicina interna", f"{int(total_medicina_interna)}", "Total pacientes", "#2c3e50", "⚕️")
+            kpi1 = create_kpi_card("Medicina interna", f"{int(total_medicina_interna)}", "Total pacientes", "#3498db", "⚕️")
             kpi2 = create_kpi_card("Cirugía general", f"{int(total_cirugia)}", "Total pacientes", "#27ae60", "🔪")
             kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neurocirugia)}", "Total pacientes", "#16a085", "🧠")
             kpi4 = create_kpi_card("Ortopedia", f"{int(total_ortopedia)}", "Total pacientes", "#9b59b6", "🦴")
             
-            # Gráficos de especialidades principales
-            fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina interna', color='#2c3e50', silent=True, decimals=0)
-            fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía general', color='#27ae60', silent=True, decimals=0)
+            # Gráficos de especialidades principales - colores más visibles
+            fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina Interna', color='#3498db', silent=True, decimals=0)
+            fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía General', color='#27ae60', silent=True, decimals=0)
             fig_neurocirugia = create_bar_chart('NEUROCIRUGIA', 'Neurocirugía', color='#16a085', silent=True, decimals=0)
             fig_ortopedia = create_bar_chart('ORTOPEDIA', 'Ortopedia', color='#9b59b6', silent=True, decimals=0)
             
             return html.Div([
-                html.H5("Principales especialidades", style={'color': '#e2e8f0', 'fontWeight': '600'}, className="mb-3"),
+                html.H5("Principales Especialidades", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '20px'}),
                 dbc.Row([
                     dbc.Col(kpi1, xs=12, md=3),
                     dbc.Col(kpi2, xs=12, md=3),
@@ -916,10 +916,12 @@ def render_content(tab):
                     dbc.Col(kpi4, xs=12, md=3),
                 ], className="mb-4"),
                 dbc.Row([
-                    dbc.Col(dcc.Graph(figure=fig_medicina, config={'displayModeBar': False}), xs=12, md=3),
-                    dbc.Col(dcc.Graph(figure=fig_cirugia, config={'displayModeBar': False}), xs=12, md=3),
-                    dbc.Col(dcc.Graph(figure=fig_neurocirugia, config={'displayModeBar': False}), xs=12, md=3),
-                    dbc.Col(dcc.Graph(figure=fig_ortopedia, config={'displayModeBar': False}), xs=12, md=3),
+                    dbc.Col(dcc.Graph(figure=fig_medicina, config={'displayModeBar': False}), xs=12, md=6),
+                    dbc.Col(dcc.Graph(figure=fig_cirugia, config={'displayModeBar': False}), xs=12, md=6),
+                ], className="mb-4"),
+                dbc.Row([
+                    dbc.Col(dcc.Graph(figure=fig_neurocirugia, config={'displayModeBar': False}), xs=12, md=6),
+                    dbc.Col(dcc.Graph(figure=fig_ortopedia, config={'displayModeBar': False}), xs=12, md=6),
                 ])
             ])
         except Exception as e:
