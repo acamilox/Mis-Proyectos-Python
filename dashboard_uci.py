@@ -729,7 +729,7 @@ def render_content(tab):
                         )
                     ], xs=12, md=4),
                     dbc.Col([
-                        html.Label("� Año :", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        html.Label("📅 Año :", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
                         dcc.Dropdown(
                             id='filtro-anio',
                             options=[
@@ -959,7 +959,8 @@ def render_content(tab):
             fig_germenes = go.Figure()
             if not df_germenes.empty:
                 colors_germenes = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', 
-                                   '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b']
+                                   '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b',
+                                   '#27ae60', '#8e44ad', '#2980b9', '#d35400', '#7f8c8d']
                 fig_germenes = go.Figure(data=[
                     go.Bar(
                         x=df_germenes['Germen'],
@@ -979,7 +980,8 @@ def render_content(tab):
                 )
             
             # Gráfico de Otros Eventos Adversos
-            colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6']
+            colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', 
+                               '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad']
             if not df_eventos_adversos.empty:
                 fig_eventos = go.Figure(data=[
                     go.Bar(
