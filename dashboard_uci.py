@@ -190,18 +190,26 @@ try:
                 evento = str(cell.value).strip()
                 eventos_azules.append(evento)
     
-    # Normalizar y agrupar eventos similares
+    # Normalizar nombres de eventos (sin agrupar, cada tipo por separado)
     def normalizar_evento(e):
         e_lower = e.lower()
-        if 'desplazamiento' in e_lower or 'autoretiro' in e_lower:
-            return 'Desplazamiento/Autoretiro dispositivo'
-        if 'error' in e_lower or 'medicamento' in e_lower:
-            return 'Error medicamentos/procedimiento'
-        if 'lecash' in e_lower or 'marsi' in e_lower or 'lesión' in e_lower:
-            return 'Lesiones (LECASH/MARSI)'
-        if 'caida' in e_lower:
+        if 'desplazamiento' in e_lower:
+            return 'Desplazamiento'
+        if 'autoretiro' in e_lower:
+            return 'Autoretiro'
+        if 'error' in e_lower:
+            return 'Error procedimiento'
+        if 'medicamento' in e_lower:
+            return 'Error medicamentos'
+        if 'lecash' in e_lower:
+            return 'LECASH'
+        if 'marsi' in e_lower:
+            return 'MARSI'
+        if 'lesión' in e_lower or 'lesion' in e_lower:
+            return 'Lesiones'
+        if 'caida' in e_lower or 'caída' in e_lower:
             return 'Caídas'
-        return 'Otros'
+        return e[:20] if len(e) > 20 else e  # Truncar si es muy largo
     
     eventos_norm = [normalizar_evento(e) for e in eventos_azules]
     df_eventos_adversos = pd.Series(eventos_norm).value_counts().reset_index()
