@@ -113,6 +113,67 @@ try:
 except Exception as e:
     print(f"⚠️ Error cargando gérmenes: {e}")
 
+# --- CARGA DE DATOS DE FALLECIDOS (MORTALIDAD) - Edad y Sexo ---
+df_fallecidos = pd.DataFrame()
+try:
+    import unicodedata
+    df_mort = pd.read_excel(EXCEL_PATH, sheet_name='MORTALIDAD', header=None, usecols='A:F')
+    
+    # Nombres de meses para identificar separadores
+    meses_separadores = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
+                         'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
+    
+    # Nombres femeninos comunes (sin tildes para comparación normalizada)
+    nombres_femeninos = ['maria', 'ana', 'luz', 'rosa', 'carmen', 'martha', 'marta', 'gloria', 
+                         'patricia', 'sandra', 'claudia', 'diana', 'adriana', 'carolina', 'andrea',
+                         'monica', 'laura', 'paula', 'angela', 'beatriz', 'cecilia', 'clara',
+                         'cristina', 'elena', 'esperanza', 'eva', 'flor', 'graciela', 'hilda',
+                         'irma', 'isabel', 'julia', 'liliana', 'lucia', 'luisa', 'margarita',
+                         'marina', 'mercedes', 'nancy', 'nelly', 'nidia', 'olga', 'oliva',
+                         'pilar', 'rocio', 'ruth', 'silvia', 'sonia', 'stella', 'teresa',
+                         'victoria', 'virginia', 'yolanda', 'blanca', 'barbara', 'nesly',
+                         'claribel', 'evelia', 'zulema', 'angelica', 'milena', 'ines']
+    
+    def normalizar_texto(s):
+        """Elimina tildes y convierte a minúsculas"""
+        return ''.join(c for c in unicodedata.normalize('NFD', s.lower()) if unicodedata.category(c) != 'Mn')
+    
+    def es_nombre_femenino(nombre_completo):
+        """Determina si un nombre es femenino basándose en el primer nombre"""
+        nombre_norm = normalizar_texto(nombre_completo)
+        primer_nombre = nombre_norm.split()[0] if nombre_norm.split() else ''
+        for nf in nombres_femeninos:
+            if nf == primer_nombre or primer_nombre.startswith(nf):
+                return True
+        return False
+    
+    fallecidos_data = []
+    for i, row in df_mort.iterrows():
+        nombre = str(row[0]).strip() if pd.notna(row[0]) else ''
+        edad = row[1]
+        
+        # Saltar filas de meses o vacías
+        if nombre.upper().replace(' ', '') in [m.upper() for m in meses_separadores]:
+            continue
+        if not nombre or nombre.upper() == 'NAN':
+            continue
+        if not pd.notna(edad) or not isinstance(edad, (int, float)):
+            continue
+        
+        # Determinar sexo por nombre
+        sexo = 'Mujer' if es_nombre_femenino(nombre) else 'Hombre'
+        
+        fallecidos_data.append({
+            'Nombre': nombre,
+            'Edad': int(edad),
+            'Sexo': sexo
+        })
+    
+    df_fallecidos = pd.DataFrame(fallecidos_data)
+    print(f"✅ Datos de fallecidos cargados: {len(df_fallecidos)} pacientes")
+except Exception as e:
+    print(f"⚠️ Error cargando fallecidos: {e}")
+
 # --- CARGA DE OTROS EVENTOS ADVERSOS (celdas azules en columna E) ---
 df_eventos_adversos = pd.DataFrame()
 try:
@@ -649,29 +710,18 @@ def render_content(tab):
             filtros = html.Div([
                 dbc.Row([
                     dbc.Col([
-                        html.Label("📅 Mes Inicio:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        html.Label("📅 Mes:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
                         dcc.Dropdown(
                             id='filtro-mes-inicio',
-                            options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
-                            value='Ene',
-                            style={'backgroundColor': '#2d3748', 'color': '#1a202c'},
-                            className='dropdown-dark',
-                            clearable=False
-                        )
-                    ], xs=12, md=3),
-                    dbc.Col([
-                        html.Label("📅 Mes Fin:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
-                        dcc.Dropdown(
-                            id='filtro-mes-fin',
                             options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
                             value='Oct',
                             style={'backgroundColor': '#2d3748', 'color': '#1a202c'},
                             className='dropdown-dark',
                             clearable=False
                         )
-                    ], xs=12, md=3),
+                    ], xs=12, md=4),
                     dbc.Col([
-                        html.Label("📆 Año:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        html.Label("� Año :", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
                         dcc.Dropdown(
                             id='filtro-anio',
                             options=[
@@ -684,7 +734,7 @@ def render_content(tab):
                             className='dropdown-dark',
                             clearable=False
                         )
-                    ], xs=12, md=3),
+                    ], xs=12, md=4),
                     dbc.Col([
                         html.Label(" ", style={'color': 'transparent', 'marginBottom': '8px', 'display': 'block'}),
                         dbc.Button(
@@ -704,7 +754,7 @@ def render_content(tab):
                                 'marginTop': '0px'
                             }
                         )
-                    ], xs=12, md=3, style={'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'flex-end'}),
+                    ], xs=12, md=4, style={'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'flex-end'}),
                 ], className="mb-2"),
             ], style={
                 'background': 'linear-gradient(145deg, #1a202c 0%, #2d3748 100%)',
@@ -761,6 +811,42 @@ def render_content(tab):
                 decimals=0
             )
             
+            # Gráfico de Edad y Sexo de Fallecidos
+            fig_edad_sexo = go.Figure()
+            if not df_fallecidos.empty:
+                # Crear rangos de edad
+                bins = [0, 40, 50, 60, 70, 80, 90, 100]
+                labels = ['<40', '40-49', '50-59', '60-69', '70-79', '80-89', '90+']
+                df_fallecidos['Rango_Edad'] = pd.cut(df_fallecidos['Edad'], bins=bins, labels=labels, right=False)
+                
+                # Agrupar por rango de edad y sexo
+                edad_sexo = df_fallecidos.groupby(['Rango_Edad', 'Sexo']).size().unstack(fill_value=0)
+                
+                # Asegurar que existan ambas columnas
+                if 'Hombre' not in edad_sexo.columns:
+                    edad_sexo['Hombre'] = 0
+                if 'Mujer' not in edad_sexo.columns:
+                    edad_sexo['Mujer'] = 0
+                
+                fig_edad_sexo = go.Figure(data=[
+                    go.Bar(name='Hombres', x=edad_sexo.index.astype(str), y=edad_sexo['Hombre'], 
+                           marker_color='#3498db', hovertemplate='<b>%{x}</b><br>Hombres: %{y}<extra></extra>'),
+                    go.Bar(name='Mujeres', x=edad_sexo.index.astype(str), y=edad_sexo['Mujer'], 
+                           marker_color='#e91e63', hovertemplate='<b>%{x}</b><br>Mujeres: %{y}<extra></extra>')
+                ])
+                fig_edad_sexo.update_layout(
+                    title={'text': 'Edad y Sexo de Fallecidos', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
+                    barmode='group',
+                    plot_bgcolor='#1a202c',
+                    paper_bgcolor='#2d3748',
+                    xaxis={'title': 'Rango de Edad', 'gridcolor': '#4a5568', 'color': '#e2e8f0'},
+                    yaxis={'title': 'Cantidad', 'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1},
+                    margin=dict(l=50, r=30, t=50, b=60),
+                    legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5, 
+                               bgcolor='rgba(26,32,44,0.95)', font={'color': '#ffffff'}),
+                    hoverlabel=dict(bgcolor='white', font_size=14, font_color='#1a202c')
+                )
+            
             return html.Div([
                 dbc.Row([
                     dbc.Col(kpi1, xs=12, md=3),
@@ -774,6 +860,7 @@ def render_content(tab):
                 ]),
                 dbc.Row([
                     dbc.Col(dcc.Graph(figure=fig_trauma, config={'displayModeBar': False}), xs=12, md=6),
+                    dbc.Col(dcc.Graph(figure=fig_edad_sexo, config={'displayModeBar': False}), xs=12, md=6),
                 ], className="mt-3")
             ])
         except Exception as e:
@@ -949,27 +1036,19 @@ def render_content(tab):
     Output('resumen-content', 'children'),
     [Input('btn-aplicar-filtros', 'n_clicks')],
     [dash.dependencies.State('filtro-mes-inicio', 'value'),
-     dash.dependencies.State('filtro-mes-fin', 'value'),
      dash.dependencies.State('filtro-anio', 'value')],
     prevent_initial_call=False
 )
-def actualizar_resumen(n_clicks, mes_inicio, mes_fin, anio):
+def actualizar_resumen(n_clicks, mes_seleccionado, anio):
     try:
-        # Determinar rango de meses
-        if mes_inicio and mes_fin:
-            idx_inicio = meses_disponibles.index(mes_inicio) if mes_inicio in meses_disponibles else 0
-            idx_fin = meses_disponibles.index(mes_fin) if mes_fin in meses_disponibles else len(meses_disponibles) - 1
-            
-            # Asegurar que inicio <= fin
-            if idx_inicio > idx_fin:
-                idx_inicio, idx_fin = idx_fin, idx_inicio
-            
-            meses_filtrados = meses_disponibles[idx_inicio:idx_fin + 1]
+        # Usar solo el mes seleccionado
+        if mes_seleccionado and mes_seleccionado in meses_disponibles:
+            meses_filtrados = [mes_seleccionado]
         else:
             meses_filtrados = meses_disponibles
         
-        # Texto del rango para subtítulos
-        rango_texto = f"{meses_filtrados[0]} - {meses_filtrados[-1]}" if len(meses_filtrados) > 1 else meses_filtrados[0]
+        # Texto del mes para subtítulos
+        rango_texto = meses_completos.get(mes_seleccionado, mes_seleccionado) if mes_seleccionado else "Todos"
         
         # Obtener columna de suma
         suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
