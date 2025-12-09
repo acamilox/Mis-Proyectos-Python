@@ -663,23 +663,33 @@ app.layout = html.Div([
         # Header con animación
         html.Div([
             html.Div([
-                html.H1("🏥 Dashboard UCI Adultos 2025", style={
-                    'color': '#ffffff',
-                    'fontWeight': '800',
-                    'marginBottom': '10px',
-                    'fontSize': '36px',
-                    'letterSpacing': '1px',
-                    'textShadow': '0 0 40px rgba(22,160,133,0.8), 0 0 80px rgba(22,160,133,0.4), 0 4px 8px rgba(0,0,0,0.5)',
-                    'textTransform': 'uppercase'
-                }),
-                html.P("Sistema de monitoreo y análisis de indicadores", style={
-                    'color': '#e2e8f0',
-                    'fontSize': '15px',
-                    'marginBottom': '20px',
-                    'fontWeight': '500',
-                    'letterSpacing': '0.5px',
-                    'textShadow': '0 2px 4px rgba(0,0,0,0.5)'
-                })
+                html.Div([
+                    html.Img(src='/assets/Logo.png', style={
+                        'height': '70px',
+                        'marginRight': '20px',
+                        'filter': 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+                    }),
+                    html.Div([
+                        html.H1("DASHBOARD UCI ADULTOS 2025", style={
+                            'color': '#ffffff',
+                            'fontWeight': '800',
+                            'marginBottom': '5px',
+                            'fontSize': '32px',
+                            'letterSpacing': '2px',
+                            'textShadow': '0 0 40px rgba(22,160,133,0.8), 0 0 80px rgba(22,160,133,0.4), 0 4px 8px rgba(0,0,0,0.5)',
+                            'textTransform': 'uppercase',
+                            'margin': '0'
+                        }),
+                        html.P("Sistema de Monitoreo y Análisis de Indicadores", style={
+                            'color': '#e2e8f0',
+                            'fontSize': '14px',
+                            'marginBottom': '0',
+                            'fontWeight': '500',
+                            'letterSpacing': '0.5px',
+                            'textShadow': '0 2px 4px rgba(0,0,0,0.5)'
+                        })
+                    ])
+                ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '15px'})
             ]),
             html.Div([
                 dbc.Button("📊 Exportar a Excel", color="success", size="sm", className="me-2", 
