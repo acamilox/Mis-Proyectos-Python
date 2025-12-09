@@ -239,6 +239,12 @@ COLOR_PALETTE = {
     'gradient': ['#2c3e50', '#34495e', '#16a085', '#27ae60']
 }
 
+def capitalizar_texto(texto):
+    """Convierte el texto para que tenga la primera letra en mayúscula y el resto en minúscula"""
+    if not texto or not isinstance(texto, str):
+        return texto
+    return texto[0].upper() + texto[1:].lower() if len(texto) > 1 else texto.upper()
+
 def safe_get_row(row_name, columns, silent=False):
     try:
         # Buscar el nombre de fila de forma flexible (ignorando mayúsculas/minúsculas y espacios)
@@ -414,7 +420,7 @@ def create_kpi_card(title, value, subtitle="", color="#3498db", icon="📊"):
                     'flexShrink': '0'
                 }),
                 html.Div([
-                    html.H6(title, style={
+                    html.H6(capitalizar_texto(title), style={
                         'color': '#e2e8f0', 
                         'fontSize': '12px', 
                         'marginBottom': '8px', 
@@ -436,7 +442,7 @@ def create_kpi_card(title, value, subtitle="", color="#3498db", icon="📊"):
                         'letterSpacing': '-1px',
                         'lineHeight': '1'
                     }),
-                    html.P(subtitle, style={
+                    html.P(capitalizar_texto(subtitle), style={
                         'color': '#cbd5e0', 
                         'fontSize': '11px', 
                         'margin': '0',
@@ -666,7 +672,7 @@ app.layout = html.Div([
                     'textShadow': '0 0 40px rgba(22,160,133,0.8), 0 0 80px rgba(22,160,133,0.4), 0 4px 8px rgba(0,0,0,0.5)',
                     'textTransform': 'uppercase'
                 }),
-                html.P("Sistema de Monitoreo y Análisis de Indicadores", style={
+                html.P("Sistema de monitoreo y análisis de indicadores", style={
                     'color': '#e2e8f0',
                     'fontSize': '15px',
                     'marginBottom': '20px',
@@ -685,8 +691,8 @@ app.layout = html.Div([
         
         # Tabs con estilo mejorado
         dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
-            dbc.Tab(label='📊 Resumen General', tab_id='tab-resumen'),
-            dbc.Tab(label='📈 Gestión y Calidad', tab_id='tab-gestion'),
+            dbc.Tab(label='📊 Resumen general', tab_id='tab-resumen'),
+            dbc.Tab(label='📈 Gestión y calidad', tab_id='tab-gestion'),
             dbc.Tab(label='💀 Mortalidad', tab_id='tab-mortalidad'),
             dbc.Tab(label='🏥 Especialidades y FPS', tab_id='tab-especialidades'),
         ], style={'marginBottom': '25px', 'borderBottom': '2px solid #e8eaed'}),
@@ -729,7 +735,7 @@ def render_content(tab):
                         )
                     ], xs=12, md=4),
                     dbc.Col([
-                        html.Label("📅 Año :", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        html.Label("📅 Año:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
                         dcc.Dropdown(
                             id='filtro-anio',
                             options=[
@@ -746,7 +752,7 @@ def render_content(tab):
                     dbc.Col([
                         html.Label(" ", style={'color': 'transparent', 'marginBottom': '8px', 'display': 'block'}),
                         dbc.Button(
-                            "🔍 Aplicar Filtros",
+                            "🔍 Aplicar filtros",
                             id='btn-aplicar-filtros',
                             color="success",
                             className="w-100",
@@ -805,17 +811,17 @@ def render_content(tab):
             datos_mortalidad_trauma = safe_get_row('% mortalidad en trauma', meses_disponibles, silent=True)
             mortalidad_trauma = datos_mortalidad_trauma.sum() / 10 if isinstance(datos_mortalidad_trauma, pd.Series) else 0
             
-            kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Oct", "#e74c3c", "💀")
-            kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad_general:.2f}%", "Ene - Oct", "#c0392b", "⚰️")
-            kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Oct", "#34495e", "🦠")
-            kpi4 = create_kpi_card("% Mortalidad Trauma", f"{mortalidad_trauma:.2f}%", "Promedio 10 meses", "#f39c12", "🚑")
+            kpi1 = create_kpi_card("Total fallecidos", f"{int(total_fallecidos)}", "Ene - oct", "#e74c3c", "💀")
+            kpi2 = create_kpi_card("% mortalidad general", f"{mortalidad_general:.2f}%", "Ene - oct", "#c0392b", "⚰️")
+            kpi3 = create_kpi_card("Fallecidos covid-19", f"{int(fallecidos_covid)}", "Ene - oct", "#34495e", "🦠")
+            kpi4 = create_kpi_card("% mortalidad trauma", f"{mortalidad_trauma:.2f}%", "Promedio 10 meses", "#f39c12", "🚑")
             
-            fig_fallecidos = create_bar_chart('FALLECIDOS', 'Número de Fallecidos', color='#e74c3c', decimals=0)
-            fig_mortalidad = create_line_chart('% DE MORATLIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=2)
+            fig_fallecidos = create_bar_chart('FALLECIDOS', 'Número de fallecidos', color='#e74c3c', decimals=0)
+            fig_mortalidad = create_line_chart('% DE MORATLIDAD GENERAL', '% mortalidad general', color='#e74c3c', decimals=2)
             fig_trauma = create_grouped_bar_chart(
                 ['Pacientes con diagnóstico de Trauma', 'Pacientes fallecidos por Trauma'],
-                ['Pacientes Trauma', 'Fallecidos Trauma'],
-                'Trauma: Pacientes vs Fallecidos',
+                ['Pacientes trauma', 'Fallecidos trauma'],
+                'Trauma: pacientes vs fallecidos',
                 decimals=0
             )
             
@@ -843,11 +849,11 @@ def render_content(tab):
                            marker_color='#e91e63', hovertemplate='<b>%{x}</b><br>Mujeres: %{y}<extra></extra>')
                 ])
                 fig_edad_sexo.update_layout(
-                    title={'text': 'Edad y Sexo de Fallecidos', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
+                    title={'text': 'Edad y sexo de fallecidos', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
                     barmode='group',
                     plot_bgcolor='#1a202c',
                     paper_bgcolor='#2d3748',
-                    xaxis={'title': 'Rango de Edad', 'gridcolor': '#4a5568', 'color': '#e2e8f0'},
+                    xaxis={'title': 'Rango de edad', 'gridcolor': '#4a5568', 'color': '#e2e8f0'},
                     yaxis={'title': 'Cantidad', 'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1},
                     margin=dict(l=50, r=30, t=50, b=60),
                     legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5, 
@@ -890,19 +896,19 @@ def render_content(tab):
             if pd.isna(total_neurocirugia): total_neurocirugia = 0
             if pd.isna(total_ortopedia): total_ortopedia = 0
             
-            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina_interna)}", "Total pacientes", "#2c3e50", "⚕️")
-            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", "Total pacientes", "#27ae60", "🔪")
+            kpi1 = create_kpi_card("Medicina interna", f"{int(total_medicina_interna)}", "Total pacientes", "#2c3e50", "⚕️")
+            kpi2 = create_kpi_card("Cirugía general", f"{int(total_cirugia)}", "Total pacientes", "#27ae60", "🔪")
             kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neurocirugia)}", "Total pacientes", "#16a085", "🧠")
             kpi4 = create_kpi_card("Ortopedia", f"{int(total_ortopedia)}", "Total pacientes", "#9b59b6", "🦴")
             
             # Gráficos de especialidades principales
-            fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina Interna', color='#2c3e50', silent=True, decimals=0)
-            fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía General', color='#27ae60', silent=True, decimals=0)
+            fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina interna', color='#2c3e50', silent=True, decimals=0)
+            fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía general', color='#27ae60', silent=True, decimals=0)
             fig_neurocirugia = create_bar_chart('NEUROCIRUGIA', 'Neurocirugía', color='#16a085', silent=True, decimals=0)
             fig_ortopedia = create_bar_chart('ORTOPEDIA', 'Ortopedia', color='#9b59b6', silent=True, decimals=0)
             
             return html.Div([
-                html.H5("Principales Especialidades", style={'color': '#e2e8f0', 'fontWeight': '600'}, className="mb-3"),
+                html.H5("Principales especialidades", style={'color': '#e2e8f0', 'fontWeight': '600'}, className="mb-3"),
                 dbc.Row([
                     dbc.Col(kpi1, xs=12, md=3),
                     dbc.Col(kpi2, xs=12, md=3),
@@ -939,21 +945,22 @@ def render_content(tab):
             if pd.isna(total_dias_estancia): total_dias_estancia = 0
             if pd.isna(capacidad): capacidad = 0
             
-            kpi1 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50", "⏱️")
-            kpi2 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", "Promedio", "#27ae60", "🔄")
-            kpi3 = create_kpi_card("Total Días Estancia", f"{int(total_dias_estancia)}", "Ene - Oct", "#16a085", "📅")
+            kpi1 = create_kpi_card("Estancia promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50", "⏱️")
+            kpi2 = create_kpi_card("Giro de cama", f"{giro_cama:.2f}", "Promedio", "#27ae60", "🔄")
+            kpi3 = create_kpi_card("Total días estancia", f"{int(total_dias_estancia)}", "Ene - oct", "#16a085", "📅")
             kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12", "🛏️")
             
-            fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=2)
-            fig_giro = create_line_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
+            fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia promedio (días)', color='#16a085', decimals=2)
+            fig_giro = create_line_chart('GIRO CAMA', 'Giro de cama', color='#27ae60', decimals=2)
+            
             # Gráficos de infecciones
             fig_bacteriemia = create_line_chart('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', 'Tasa de ITS AC', color='#e74c3c', silent=True, decimals=2)
             fig_nav = create_line_chart('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV', color='#e74c3c', silent=True, decimals=2)
             fig_istu = create_line_chart('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa de ISTU AC', color='#f39c12', silent=True, decimals=2)
             # Gráficos de seguridad del paciente
-            fig_lesiones = create_line_chart('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión', color='#9b59b6', silent=True, decimals=2)
-            fig_autoextubaciones = create_line_chart('% AUTOEXTUBACIONES', '% Autoextubaciones', color='#3498db', silent=True, decimals=2)
-            fig_caidas = create_line_chart('% CAÍDAS', '% Caídas', color='#e67e22', silent=True, decimals=2)
+            fig_lesiones = create_line_chart('TASA LESIONES POR PRESION', 'Tasa lesiones por presión', color='#9b59b6', silent=True, decimals=2)
+            fig_autoextubaciones = create_line_chart('% AUTOEXTUBACIONES', '% autoextubaciones', color='#3498db', silent=True, decimals=2)
+            fig_caidas = create_line_chart('% CAÍDAS', '% caídas', color='#e67e22', silent=True, decimals=2)
             
             # Gráfico de Gérmenes Aislados
             fig_germenes = go.Figure()
@@ -970,7 +977,7 @@ def render_content(tab):
                     )
                 ])
                 fig_germenes.update_layout(
-                    title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
+                    title={'text': 'Gérmenes aislados (IAAS)', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
                     plot_bgcolor='#1a202c',
                     paper_bgcolor='#2d3748',
                     xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -45},
@@ -995,7 +1002,7 @@ def render_content(tab):
                 fig_eventos = go.Figure(data=[go.Bar(x=['Sin datos'], y=[0], marker_color='#4a5568')])
             
             fig_eventos.update_layout(
-                title={'text': 'Otros Eventos Adversos', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
+                title={'text': 'Otros eventos adversos', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
                 plot_bgcolor='#1a202c',
                 paper_bgcolor='#2d3748',
                 xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -25},
@@ -1005,7 +1012,7 @@ def render_content(tab):
             )
             
             return html.Div([
-                html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-3"),
+                html.H5("Indicadores de gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-3"),
                 dbc.Row([
                     dbc.Col(kpi1, xs=12, md=3),
                     dbc.Col(kpi2, xs=12, md=3),
@@ -1016,7 +1023,7 @@ def render_content(tab):
                     dbc.Col(dcc.Graph(figure=fig_estancia, config={'displayModeBar': False}), xs=12, md=6),
                     dbc.Col(dcc.Graph(figure=fig_giro, config={'displayModeBar': False}), xs=12, md=6),
                 ]),
-                html.H5("Indicadores de Calidad e Infecciones", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '50px', 'marginBottom': '30px', 'textAlign': 'center'}),
+                html.H5("Indicadores de calidad e infecciones", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '50px', 'marginBottom': '30px', 'textAlign': 'center'}),
                 dbc.Row([
                     dbc.Col(dcc.Graph(figure=fig_bacteriemia, config={'displayModeBar': False}), xs=12, md=6),
                     dbc.Col(dcc.Graph(figure=fig_nav, config={'displayModeBar': False}), xs=12, md=6),
@@ -1029,7 +1036,7 @@ def render_content(tab):
                     dbc.Col(dcc.Graph(figure=fig_autoextubaciones, config={'displayModeBar': False}), xs=12, md=6),
                     dbc.Col(dcc.Graph(figure=fig_caidas, config={'displayModeBar': False}), xs=12, md=6),
                 ], className="mt-3"),
-                html.H5("Gérmenes Aislados y Eventos Adversos", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '50px', 'marginBottom': '30px', 'textAlign': 'center'}),
+                html.H5("Gérmenes aislados y eventos adversos", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '50px', 'marginBottom': '30px', 'textAlign': 'center'}),
                 dbc.Row([
                     dbc.Col(dcc.Graph(figure=fig_germenes, config={'displayModeBar': False}), xs=12, md=6),
                     dbc.Col(dcc.Graph(figure=fig_eventos, config={'displayModeBar': False}), xs=12, md=6),
@@ -1097,16 +1104,16 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
         mortalidad = (total_fallecidos / total_egresos * 100)
         
         # Crear KPIs - Primera fila
-        kpi_ingresos = create_kpi_card("Total Ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db", "📥")
-        kpi1 = create_kpi_card("% Ocupación Promedio", f"{promedio_ocupacional:.2f}%", rango_texto, "#2c3e50", "🏥")
-        kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad:.2f}%", f"Total {rango_texto}", "#e74c3c", "💔")
-        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#27ae60", "⏱️")
-        kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄")
+        kpi_ingresos = create_kpi_card("Total ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db", "📥")
+        kpi1 = create_kpi_card("% ocupación promedio", f"{promedio_ocupacional:.2f}%", rango_texto, "#2c3e50", "🏥")
+        kpi2 = create_kpi_card("% mortalidad general", f"{mortalidad:.2f}%", f"Total {rango_texto}", "#e74c3c", "💔")
+        kpi3 = create_kpi_card("Estancia promedio", f"{promedio_estancia:.2f}", "Días", "#27ae60", "⏱️")
+        kpi4 = create_kpi_card("Giro de cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄")
         
         # EPS principales: Famisanar, Compensar, Salud Total
-        total_famisanar = safe_get_row('FAMISANAR', suma_col, silent=True)
-        total_compensar = safe_get_row('COMPENSAR', suma_col, silent=True)
-        total_salud_total = safe_get_row('SALUD TOTAL', suma_col, silent=True)
+        total_famisanar = safe_get_row('Famisanar', suma_col, silent=True)
+        total_compensar = safe_get_row('Compensar', suma_col, silent=True)
+        total_salud_total = safe_get_row('Salud total', suma_col, silent=True)
         
         if pd.isna(total_famisanar): total_famisanar = 0
         if pd.isna(total_compensar): total_compensar = 0
@@ -1120,11 +1127,11 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
         
         kpi_eps1 = create_kpi_card("Famisanar", f"{int(total_famisanar)}", f"{pct_famisanar:.1f}% del total", "#27ae60", "🏢")
         kpi_eps2 = create_kpi_card("Compensar", f"{int(total_compensar)}", f"{pct_compensar:.1f}% del total", "#f39c12", "🏢")
-        kpi_eps3 = create_kpi_card("Salud Total", f"{int(total_salud_total)}", f"{pct_salud_total:.1f}% del total", "#e74c3c", "🏢")
+        kpi_eps3 = create_kpi_card("Salud total", f"{int(total_salud_total)}", f"{pct_salud_total:.1f}% del total", "#e74c3c", "🏢")
         
         # Crear gráficos con meses filtrados
-        datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados)
-        fig_ocupacional = px.line(x=meses_filtrados, y=datos_ocup, title='% Ocupacional Mensual', markers=True)
+        datos_ocup = safe_get_row('% Ocupacional', meses_filtrados)
+        fig_ocupacional = px.line(x=meses_filtrados, y=datos_ocup, title='% ocupacional mensual', markers=True)
         fig_ocupacional.update_traces(
             line_color='#16a085',
             line_width=3,
@@ -1144,8 +1151,8 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
         )
         
         # Gráfico de ingresos vs egresos
-        datos_ingresos = safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
-        datos_egresos_chart = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
+        datos_ingresos = safe_get_row('Número de ingresos del mes', meses_filtrados)
+        datos_egresos_chart = safe_get_row('Número de egresos del mes', meses_filtrados)
         
         fig_ingresos_egresos = go.Figure()
         fig_ingresos_egresos.add_trace(go.Bar(
@@ -1163,7 +1170,7 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
             hovertemplate='<b>%{x}</b><br>Egresos: %{y:.0f}<extra></extra>'
         ))
         fig_ingresos_egresos.update_layout(
-            title={'text': 'Ingresos vs. Egresos Mensuales', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
+            title={'text': 'Ingresos vs. egresos mensuales', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
             barmode='group',
             plot_bgcolor='#1a202c',
             paper_bgcolor='#2d3748',
@@ -1188,7 +1195,7 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
                 )
             ])
             fig_morbilidad_total.update_layout(
-                title={'text': 'Morbilidad por Diagnóstico (Total Acumulado)', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
+                title={'text': 'Morbilidad por diagnóstico (total acumulado)', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
                 plot_bgcolor='#1a202c',
                 paper_bgcolor='#2d3748',
                 xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -45},
@@ -1206,7 +1213,7 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
                        marker_color='#e91e63', hovertemplate='<b>%{x}</b><br>Mujeres: %{y}<extra></extra>')
             ])
             fig_morbilidad_genero.update_layout(
-                title={'text': 'Morbilidad por Género', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
+                title={'text': 'Morbilidad por género', 'font': {'size': 15, 'color': '#e2e8f0'}, 'x': 0.5, 'xanchor': 'center'},
                 barmode='group',
                 plot_bgcolor='#1a202c',
                 paper_bgcolor='#2d3748',
@@ -1248,5 +1255,5 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
 
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=8050)
-
-
+    
+    
