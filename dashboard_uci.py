@@ -1131,11 +1131,12 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
         if pd.isna(total_compensar): total_compensar = 0
         if pd.isna(total_salud_total): total_salud_total = 0
         
-        # Calcular porcentajes
-        total_ingresos_pct = total_ingresos if total_ingresos > 0 else 1
-        pct_famisanar = (total_famisanar / total_ingresos_pct * 100)
-        pct_compensar = (total_compensar / total_ingresos_pct * 100)
-        pct_salud_total = (total_salud_total / total_ingresos_pct * 100)
+        # Calcular porcentajes usando el total de ingresos del año (suma_col)
+        total_ingresos_anual = safe_get_row('NUMERO DE INGRESOS DEL MES', suma_col, silent=True)
+        if pd.isna(total_ingresos_anual) or total_ingresos_anual == 0: total_ingresos_anual = 1
+        pct_famisanar = (total_famisanar / total_ingresos_anual * 100)
+        pct_compensar = (total_compensar / total_ingresos_anual * 100)
+        pct_salud_total = (total_salud_total / total_ingresos_anual * 100)
         
         kpi_eps1 = create_kpi_card("Famisanar", f"{int(total_famisanar)}", f"{pct_famisanar:.1f}% del total", "#27ae60", "🏢")
         kpi_eps2 = create_kpi_card("Compensar", f"{int(total_compensar)}", f"{pct_compensar:.1f}% del total", "#f39c12", "🏢")
