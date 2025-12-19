@@ -714,22 +714,16 @@ app.layout = html.Div([
             html.Hr(style={'borderColor': '#4a5568', 'margin': '40px 0 20px 0'}),
             html.Div([
                 html.Div([
-                    html.Img(src='/assets/Logo.png', style={'height': '50px', 'marginRight': '15px', 'opacity': '0.9'}),
-                    html.Div([
-                        html.P("Hospital Infantil Universitario de San José", style={
-                            'color': '#e2e8f0', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px'
-                        }),
-                        html.P("Unidad de Cuidados Intensivos - Adultos", style={
-                            'color': '#a0aec0', 'margin': '0', 'fontSize': '12px'
-                        })
-                    ])
-                ], style={'display': 'flex', 'alignItems': 'center'}),
+                    html.P("Hospital Infantil Universitario de San José", style={
+                        'color': '#e2e8f0', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px'
+                    }),
+                    html.P("Unidad de Cuidados Intensivos - Adultos", style={
+                        'color': '#a0aec0', 'margin': '0', 'fontSize': '12px'
+                    })
+                ]),
                 html.Div([
                     html.P("© 2025 - Dashboard de Indicadores UCI", style={
                         'color': '#718096', 'margin': '0', 'fontSize': '12px'
-                    }),
-                    html.P("Desarrollado con ❤️ para el equipo de UCI", style={
-                        'color': '#718096', 'margin': '0', 'fontSize': '11px'
                     })
                 ], style={'textAlign': 'right'})
             ], style={
