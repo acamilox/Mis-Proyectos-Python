@@ -276,11 +276,11 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
     )
     fig.update_layout(
         showlegend=False,
-        plot_bgcolor='#000000',
-        paper_bgcolor='#1a1a1a',
+        plot_bgcolor='#0c1929',
+        paper_bgcolor='#132238',
         title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
-        xaxis={'gridcolor': '#333333', 'showline': True, 'linecolor': '#333333', 'color': '#e2e8f0'},
-        yaxis={'gridcolor': '#333333', 'showline': True, 'linecolor': '#333333', 'color': '#e2e8f0', 'tickformat': 'd'},
+        xaxis={'gridcolor': '#1e3a5f', 'showline': True, 'linecolor': '#1e3a5f', 'color': '#e2e8f0'},
+        yaxis={'gridcolor': '#1e3a5f', 'showline': True, 'linecolor': '#1e3a5f', 'color': '#e2e8f0', 'tickformat': 'd'},
         margin=dict(l=50, r=30, t=60, b=40),
         hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000', bordercolor='#333333')
     )
@@ -302,7 +302,7 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
         hovertemplate=hover_format
     )
     
-    yaxis_config = {'gridcolor': '#333333', 'showline': True, 'linecolor': '#333333', 'color': '#e2e8f0'}
+    yaxis_config = {'gridcolor': '#1e3a5f', 'showline': True, 'linecolor': '#1e3a5f', 'color': '#e2e8f0'}
     if isinstance(data, pd.Series):
         max_val = data.max() if not data.empty else 0
         if pd.notna(max_val) and max_val <= 5:
@@ -310,10 +310,10 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
     
     fig.update_layout(
         showlegend=False,
-        plot_bgcolor='#000000',
-        paper_bgcolor='#1a1a1a',
+        plot_bgcolor='#0c1929',
+        paper_bgcolor='#132238',
         title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
-        xaxis={'gridcolor': '#333333', 'showline': True, 'linecolor': '#333333', 'color': '#e2e8f0'},
+        xaxis={'gridcolor': '#1e3a5f', 'showline': True, 'linecolor': '#1e3a5f', 'color': '#e2e8f0'},
         yaxis=yaxis_config,
         margin=dict(l=50, r=30, t=60, b=40),
         hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000', bordercolor='#333333')
@@ -341,10 +341,10 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     fig.update_layout(
         title={'text': title, 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
         barmode='group',
-        plot_bgcolor='#000000',
-        paper_bgcolor='#1a1a1a',
-        xaxis={'gridcolor': '#333333', 'color': '#e2e8f0'},
-        yaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickformat': 'd'},
+        plot_bgcolor='#0c1929',
+        paper_bgcolor='#132238',
+        xaxis={'gridcolor': '#1e3a5f', 'color': '#e2e8f0'},
+        yaxis={'gridcolor': '#1e3a5f', 'color': '#e2e8f0', 'tickformat': 'd'},
         margin=dict(l=50, r=30, t=90, b=40),
         legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5, 
                    bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}),
@@ -376,8 +376,8 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊"):
         className="kpi-card h-100",
         style={
             'border': 'none', 'borderLeft': f'4px solid {color or COLOR_PALETTE["primary"]}',
-            'borderRadius': '8px', 'boxShadow': '0 4px 20px rgba(0,0,0,0.5)',
-            'background': '#1a1a1a', 'transition': 'all 0.3s ease', 'height': '100%'
+            'borderRadius': '12px', 'boxShadow': '0 8px 32px rgba(0,0,0,0.3)',
+            'background': 'linear-gradient(145deg, #132238 0%, #1a365d 100%)', 'transition': 'all 0.3s ease', 'height': '100%'
         }
     )
 
@@ -399,8 +399,9 @@ app.index_string = '''
             
             body {
                 font-family: 'Inter', sans-serif !important;
-                background-color: #000000;
+                background: linear-gradient(135deg, #0c1929 0%, #1a365d 25%, #1e3a5f 50%, #0f2744 75%, #0a1628 100%);
                 color: #e2e8f0;
+                min-height: 100vh;
             }
             
             @keyframes fadeIn {
@@ -410,13 +411,14 @@ app.index_string = '''
             
             .kpi-card {
                 transition: all 0.3s ease;
-                border-radius: 8px !important;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+                border-radius: 12px !important;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 40px rgba(26,54,93,0.2) !important;
+                backdrop-filter: blur(10px);
             }
             
             .kpi-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 8px 30px rgba(0,0,0,0.7) !important;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 60px rgba(52,152,219,0.15) !important;
             }
             
             .fade-in { animation: fadeIn 0.6s ease-out; }
@@ -451,16 +453,16 @@ app.index_string = '''
             }
             
             .tab-content {
-                background-color: #111111;
-                border-radius: 0 8px 8px 8px;
-                padding: 20px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+                background: linear-gradient(145deg, #0f2744 0%, #132238 100%);
+                border-radius: 0 12px 12px 12px;
+                padding: 25px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             }
             
-            .Select-control { background-color: #1a1a1a !important; border-color: #333333 !important; border-radius: 6px !important; }
+            .Select-control { background-color: rgba(19,34,56,0.9) !important; border-color: #1e3a5f !important; border-radius: 8px !important; }
             .Select-value-label, .Select-placeholder, .Select-value { color: #ffffff !important; }
-            .Select-menu-outer { background-color: #1a1a1a !important; border-color: #333333 !important; }
-            .Select-option { background-color: #1a1a1a !important; color: #ffffff !important; }
+            .Select-menu-outer { background-color: #132238 !important; border-color: #1e3a5f !important; }
+            .Select-option { background-color: #132238 !important; color: #ffffff !important; }
             .Select-option:hover, .Select-option.is-focused { background-color: #3498db !important; color: #ffffff !important; }
             .Select-option.is-selected { background-color: #3498db !important; color: #ffffff !important; }
             
@@ -512,7 +514,7 @@ app.layout = html.Div([
             dbc.Tab(label='� Goestión y calidad', tab_id='tab-gestion'),
             dbc.Tab(label='💀 Mortalidad', tab_id='tab-mortalidad'),
             dbc.Tab(label='🏥 Especialidades y FPS', tab_id='tab-especialidades'),
-        ], style={'marginBottom': '0', 'borderBottom': 'none', 'backgroundColor': '#1a1a1a', 'borderRadius': '8px 8px 0 0', 'padding': '0 10px'}),
+        ], style={'marginBottom': '0', 'borderBottom': 'none', 'backgroundColor': 'rgba(19,34,56,0.8)', 'borderRadius': '12px 12px 0 0', 'padding': '0 10px'}),
         
         html.Div(id='tab-content', className="tab-content"),
         
@@ -530,8 +532,8 @@ app.layout = html.Div([
             ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '15px'})
         ], className="dashboard-footer")
         
-    ], fluid=True, style={'maxWidth': '1400px', 'padding': '30px 20px', 'backgroundColor': '#000000'})
-], style={'backgroundColor': '#000000', 'minHeight': '100vh', 'fontFamily': "'Inter', sans-serif"})
+    ], fluid=True, style={'maxWidth': '1400px', 'padding': '30px 20px'})
+], style={'background': 'linear-gradient(135deg, #0c1929 0%, #1a365d 25%, #1e3a5f 50%, #0f2744 75%, #0a1628 100%)', 'minHeight': '100vh', 'fontFamily': "'Inter', sans-serif"})
 
 @app.callback(Output('tab-content', 'children'), Input('tabs', 'active_tab'))
 def render_tab_content(tab):
@@ -548,7 +550,6 @@ def render_tab_content(tab):
                             id='filtro-mes-inicio',
                             options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
                             value='Oct',
-                            style={'backgroundColor': '#1a1a1a'},
                             clearable=False
                         )
                     ], xs=12, md=4),
@@ -558,7 +559,6 @@ def render_tab_content(tab):
                             id='filtro-anio',
                             options=[{'label': '2025', 'value': '2025'}],
                             value='2025',
-                            style={'backgroundColor': '#1a1a1a'},
                             clearable=False
                         )
                     ], xs=12, md=4),
@@ -568,7 +568,7 @@ def render_tab_content(tab):
                                   style={'borderRadius': '8px', 'fontWeight': '600', 'height': '38px'})
                     ], xs=12, md=4),
                 ], className="mb-2"),
-            ], style={'background': '#1a1a1a', 'padding': '20px', 'borderRadius': '15px', 'marginBottom': '25px'})
+            ], style={'background': 'linear-gradient(145deg, #132238 0%, #1a365d 100%)', 'padding': '20px', 'borderRadius': '15px', 'marginBottom': '25px'})
             
             return html.Div([filtros, html.Div(id='resumen-content')])
         except Exception as e:
