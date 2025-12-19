@@ -214,18 +214,24 @@ meses_completos = {
     'Sep': 'Septiembre', 'Oct': 'Octubre', 'Nov': 'Noviembre', 'Dic': 'Diciembre'
 }
 
-# Paleta de colores profesional
+# Paleta de colores - Tema Oscuro/Negro
 COLOR_PALETTE = {
-    'primary': '#1a365d',
-    'secondary': '#2c5282',
-    'accent': '#3182ce',
-    'success': '#38a169',
-    'danger': '#e53e3e',
-    'warning': '#dd6b20',
-    'info': '#4299e1',
-    'light': '#f7fafc',
-    'dark': '#1a202c',
-    'muted': '#718096',
+    'primary': '#3498db',
+    'secondary': '#27ae60',
+    'accent': '#16a085',
+    'success': '#27ae60',
+    'danger': '#e74c3c',
+    'warning': '#f39c12',
+    'info': '#34495e',
+    'light': '#e2e8f0',
+    'dark': '#0a0a0a',
+    'muted': '#a0aec0',
+    'bg_primary': '#000000',
+    'bg_secondary': '#111111',
+    'bg_card': '#1a1a1a',
+    'text_primary': '#ffffff',
+    'text_secondary': '#e2e8f0',
+    'border': '#333333',
 }
 
 def capitalizar_texto(texto):
@@ -270,13 +276,13 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
     )
     fig.update_layout(
         showlegend=False,
-        plot_bgcolor='#f8fafc',
-        paper_bgcolor='#ffffff',
-        title={'font': {'size': 16, 'color': COLOR_PALETTE['dark']}, 'x': 0.5, 'xanchor': 'center'},
-        xaxis={'gridcolor': '#e2e8f0', 'showline': True, 'linecolor': '#cbd5e0', 'color': COLOR_PALETTE['dark']},
-        yaxis={'gridcolor': '#e2e8f0', 'showline': True, 'linecolor': '#cbd5e0', 'color': COLOR_PALETTE['dark'], 'tickformat': 'd'},
+        plot_bgcolor='#000000',
+        paper_bgcolor='#1a1a1a',
+        title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
+        xaxis={'gridcolor': '#333333', 'showline': True, 'linecolor': '#333333', 'color': '#e2e8f0'},
+        yaxis={'gridcolor': '#333333', 'showline': True, 'linecolor': '#333333', 'color': '#e2e8f0', 'tickformat': 'd'},
         margin=dict(l=50, r=30, t=60, b=40),
-        hoverlabel=dict(bgcolor='white', font_size=14, font_color=COLOR_PALETTE['dark'], bordercolor='#cbd5e0')
+        hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000', bordercolor='#333333')
     )
     return fig
 
@@ -292,11 +298,11 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
     fig.update_traces(
         line_color=color or COLOR_PALETTE['secondary'],
         line_width=3,
-        marker=dict(size=8, line=dict(width=2, color='#ffffff')),
+        marker=dict(size=8, line=dict(width=2, color='#1a1a1a')),
         hovertemplate=hover_format
     )
     
-    yaxis_config = {'gridcolor': '#e2e8f0', 'showline': True, 'linecolor': '#cbd5e0', 'color': COLOR_PALETTE['dark']}
+    yaxis_config = {'gridcolor': '#333333', 'showline': True, 'linecolor': '#333333', 'color': '#e2e8f0'}
     if isinstance(data, pd.Series):
         max_val = data.max() if not data.empty else 0
         if pd.notna(max_val) and max_val <= 5:
@@ -304,13 +310,13 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
     
     fig.update_layout(
         showlegend=False,
-        plot_bgcolor='#f8fafc',
-        paper_bgcolor='#ffffff',
-        title={'font': {'size': 16, 'color': COLOR_PALETTE['dark']}, 'x': 0.5, 'xanchor': 'center'},
-        xaxis={'gridcolor': '#e2e8f0', 'showline': True, 'linecolor': '#cbd5e0', 'color': COLOR_PALETTE['dark']},
+        plot_bgcolor='#000000',
+        paper_bgcolor='#1a1a1a',
+        title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
+        xaxis={'gridcolor': '#333333', 'showline': True, 'linecolor': '#333333', 'color': '#e2e8f0'},
         yaxis=yaxis_config,
         margin=dict(l=50, r=30, t=60, b=40),
-        hoverlabel=dict(bgcolor='white', font_size=14, font_color=COLOR_PALETTE['dark'], bordercolor='#cbd5e0')
+        hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000', bordercolor='#333333')
     )
     return fig
 
@@ -333,16 +339,16 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
         ))
     
     fig.update_layout(
-        title={'text': title, 'font': {'size': 16, 'color': COLOR_PALETTE['dark']}, 'x': 0.5, 'xanchor': 'center'},
+        title={'text': title, 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
         barmode='group',
-        plot_bgcolor='#f8fafc',
-        paper_bgcolor='#ffffff',
-        xaxis={'gridcolor': '#e2e8f0', 'color': COLOR_PALETTE['dark']},
-        yaxis={'gridcolor': '#e2e8f0', 'color': COLOR_PALETTE['dark'], 'tickformat': 'd'},
+        plot_bgcolor='#000000',
+        paper_bgcolor='#1a1a1a',
+        xaxis={'gridcolor': '#333333', 'color': '#e2e8f0'},
+        yaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickformat': 'd'},
         margin=dict(l=50, r=30, t=90, b=40),
         legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5, 
-                   bgcolor='rgba(255,255,255,0.95)', font={'color': COLOR_PALETTE['dark']}),
-        hoverlabel=dict(bgcolor='white', font_size=13, bordercolor='#cbd5e0')
+                   bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}),
+        hoverlabel=dict(bgcolor='white', font_size=13, font_color='#000000', bordercolor='#333333')
     )
     return fig
 
@@ -353,15 +359,16 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊"):
                 html.Span(icon, style={'fontSize': '28px', 'marginRight': '12px', 'flexShrink': '0'}),
                 html.Div([
                     html.H6(capitalizar_texto(title), style={
-                        'color': COLOR_PALETTE['muted'], 'fontSize': '13px', 'marginBottom': '8px', 
+                        'color': '#a0aec0', 'fontSize': '13px', 'marginBottom': '8px', 
                         'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px'
                     }),
                     html.H2(value, style={
-                        'color': color or COLOR_PALETTE['primary'], 'fontWeight': '700', 
-                        'marginBottom': '5px', 'fontSize': '28px', 'lineHeight': '1'
+                        'color': '#ffffff', 'fontWeight': '700', 
+                        'marginBottom': '5px', 'fontSize': '28px', 'lineHeight': '1',
+                        'textShadow': f'0 0 20px {color or COLOR_PALETTE["primary"]}'
                     }),
                     html.P(capitalizar_texto(subtitle), style={
-                        'color': COLOR_PALETTE['muted'], 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
+                        'color': '#a0aec0', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
                     })
                 ], style={'flex': '1', 'minWidth': '0', 'overflow': 'hidden'})
             ], style={'display': 'flex', 'alignItems': 'center'})
@@ -369,8 +376,8 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊"):
         className="kpi-card h-100",
         style={
             'border': 'none', 'borderLeft': f'4px solid {color or COLOR_PALETTE["primary"]}',
-            'borderRadius': '8px', 'boxShadow': '0 4px 12px rgba(0,0,0,0.08)',
-            'background': '#ffffff', 'transition': 'all 0.3s ease', 'height': '100%'
+            'borderRadius': '8px', 'boxShadow': '0 4px 20px rgba(0,0,0,0.5)',
+            'background': '#1a1a1a', 'transition': 'all 0.3s ease', 'height': '100%'
         }
     )
 
@@ -392,8 +399,8 @@ app.index_string = '''
             
             body {
                 font-family: 'Inter', sans-serif !important;
-                background-color: #f8fafc;
-                color: #1a365d;
+                background-color: #000000;
+                color: #e2e8f0;
             }
             
             @keyframes fadeIn {
@@ -404,18 +411,22 @@ app.index_string = '''
             .kpi-card {
                 transition: all 0.3s ease;
                 border-radius: 8px !important;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
             }
             
             .kpi-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 8px 16px rgba(0,0,0,0.12) !important;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.7) !important;
             }
             
             .fade-in { animation: fadeIn 0.6s ease-out; }
             
+            .nav-tabs {
+                border-bottom: none !important;
+            }
+            
             .nav-tabs .nav-link {
-                color: #718096;
+                color: #a0aec0;
                 border: none;
                 border-bottom: 3px solid transparent;
                 transition: all 0.3s ease;
@@ -427,37 +438,35 @@ app.index_string = '''
             }
             
             .nav-tabs .nav-link:hover {
-                border-bottom: 3px solid #3182ce;
-                color: #3182ce;
-                background-color: rgba(49, 130, 206, 0.05);
+                border-bottom: 3px solid #3498db;
+                color: #3498db;
+                background-color: rgba(52, 152, 219, 0.1);
             }
             
             .nav-tabs .nav-link.active {
-                color: #2c5282;
-                border-bottom: 3px solid #2c5282;
-                background: rgba(44, 82, 130, 0.08);
+                color: #3498db;
+                border-bottom: 3px solid #3498db;
+                background: rgba(52, 152, 219, 0.15);
                 font-weight: 600;
             }
             
             .tab-content {
-                background-color: white;
+                background-color: #111111;
                 border-radius: 0 8px 8px 8px;
                 padding: 20px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             }
             
-            .Select-control { background-color: #ffffff !important; border-color: #cbd5e0 !important; border-radius: 6px !important; }
-            .Select-value-label, .Select-placeholder, .Select-value { color: #1a365d !important; }
-            .Select-menu-outer { background-color: #ffffff !important; border-color: #cbd5e0 !important; }
-            .Select-option { background-color: #ffffff !important; color: #1a365d !important; }
-            .Select-option:hover, .Select-option.is-focused { background-color: #ebf8ff !important; color: #2c5282 !important; }
-            .Select-option.is-selected { background-color: #3182ce !important; color: #ffffff !important; }
+            .Select-control { background-color: #1a1a1a !important; border-color: #333333 !important; border-radius: 6px !important; }
+            .Select-value-label, .Select-placeholder, .Select-value { color: #ffffff !important; }
+            .Select-menu-outer { background-color: #1a1a1a !important; border-color: #333333 !important; }
+            .Select-option { background-color: #1a1a1a !important; color: #ffffff !important; }
+            .Select-option:hover, .Select-option.is-focused { background-color: #3498db !important; color: #ffffff !important; }
+            .Select-option.is-selected { background-color: #3498db !important; color: #ffffff !important; }
             
             .dashboard-footer {
-                background-color: #ffffff;
-                border-top: 1px solid #e2e8f0;
-                padding: 20px 0;
-                margin-top: 40px;
+                background-color: transparent;
+                padding: 0 0 20px 0;
             }
         </style>
     </head>
@@ -478,46 +487,356 @@ app.layout = html.Div([
         html.Div([
             html.Div([
                 html.Div([
-                    html.Img(src='/assets/Logo.png', style={'height': '60px', 'marginRight': '20px', 'filter': 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'}),
+                    html.Img(src='/assets/Logo.png', style={'height': '60px', 'marginRight': '20px', 'filter': 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'}),
                     html.Div([
                         html.H1("DASHBOARD UCI ADULTOS 2025", style={
-                            'color': COLOR_PALETTE['primary'], 'fontWeight': '700', 'marginBottom': '5px',
-                            'fontSize': '28px', 'letterSpacing': '0.5px', 'margin': '0'
+                            'color': '#ffffff', 'fontWeight': '700', 'marginBottom': '5px',
+                            'fontSize': '28px', 'letterSpacing': '0.5px', 'margin': '0',
+                            'textShadow': '0 0 30px rgba(52,152,219,0.5)'
                         }),
                         html.P("Sistema de Monitoreo y Análisis de Indicadores", style={
-                            'color': COLOR_PALETTE['muted'], 'fontSize': '14px', 'marginBottom': '0', 'fontWeight': '400'
+                            'color': '#a0aec0', 'fontSize': '14px', 'marginBottom': '0', 'fontWeight': '400'
                         })
                     ])
                 ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '15px'})
             ]),
             html.Div([
-                dbc.Button("📊 Exportar a Excel", color="primary", size="sm", className="me-2", style={'borderRadius': '6px', 'fontWeight': '500'}),
-                dbc.Button("📄 Exportar a CSV", color="secondary", size="sm", style={'borderRadius': '6px', 'fontWeight': '500'}),
+                dbc.Button("� Exxportar a Excel", color="success", size="sm", className="me-2", style={'borderRadius': '6px', 'fontWeight': '500'}),
+                dbc.Button("📄 Exportar a CSV", color="primary", size="sm", style={'borderRadius': '6px', 'fontWeight': '500'}),
             ], style={'marginBottom': '20px'})
         ], className="fade-in"),
         
         # Tabs
         dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
-            dbc.Tab(label='📊 Resumen general', tab_id='tab-resumen'),
-            dbc.Tab(label='📈 Gestión y calidad', tab_id='tab-gestion'),
+            dbc.Tab(label='� GResumen general', tab_id='tab-resumen'),
+            dbc.Tab(label='� Goestión y calidad', tab_id='tab-gestion'),
             dbc.Tab(label='💀 Mortalidad', tab_id='tab-mortalidad'),
             dbc.Tab(label='🏥 Especialidades y FPS', tab_id='tab-especialidades'),
-        ], style={'marginBottom': '0', 'borderBottom': 'none', 'backgroundColor': '#ffffff', 'borderRadius': '8px 8px 0 0', 'padding': '0 10px'}),
+        ], style={'marginBottom': '0', 'borderBottom': 'none', 'backgroundColor': '#1a1a1a', 'borderRadius': '8px 8px 0 0', 'padding': '0 10px'}),
         
         html.Div(id='tab-content', className="tab-content"),
         
         # Footer
         html.Div([
+            html.Hr(style={'borderColor': '#333333', 'margin': '30px 0 20px 0'}),
             html.Div([
                 html.Div([
-                    html.P("Hospital Infantil Universitario de San José", style={'color': COLOR_PALETTE['dark'], 'fontWeight': '600', 'margin': '0', 'fontSize': '14px'}),
-                    html.P("Unidad de Cuidados Intensivos - Adultos", style={'color': COLOR_PALETTE['muted'], 'margin': '0', 'fontSize': '12px'})
+                    html.P("Hospital Infantil Universitario de San José", style={'color': '#e2e8f0', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px'}),
+                    html.P("Unidad de Cuidados Intensivos - Adultos", style={'color': '#a0aec0', 'margin': '0', 'fontSize': '12px'})
                 ]),
                 html.Div([
-                    html.P("© 2025 - Dashboard de Indicadores UCI", style={'color': COLOR_PALETTE['muted'], 'margin': '0', 'fontSize': '12px'})
+                    html.P("© 2025 - Dashboard de Indicadores UCI", style={'color': '#718096', 'margin': '0', 'fontSize': '12px'})
                 ], style={'textAlign': 'right'})
             ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '15px'})
         ], className="dashboard-footer")
         
-    ], fluid=True, style={'maxWidth': '1400px', 'padding': '30px 20px', 'backgroundColor': '#f8fafc'})
-], style={'backgroundColor': '#f8fafc', 'minHeight': '100vh', 'fontFamily': "'Inter', sans-serif"})
+    ], fluid=True, style={'maxWidth': '1400px', 'padding': '30px 20px', 'backgroundColor': '#000000'})
+], style={'backgroundColor': '#000000', 'minHeight': '100vh', 'fontFamily': "'Inter', sans-serif"})
+
+@app.callback(Output('tab-content', 'children'), Input('tabs', 'active_tab'))
+def render_tab_content(tab):
+    if tab == 'tab-resumen':
+        try:
+            if len(df.columns) == 0:
+                return html.Div([html.H3("⚠️ No hay datos", style={'color': '#ffffff'})])
+            
+            filtros = html.Div([
+                dbc.Row([
+                    dbc.Col([
+                        html.Label("📅 Mes:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        dcc.Dropdown(
+                            id='filtro-mes-inicio',
+                            options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
+                            value='Oct',
+                            style={'backgroundColor': '#1a1a1a'},
+                            clearable=False
+                        )
+                    ], xs=12, md=4),
+                    dbc.Col([
+                        html.Label("📆 Año:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        dcc.Dropdown(
+                            id='filtro-anio',
+                            options=[{'label': '2025', 'value': '2025'}],
+                            value='2025',
+                            style={'backgroundColor': '#1a1a1a'},
+                            clearable=False
+                        )
+                    ], xs=12, md=4),
+                    dbc.Col([
+                        html.Label(" ", style={'color': 'transparent', 'marginBottom': '8px', 'display': 'block'}),
+                        dbc.Button("🔍 Aplicar Filtros", id='btn-aplicar-filtros', color="success", className="w-100",
+                                  style={'borderRadius': '8px', 'fontWeight': '600', 'height': '38px'})
+                    ], xs=12, md=4),
+                ], className="mb-2"),
+            ], style={'background': '#1a1a1a', 'padding': '20px', 'borderRadius': '15px', 'marginBottom': '25px'})
+            
+            return html.Div([filtros, html.Div(id='resumen-content')])
+        except Exception as e:
+            return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
+
+    elif tab == 'tab-mortalidad':
+        try:
+            suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
+            suma_col = suma_col[0] if suma_col else '∑'
+            
+            total_fallecidos = safe_get_row('FALLECIDOS', suma_col)
+            fallecidos_covid = safe_get_row('FALLECIDOS COVID-19', suma_col)
+            total_egresos = safe_get_row('NÚMERO DE EGRESOS DEL MES', suma_col)
+            
+            if pd.isna(total_fallecidos): total_fallecidos = 0
+            if pd.isna(fallecidos_covid): fallecidos_covid = 0
+            if pd.isna(total_egresos) or total_egresos == 0: total_egresos = 1
+            
+            mortalidad_general = (total_fallecidos / total_egresos * 100)
+            datos_mortalidad_trauma = safe_get_row('% mortalidad en trauma', meses_disponibles, silent=True)
+            mortalidad_trauma = datos_mortalidad_trauma.sum() / 10 if isinstance(datos_mortalidad_trauma, pd.Series) else 0
+            
+            kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Oct", "#e74c3c", "💀")
+            kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad_general:.2f}%", "Ene - Oct", "#c0392b", "⚰️")
+            kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Oct", "#34495e", "🦠")
+            kpi4 = create_kpi_card("% Mortalidad Trauma", f"{mortalidad_trauma:.2f}%", "Promedio", "#f39c12", "🚑")
+            
+            fig_fallecidos = create_bar_chart('FALLECIDOS', 'Número de Fallecidos', color='#e74c3c', decimals=0)
+            fig_mortalidad = create_line_chart('% DE MORATLIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=2)
+            fig_trauma = create_grouped_bar_chart(
+                ['Pacientes con diagnóstico de Trauma', 'Pacientes fallecidos por Trauma'],
+                ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos', decimals=0)
+
+            # Gráfico de Edad y Sexo de Fallecidos
+            fig_edad_sexo = go.Figure()
+            if not df_fallecidos.empty:
+                bins = [0, 40, 50, 60, 70, 80, 90, 100]
+                labels = ['<40', '40-49', '50-59', '60-69', '70-79', '80-89', '90+']
+                df_fallecidos['Rango_Edad'] = pd.cut(df_fallecidos['Edad'], bins=bins, labels=labels, right=False)
+                edad_sexo = df_fallecidos.groupby(['Rango_Edad', 'Sexo']).size().unstack(fill_value=0)
+                if 'Hombre' not in edad_sexo.columns: edad_sexo['Hombre'] = 0
+                if 'Mujer' not in edad_sexo.columns: edad_sexo['Mujer'] = 0
+                fig_edad_sexo = go.Figure(data=[
+                    go.Bar(name='Hombres', x=edad_sexo.index.astype(str), y=edad_sexo['Hombre'], 
+                           marker_color='#3498db', hovertemplate='<b>%{x}</b><br>Hombres: %{y}<extra></extra>'),
+                    go.Bar(name='Mujeres', x=edad_sexo.index.astype(str), y=edad_sexo['Mujer'], 
+                           marker_color='#e91e63', hovertemplate='<b>%{x}</b><br>Mujeres: %{y}<extra></extra>')
+                ])
+                fig_edad_sexo.update_layout(
+                    title={'text': 'Edad y Sexo de Fallecidos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                    barmode='group', plot_bgcolor='#000000', paper_bgcolor='#1a1a1a',
+                    xaxis={'title': 'Rango de Edad', 'gridcolor': '#333333', 'color': '#e2e8f0'},
+                    yaxis={'title': 'Cantidad', 'gridcolor': '#333333', 'color': '#e2e8f0', 'dtick': 1},
+                    legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center", bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}),
+                    hoverlabel=dict(bgcolor='white', font_color='#000000'))
+            
+            return html.Div([
+                dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_fallecidos), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_mortalidad), xs=12, md=6)]),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_trauma), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_edad_sexo), xs=12, md=6)], className="mt-3")
+            ])
+        except Exception as e:
+            return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
+
+    elif tab == 'tab-especialidades':
+        try:
+            suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
+            suma_col = suma_col[0] if suma_col else '∑'
+            
+            total_medicina = safe_get_row('MEDICINA INTERNA', suma_col, silent=True)
+            total_cirugia = safe_get_row('CIRUGIA GENERAL', suma_col, silent=True)
+            total_neuro = safe_get_row('NEUROCIRUGIA', suma_col, silent=True)
+            total_orto = safe_get_row('ORTOPEDIA', suma_col, silent=True)
+            
+            if pd.isna(total_medicina): total_medicina = 0
+            if pd.isna(total_cirugia): total_cirugia = 0
+            if pd.isna(total_neuro): total_neuro = 0
+            if pd.isna(total_orto): total_orto = 0
+            
+            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", "Total", "#3498db", "⚕️")
+            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", "Total", "#27ae60", "🔪")
+            kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", "Total", "#16a085", "🧠")
+            kpi4 = create_kpi_card("Ortopedia", f"{int(total_orto)}", "Total", "#9b59b6", "🦴")
+            
+            fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina Interna', color='#3498db', silent=True, decimals=0)
+            fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía General', color='#27ae60', silent=True, decimals=0)
+            fig_neuro = create_bar_chart('NEUROCIRUGIA', 'Neurocirugía', color='#16a085', silent=True, decimals=0)
+            fig_orto = create_bar_chart('ORTOPEDIA', 'Ortopedia', color='#9b59b6', silent=True, decimals=0)
+            
+            return html.Div([
+                html.H5("Principales Especialidades", style={'color': '#ffffff', 'fontWeight': '600', 'marginBottom': '20px'}),
+                dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_medicina), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_cirugia), xs=12, md=6)], className="mb-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_neuro), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_orto), xs=12, md=6)])
+            ])
+        except Exception as e:
+            return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
+
+    elif tab == 'tab-gestion':
+        try:
+            suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
+            suma_col = suma_col[0] if suma_col else '∑'
+            
+            datos_estancia = safe_get_row('PROMEDIO ESTANCIA', meses_disponibles)
+            promedio_estancia = datos_estancia[datos_estancia > 0].mean() if isinstance(datos_estancia, pd.Series) and len(datos_estancia[datos_estancia > 0]) > 0 else 0
+            datos_giro = safe_get_row('GIRO CAMA', meses_disponibles)
+            giro_cama = datos_giro[datos_giro > 0].mean() if isinstance(datos_giro, pd.Series) and len(datos_giro[datos_giro > 0]) > 0 else 0
+            total_dias = safe_get_row('TOTAL DIAS ESTANCIA', suma_col)
+            capacidad = safe_get_row('CAPACIDAD INSTALADA: UCI', 'Ene')
+            
+            if pd.isna(promedio_estancia): promedio_estancia = 0
+            if pd.isna(giro_cama): giro_cama = 0
+            if pd.isna(total_dias): total_dias = 0
+            if pd.isna(capacidad): capacidad = 0
+            
+            kpi1 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50", "⏱️")
+            kpi2 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", "Promedio", "#27ae60", "🔄")
+            kpi3 = create_kpi_card("Total Días Estancia", f"{int(total_dias)}", "Ene - Oct", "#16a085", "📅")
+            kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12", "🛏️")
+            
+            fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=2)
+            fig_giro = create_line_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
+            fig_bacteriemia = create_line_chart('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', 'Tasa de ITS AC', color='#e74c3c', silent=True, decimals=2)
+            fig_nav = create_line_chart('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV', color='#e74c3c', silent=True, decimals=2)
+            fig_istu = create_line_chart('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa de ISTU AC', color='#f39c12', silent=True, decimals=2)
+            fig_lesiones = create_line_chart('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión', color='#9b59b6', silent=True, decimals=2)
+
+            # Gráfico de Gérmenes Aislados
+            fig_germenes = go.Figure()
+            if not df_germenes.empty:
+                colors_germenes = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b', '#27ae60', '#8e44ad', '#2980b9', '#d35400', '#7f8c8d']
+                fig_germenes = go.Figure(data=[go.Bar(x=df_germenes['Germen'], y=df_germenes['Cantidad'],
+                    marker_color=colors_germenes[:len(df_germenes)], hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>')])
+                fig_germenes.update_layout(title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                    plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickangle': -45},
+                    yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
+                    hoverlabel=dict(bgcolor='white', font_color='#000000'))
+            
+            # Gráfico de Eventos Adversos
+            colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad']
+            fig_eventos = go.Figure()
+            if not df_eventos_adversos.empty:
+                fig_eventos = go.Figure(data=[go.Bar(x=df_eventos_adversos['Evento'], y=df_eventos_adversos['Cantidad'],
+                    marker_color=colors_eventos[:len(df_eventos_adversos)], hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>')])
+            fig_eventos.update_layout(title={'text': 'Otros Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickangle': -25},
+                yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
+                hoverlabel=dict(bgcolor='white', font_color='#000000'))
+
+            return html.Div([
+                html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-3"),
+                dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_estancia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_giro), xs=12, md=6)]),
+                html.H5("Indicadores de Calidad e Infecciones", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '40px', 'marginBottom': '20px', 'textAlign': 'center'}),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_bacteriemia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_nav), xs=12, md=6)]),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_istu), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_lesiones), xs=12, md=6)], className="mt-3"),
+                html.H5("Gérmenes Aislados y Eventos Adversos", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '40px', 'marginBottom': '20px', 'textAlign': 'center'}),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_germenes), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_eventos), xs=12, md=6)], className="mt-3")
+            ])
+        except Exception as e:
+            return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
+    
+    return html.Div([html.H5("Selecciona una pestaña", style={'color': '#ffffff'})])
+
+
+@app.callback(Output('resumen-content', 'children'), [Input('btn-aplicar-filtros', 'n_clicks')],
+    [dash.dependencies.State('filtro-mes-inicio', 'value'), dash.dependencies.State('filtro-anio', 'value')], prevent_initial_call=False)
+def actualizar_resumen(n_clicks, mes_seleccionado, anio):
+    try:
+        meses_filtrados = [mes_seleccionado] if mes_seleccionado and mes_seleccionado in meses_disponibles else meses_disponibles
+        rango_texto = meses_completos.get(mes_seleccionado, mes_seleccionado) if mes_seleccionado else "Todos"
+        suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
+        suma_col = suma_col[0] if suma_col else '∑'
+        
+        datos_ocupacional = safe_get_row('% OCUPACIONAL', meses_filtrados)
+        promedio_ocupacional = datos_ocupacional[datos_ocupacional > 0].mean() if len(datos_ocupacional[datos_ocupacional > 0]) > 0 else 0
+        datos_ingresos_kpi = safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
+        total_ingresos = datos_ingresos_kpi.sum() if isinstance(datos_ingresos_kpi, pd.Series) else datos_ingresos_kpi
+        datos_fallecidos = safe_get_row('FALLECIDOS', meses_filtrados)
+        total_fallecidos = datos_fallecidos.sum() if isinstance(datos_fallecidos, pd.Series) else datos_fallecidos
+        datos_egresos = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
+        total_egresos = datos_egresos.sum() if isinstance(datos_egresos, pd.Series) else datos_egresos
+        datos_estancia = safe_get_row('PROMEDIO ESTANCIA', meses_filtrados)
+        promedio_estancia = datos_estancia[datos_estancia > 0].mean() if len(datos_estancia[datos_estancia > 0]) > 0 else 0
+        datos_giro = safe_get_row('GIRO CAMA', meses_filtrados)
+        giro_cama = datos_giro[datos_giro > 0].mean() if len(datos_giro[datos_giro > 0]) > 0 else 0
+        
+        if pd.isna(promedio_ocupacional): promedio_ocupacional = 0
+        if pd.isna(total_ingresos): total_ingresos = 0
+        if pd.isna(total_fallecidos): total_fallecidos = 0
+        if pd.isna(total_egresos) or total_egresos == 0: total_egresos = 1
+        if pd.isna(promedio_estancia): promedio_estancia = 0
+        if pd.isna(giro_cama): giro_cama = 0
+        mortalidad = (total_fallecidos / total_egresos * 100)
+
+        kpi_ingresos = create_kpi_card("Total Ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db", "📥")
+        kpi1 = create_kpi_card("% Ocupación Promedio", f"{promedio_ocupacional:.2f}%", rango_texto, "#2c3e50", "🏥")
+        kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad:.2f}%", f"Total {rango_texto}", "#e74c3c", "💔")
+        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#27ae60", "⏱️")
+        kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄")
+        
+        # EPS
+        total_famisanar = safe_get_row('FAMISANAR', suma_col, silent=True)
+        total_compensar = safe_get_row('COMPENSAR', suma_col, silent=True)
+        total_salud_total = safe_get_row('SALUD TOTAL', suma_col, silent=True)
+        if pd.isna(total_famisanar): total_famisanar = 0
+        if pd.isna(total_compensar): total_compensar = 0
+        if pd.isna(total_salud_total): total_salud_total = 0
+        total_ingresos_anual = safe_get_row('NUMERO DE INGRESOS DEL MES', suma_col, silent=True)
+        if pd.isna(total_ingresos_anual) or total_ingresos_anual == 0: total_ingresos_anual = 1
+        pct_famisanar = (total_famisanar / total_ingresos_anual * 100)
+        pct_compensar = (total_compensar / total_ingresos_anual * 100)
+        pct_salud_total = (total_salud_total / total_ingresos_anual * 100)
+        
+        kpi_eps1 = create_kpi_card("Famisanar", f"{int(total_famisanar)}", f"{pct_famisanar:.1f}% del total", "#27ae60", "🏢")
+        kpi_eps2 = create_kpi_card("Compensar", f"{int(total_compensar)}", f"{pct_compensar:.1f}% del total", "#f39c12", "🏢")
+        kpi_eps3 = create_kpi_card("Salud Total", f"{int(total_salud_total)}", f"{pct_salud_total:.1f}% del total", "#e74c3c", "🏢")
+
+        # Gráficos
+        datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados)
+        fig_ocupacional = px.line(x=meses_filtrados, y=datos_ocup, title='% Ocupacional Mensual', markers=True)
+        fig_ocupacional.update_traces(line_color='#16a085', line_width=3, marker=dict(size=10))
+        fig_ocupacional.update_layout(showlegend=False, plot_bgcolor='#000000', paper_bgcolor='#1a1a1a',
+            title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5}, xaxis={'gridcolor': '#333333', 'color': '#e2e8f0'},
+            yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, hoverlabel=dict(bgcolor='white', font_color='#000000'))
+        
+        datos_ingresos = safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
+        datos_egresos_chart = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
+        fig_ingresos_egresos = go.Figure()
+        fig_ingresos_egresos.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ingresos, marker_color='#3498db'))
+        fig_ingresos_egresos.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_egresos_chart, marker_color='#27ae60'))
+        fig_ingresos_egresos.update_layout(title={'text': 'Ingresos vs. Egresos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+            barmode='group', plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0'},
+            yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", 
+            bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}), hoverlabel=dict(bgcolor='white', font_color='#000000'))
+
+        # Gráficos de Morbilidad
+        fig_morbilidad_total = go.Figure()
+        fig_morbilidad_genero = go.Figure()
+        if not df_morbilidad.empty:
+            colors_morb = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b']
+            fig_morbilidad_total = go.Figure(data=[go.Bar(x=df_morbilidad.index, y=df_morbilidad['Total'], marker_color=colors_morb)])
+            fig_morbilidad_total.update_layout(title={'text': 'Morbilidad por Diagnóstico', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickangle': -45},
+                yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, hoverlabel=dict(bgcolor='white', font_color='#000000'))
+            
+            fig_morbilidad_genero = go.Figure(data=[
+                go.Bar(name='Hombres', x=df_morbilidad.index, y=df_morbilidad['Hombre'], marker_color='#3498db'),
+                go.Bar(name='Mujeres', x=df_morbilidad.index, y=df_morbilidad['Mujer'], marker_color='#e91e63')])
+            fig_morbilidad_genero.update_layout(title={'text': 'Morbilidad por Género', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                barmode='group', plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickangle': -45},
+                yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, legend=dict(orientation="h", y=-0.35, x=0.5, xanchor="center",
+                bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}), hoverlabel=dict(bgcolor='white', font_color='#000000'))
+
+        return html.Div([
+            dbc.Row([dbc.Col(kpi_ingresos, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi1, xs=12, sm=6, md=True, className="mb-3"),
+                     dbc.Col(kpi2, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi3, xs=12, sm=6, md=True, className="mb-3"),
+                     dbc.Col(kpi4, xs=12, sm=6, md=True, className="mb-3")], className="mb-3 g-3"),
+            html.H6("Principales EPS", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '15px', 'marginTop': '10px'}),
+            dbc.Row([dbc.Col(kpi_eps1, xs=12, sm=6, md=4, className="mb-3"), dbc.Col(kpi_eps2, xs=12, sm=6, md=4, className="mb-3"),
+                     dbc.Col(kpi_eps3, xs=12, sm=6, md=4, className="mb-3")], className="mb-4 g-3"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocupacional), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_ingresos_egresos), xs=12, md=6)]),
+            html.H6("Morbilidad", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '20px', 'textAlign': 'center'}),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morbilidad_total), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_genero), xs=12, md=6)])
+        ])
+    except Exception as e:
+        return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
+
+
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0', port=8050)
