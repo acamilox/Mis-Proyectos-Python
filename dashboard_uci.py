@@ -276,11 +276,11 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
     )
     fig.update_layout(
         showlegend=False,
-        plot_bgcolor='#0c1929',
-        paper_bgcolor='#132238',
+        plot_bgcolor='#1a202c',
+        paper_bgcolor='#2d3748',
         title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
-        xaxis={'gridcolor': '#1e3a5f', 'showline': True, 'linecolor': '#1e3a5f', 'color': '#e2e8f0'},
-        yaxis={'gridcolor': '#1e3a5f', 'showline': True, 'linecolor': '#1e3a5f', 'color': '#e2e8f0', 'tickformat': 'd'},
+        xaxis={'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0'},
+        yaxis={'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0', 'tickformat': 'd'},
         margin=dict(l=50, r=30, t=60, b=40),
         hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000', bordercolor='#333333')
     )
@@ -302,7 +302,7 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
         hovertemplate=hover_format
     )
     
-    yaxis_config = {'gridcolor': '#1e3a5f', 'showline': True, 'linecolor': '#1e3a5f', 'color': '#e2e8f0'}
+    yaxis_config = {'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0'}
     if isinstance(data, pd.Series):
         max_val = data.max() if not data.empty else 0
         if pd.notna(max_val) and max_val <= 5:
@@ -310,10 +310,10 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
     
     fig.update_layout(
         showlegend=False,
-        plot_bgcolor='#0c1929',
-        paper_bgcolor='#132238',
+        plot_bgcolor='#1a202c',
+        paper_bgcolor='#2d3748',
         title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
-        xaxis={'gridcolor': '#1e3a5f', 'showline': True, 'linecolor': '#1e3a5f', 'color': '#e2e8f0'},
+        xaxis={'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0'},
         yaxis=yaxis_config,
         margin=dict(l=50, r=30, t=60, b=40),
         hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000', bordercolor='#333333')
@@ -341,10 +341,10 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     fig.update_layout(
         title={'text': title, 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
         barmode='group',
-        plot_bgcolor='#0c1929',
-        paper_bgcolor='#132238',
-        xaxis={'gridcolor': '#1e3a5f', 'color': '#e2e8f0'},
-        yaxis={'gridcolor': '#1e3a5f', 'color': '#e2e8f0', 'tickformat': 'd'},
+        plot_bgcolor='#1a202c',
+        paper_bgcolor='#2d3748',
+        xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'},
+        yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickformat': 'd'},
         margin=dict(l=50, r=30, t=90, b=40),
         legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5, 
                    bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}),
@@ -489,7 +489,7 @@ app.layout = html.Div([
         html.Div([
             html.Div([
                 html.Div([
-                    html.Img(src='/assets/Logo.png', style={'height': '60px', 'marginRight': '20px', 'filter': 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'}),
+                    html.Img(src='/assets/Logo.png', style={'height': '90px', 'marginRight': '25px', 'filter': 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))'}),
                     html.Div([
                         html.H1("DASHBOARD UCI ADULTOS 2025", style={
                             'color': '#ffffff', 'fontWeight': '700', 'marginBottom': '5px',
@@ -619,9 +619,9 @@ def render_tab_content(tab):
                 ])
                 fig_edad_sexo.update_layout(
                     title={'text': 'Edad y Sexo de Fallecidos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                    barmode='group', plot_bgcolor='#000000', paper_bgcolor='#1a1a1a',
-                    xaxis={'title': 'Rango de Edad', 'gridcolor': '#333333', 'color': '#e2e8f0'},
-                    yaxis={'title': 'Cantidad', 'gridcolor': '#333333', 'color': '#e2e8f0', 'dtick': 1},
+                    barmode='group', plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
+                    xaxis={'title': 'Rango de Edad', 'gridcolor': '#4a5568', 'color': '#e2e8f0'},
+                    yaxis={'title': 'Cantidad', 'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1},
                     legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center", bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}),
                     hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
@@ -703,8 +703,8 @@ def render_tab_content(tab):
                 fig_germenes = go.Figure(data=[go.Bar(x=df_germenes['Germen'], y=df_germenes['Cantidad'],
                     marker_color=colors_germenes[:len(df_germenes)], hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>')])
                 fig_germenes.update_layout(title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                    plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickangle': -45},
-                    yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
+                    plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -45},
+                    yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
                     hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
             # Gráfico de Eventos Adversos
@@ -714,8 +714,8 @@ def render_tab_content(tab):
                 fig_eventos = go.Figure(data=[go.Bar(x=df_eventos_adversos['Evento'], y=df_eventos_adversos['Cantidad'],
                     marker_color=colors_eventos[:len(df_eventos_adversos)], hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>')])
             fig_eventos.update_layout(title={'text': 'Otros Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickangle': -25},
-                yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
+                plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -25},
+                yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
                 hoverlabel=dict(bgcolor='white', font_color='#000000'))
 
             return html.Div([
@@ -791,9 +791,9 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
         datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados)
         fig_ocupacional = px.line(x=meses_filtrados, y=datos_ocup, title='% Ocupacional Mensual', markers=True)
         fig_ocupacional.update_traces(line_color='#16a085', line_width=3, marker=dict(size=10))
-        fig_ocupacional.update_layout(showlegend=False, plot_bgcolor='#000000', paper_bgcolor='#1a1a1a',
-            title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5}, xaxis={'gridcolor': '#333333', 'color': '#e2e8f0'},
-            yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, hoverlabel=dict(bgcolor='white', font_color='#000000'))
+        fig_ocupacional.update_layout(showlegend=False, plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
+            title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5}, xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'},
+            yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, hoverlabel=dict(bgcolor='white', font_color='#000000'))
         
         datos_ingresos = safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         datos_egresos_chart = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
@@ -801,9 +801,9 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
         fig_ingresos_egresos.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ingresos, marker_color='#3498db'))
         fig_ingresos_egresos.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_egresos_chart, marker_color='#27ae60'))
         fig_ingresos_egresos.update_layout(title={'text': 'Ingresos vs. Egresos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-            barmode='group', plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0'},
-            yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", 
-            bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}), hoverlabel=dict(bgcolor='white', font_color='#000000'))
+            barmode='group', plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'},
+            yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", 
+            bgcolor='rgba(26,32,44,0.95)', font={'color': '#ffffff'}), hoverlabel=dict(bgcolor='white', font_color='#000000'))
 
         # Gráficos de Morbilidad
         fig_morbilidad_total = go.Figure()
@@ -812,16 +812,16 @@ def actualizar_resumen(n_clicks, mes_seleccionado, anio):
             colors_morb = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b']
             fig_morbilidad_total = go.Figure(data=[go.Bar(x=df_morbilidad.index, y=df_morbilidad['Total'], marker_color=colors_morb)])
             fig_morbilidad_total.update_layout(title={'text': 'Morbilidad por Diagnóstico', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickangle': -45},
-                yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, hoverlabel=dict(bgcolor='white', font_color='#000000'))
+                plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -45},
+                yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
             fig_morbilidad_genero = go.Figure(data=[
                 go.Bar(name='Hombres', x=df_morbilidad.index, y=df_morbilidad['Hombre'], marker_color='#3498db'),
                 go.Bar(name='Mujeres', x=df_morbilidad.index, y=df_morbilidad['Mujer'], marker_color='#e91e63')])
             fig_morbilidad_genero.update_layout(title={'text': 'Morbilidad por Género', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                barmode='group', plot_bgcolor='#000000', paper_bgcolor='#1a1a1a', xaxis={'gridcolor': '#333333', 'color': '#e2e8f0', 'tickangle': -45},
-                yaxis={'gridcolor': '#333333', 'color': '#e2e8f0'}, legend=dict(orientation="h", y=-0.35, x=0.5, xanchor="center",
-                bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}), hoverlabel=dict(bgcolor='white', font_color='#000000'))
+                barmode='group', plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -45},
+                yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, legend=dict(orientation="h", y=-0.35, x=0.5, xanchor="center",
+                bgcolor='rgba(26,32,44,0.95)', font={'color': '#ffffff'}), hoverlabel=dict(bgcolor='white', font_color='#000000'))
 
         return html.Div([
             dbc.Row([dbc.Col(kpi_ingresos, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi1, xs=12, sm=6, md=True, className="mb-3"),
