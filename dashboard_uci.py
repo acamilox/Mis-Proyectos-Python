@@ -491,8 +491,8 @@ app.layout = html.Div([
         dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
             dbc.Tab(label='✅ Resumen general', tab_id='tab-resumen'),
             dbc.Tab(label='📦 Gestión y calidad', tab_id='tab-gestion'),
-            dbc.Tab(label='💀 Mortalidad', tab_id='tab-mortalidad'),
             dbc.Tab(label='🏥 Especialidades y FPS', tab_id='tab-especialidades'),
+            dbc.Tab(label='💀 Mortalidad', tab_id='tab-mortalidad'),
         ], style={'marginBottom': '0', 'borderBottom': 'none', 'backgroundColor': 'rgba(19,34,56,0.8)', 'borderRadius': '12px 12px 0 0', 'padding': '0 10px'}),
         
         html.Div(id='tab-content', className="tab-content"),
@@ -650,10 +650,19 @@ def render_tab_content(tab):
             if pd.isna(total_neuro): total_neuro = 0
             if pd.isna(total_orto): total_orto = 0
             
-            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", "Total", "#3498db", "⚕️")
-            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", "Total", "#27ae60", "🔪")
-            kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", "Total", "#16a085", "🧠")
-            kpi4 = create_kpi_card("Ortopedia", f"{int(total_orto)}", "Total", "#9b59b6", "🦴")
+            # Calcular total de especialidades y porcentajes
+            total_especialidades = total_medicina + total_cirugia + total_neuro + total_orto
+            if total_especialidades == 0: total_especialidades = 1
+            
+            pct_medicina = (total_medicina / total_especialidades * 100)
+            pct_cirugia = (total_cirugia / total_especialidades * 100)
+            pct_neuro = (total_neuro / total_especialidades * 100)
+            pct_orto = (total_orto / total_especialidades * 100)
+            
+            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{pct_medicina:.1f}% del total", "#3498db", "⚕️")
+            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{pct_cirugia:.1f}% del total", "#27ae60", "🔪")
+            kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", f"{pct_neuro:.1f}% del total", "#16a085", "🧠")
+            kpi4 = create_kpi_card("Ortopedia", f"{int(total_orto)}", f"{pct_orto:.1f}% del total", "#9b59b6", "🦴")
             
             fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina Interna', color='#3498db', silent=True, decimals=0)
             fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía General', color='#27ae60', silent=True, decimals=0)
