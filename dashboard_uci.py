@@ -709,25 +709,26 @@ def render_tab_content(tab):
                     yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
                     hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
-            # Gráfico de Eventos Adversos (barras horizontales para mejor legibilidad)
-            colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#16a085', '#d35400', '#7f8c8d', '#2980b9', '#8e44ad']
+            # Gráfico de Eventos Adversos - Treemap
             fig_eventos = go.Figure()
             if not df_eventos_adversos.empty:
-                fig_eventos = go.Figure(data=[go.Bar(
-                    y=df_eventos_adversos['Evento'], 
-                    x=df_eventos_adversos['Cantidad'],
-                    orientation='h',
-                    marker_color=colors_eventos[:len(df_eventos_adversos)], 
-                    hovertemplate='<b>%{y}</b><br>Casos: %{x}<extra></extra>'
+                colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#16a085', '#d35400', '#7f8c8d', '#2980b9', '#e91e63']
+                fig_eventos = go.Figure(data=[go.Treemap(
+                    labels=df_eventos_adversos['Evento'],
+                    values=df_eventos_adversos['Cantidad'],
+                    parents=[''] * len(df_eventos_adversos),
+                    marker=dict(colors=colors_eventos[:len(df_eventos_adversos)], line=dict(width=2, color='#1a202c')),
+                    textinfo='label',
+                    textfont=dict(size=11, color='white'),
+                    hovertemplate='<b>%{label}</b><extra></extra>',
+                    tiling=dict(packing='squarify')
                 )])
             fig_eventos.update_layout(
                 title={'text': 'Otros Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', 
-                xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1},
-                yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickfont': {'size': 10}}, 
-                margin=dict(l=250, r=30, t=50, b=50),
-                height=500,
-                hoverlabel=dict(bgcolor='white', font_color='#000000')
+                paper_bgcolor='#2d3748',
+                margin=dict(l=10, r=10, t=50, b=10),
+                height=400,
+                hoverlabel=dict(bgcolor='white', font_color='#000000', font_size=12)
             )
 
             return html.Div([
