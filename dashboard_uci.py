@@ -170,7 +170,7 @@ try:
     ws = wb['EVENTOS ADVERSOS']
     
     eventos_azules = []
-    for i in range(1, 100):
+    for i in range(1, 150):
         cell = ws.cell(i, 5)
         if cell.value:
             fill_color = cell.fill.fgColor.rgb if cell.fill.fgColor else None
@@ -178,29 +178,8 @@ try:
                 evento = str(cell.value).strip()
                 eventos_azules.append(evento)
     
-    def normalizar_evento(e):
-        e_lower = e.lower()
-        if 'desplazamiento' in e_lower:
-            return 'Desplazamiento'
-        if 'autoretiro' in e_lower:
-            return 'Autoretiro'
-        if 'error' in e_lower:
-            return 'Error procedimiento'
-        if 'medicamento' in e_lower:
-            return 'Error medicamentos'
-        if 'lecash' in e_lower:
-            return 'LECASH'
-        if 'marsi' in e_lower:
-            return 'MARSI'
-        if 'lesión' in e_lower or 'lesion' in e_lower:
-            return 'Lesiones'
-        if 'caida' in e_lower or 'caída' in e_lower:
-            return 'Caídas'
-        return e[:20] if len(e) > 20 else e
-    
-    eventos_norm = [normalizar_evento(e) for e in eventos_azules]
-    df_eventos_adversos = pd.Series(eventos_norm).value_counts().reset_index()
-    df_eventos_adversos.columns = ['Evento', 'Cantidad']
+    # Crear DataFrame con cada evento individual (sin agrupar)
+    df_eventos_adversos = pd.DataFrame({'Evento': eventos_azules, 'Cantidad': [1] * len(eventos_azules)})
     print(f"✅ Datos de eventos adversos cargados: {len(eventos_azules)} eventos")
 except Exception as e:
     print(f"⚠️ Error cargando eventos adversos: {e}")
@@ -730,16 +709,26 @@ def render_tab_content(tab):
                     yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
                     hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
-            # Gráfico de Eventos Adversos
-            colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad']
+            # Gráfico de Eventos Adversos (barras horizontales para mejor legibilidad)
+            colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#16a085', '#d35400', '#7f8c8d', '#2980b9', '#8e44ad']
             fig_eventos = go.Figure()
             if not df_eventos_adversos.empty:
-                fig_eventos = go.Figure(data=[go.Bar(x=df_eventos_adversos['Evento'], y=df_eventos_adversos['Cantidad'],
-                    marker_color=colors_eventos[:len(df_eventos_adversos)], hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>')])
-            fig_eventos.update_layout(title={'text': 'Otros Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -25},
-                yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
-                hoverlabel=dict(bgcolor='white', font_color='#000000'))
+                fig_eventos = go.Figure(data=[go.Bar(
+                    y=df_eventos_adversos['Evento'], 
+                    x=df_eventos_adversos['Cantidad'],
+                    orientation='h',
+                    marker_color=colors_eventos[:len(df_eventos_adversos)], 
+                    hovertemplate='<b>%{y}</b><br>Casos: %{x}<extra></extra>'
+                )])
+            fig_eventos.update_layout(
+                title={'text': 'Otros Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', 
+                xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1},
+                yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickfont': {'size': 10}}, 
+                margin=dict(l=250, r=30, t=50, b=50),
+                height=500,
+                hoverlabel=dict(bgcolor='white', font_color='#000000')
+            )
 
             return html.Div([
                 html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-3"),
