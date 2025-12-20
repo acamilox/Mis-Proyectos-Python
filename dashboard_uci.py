@@ -759,6 +759,37 @@ def render_tab_content(tab):
             
             fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=2)
             fig_giro = create_line_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
+            
+            # Gráfico Promedio de Días de VM (días ventilador / pacientes ventilados)
+            datos_dias_vm = safe_get_row('DIAS VENTILADOR', meses_disponibles, silent=True)
+            datos_pac_vm = safe_get_row('PACIENTES VENTILADOS', meses_disponibles, silent=True)
+            
+            # Calcular promedio días VM por mes
+            promedio_vm = []
+            for i in range(len(meses_disponibles)):
+                dias = datos_dias_vm.iloc[i] if isinstance(datos_dias_vm, pd.Series) else 0
+                pac = datos_pac_vm.iloc[i] if isinstance(datos_pac_vm, pd.Series) else 0
+                if pd.notna(dias) and pd.notna(pac) and pac > 0:
+                    promedio_vm.append(round(dias / pac, 2))
+                else:
+                    promedio_vm.append(0)
+            
+            fig_promedio_vm = go.Figure()
+            fig_promedio_vm.add_trace(go.Scatter(
+                x=meses_disponibles, y=promedio_vm, mode='lines+markers',
+                line=dict(color='#9b59b6', width=3),
+                marker=dict(size=10, line=dict(width=2, color='#1a1a1a')),
+                hovertemplate='<b>%{x}</b><br>Promedio días VM: %{y:.2f}<extra></extra>'
+            ))
+            fig_promedio_vm.update_layout(
+                title={'text': 'Promedio de Días de VM', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
+                xaxis={'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0'},
+                yaxis={'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0'},
+                margin=dict(l=50, r=30, t=60, b=40),
+                hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000')
+            )
+            
             fig_bacteriemia = create_line_chart('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', 'Tasa de ITS AC', color='#e74c3c', silent=True, decimals=2)
             fig_nav = create_line_chart('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV', color='#e74c3c', silent=True, decimals=2)
             fig_istu = create_line_chart('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa de ISTU AC', color='#f39c12', silent=True, decimals=2)
@@ -808,7 +839,7 @@ def render_tab_content(tab):
             return html.Div([
                 html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-3"),
                 dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_estancia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_giro), xs=12, md=6)]),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_estancia), xs=12, md=4), dbc.Col(dcc.Graph(figure=fig_giro), xs=12, md=4), dbc.Col(dcc.Graph(figure=fig_promedio_vm), xs=12, md=4)]),
                 html.H5("Indicadores de Calidad e Infecciones", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '40px', 'marginBottom': '20px', 'textAlign': 'center'}),
                 dbc.Row([dbc.Col(dcc.Graph(figure=fig_bacteriemia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_nav), xs=12, md=6)]),
                 dbc.Row([dbc.Col(dcc.Graph(figure=fig_istu), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_lesiones), xs=12, md=6)], className="mt-3"),
