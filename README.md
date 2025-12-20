@@ -1,5 +1,3 @@
-﻿# Dashboard-UCI-Adultos-2025
-
 # Dashboard UCI Adultos 2025
 
 Sistema de monitoreo y análisis de indicadores para la Unidad de Cuidados Intensivos de Adultos del Hospital Infantil Universitario de San José.
@@ -139,3 +137,4 @@ Andrés Camilo Camacho Labrador - Ing. Sistemas
 ## Licencia
 
 Uso interno - Hospital Infantil Universitario de San José © 2025
+
