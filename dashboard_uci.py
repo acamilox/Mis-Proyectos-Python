@@ -706,8 +706,8 @@ def render_tab_content(tab):
                     marker_color=colors_germenes[:len(df_germenes)], hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>')])
                 fig_germenes.update_layout(title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
                     plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -45},
-                    yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1}, margin=dict(l=50, r=50, t=50, b=100),
-                    height=350, hoverlabel=dict(bgcolor='white', font_color='#000000'))
+                    yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1}, margin=dict(l=50, r=50, t=50, b=120),
+                    height=450, hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
             # Gráfico de Eventos Adversos - Barras horizontales expandido
             fig_eventos = go.Figure()
