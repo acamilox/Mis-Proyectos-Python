@@ -471,10 +471,9 @@ app.index_string = '''
             }
             
             .tab-content {
-                background: linear-gradient(145deg, #0f2744 0%, #132238 100%);
+                background: transparent;
                 border-radius: 0 12px 12px 12px;
                 padding: 25px;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             }
             
             .Select-control { background-color: rgba(19,34,56,0.9) !important; border-color: #1e3a5f !important; border-radius: 8px !important; }
