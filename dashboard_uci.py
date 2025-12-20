@@ -113,7 +113,7 @@ try:
 except Exception as e:
     print(f"⚠️ Error cargando gérmenes: {e}")
 
-# --- CARGA DE DATOS DE FALLECIDOS (MORTALIDAD) - Edad y Sexo ---
+# --- CARGA DE DATOS DE FALLECIDOS (MORTALIDAD) - Edad, Sexo y Días de Estancia ---
 df_fallecidos = pd.DataFrame()
 try:
     import unicodedata
@@ -121,6 +121,10 @@ try:
     
     meses_separadores = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
                          'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
+    
+    meses_map = {'ENERO': 'Ene', 'FEBRERO': 'Feb', 'MARZO': 'Mar', 'ABRIL': 'Abr', 
+                 'MAYO': 'May', 'JUNIO': 'Jun', 'JULIO': 'Jul', 'AGOSTO': 'Agos',
+                 'SEPTIEMBRE': 'Sep', 'OCTUBRE': 'Oct', 'NOVIEMBRE': 'Nov', 'DICIEMBRE': 'Dic'}
     
     nombres_femeninos = ['maria', 'ana', 'luz', 'rosa', 'carmen', 'martha', 'marta', 'gloria', 
                          'patricia', 'sandra', 'claudia', 'diana', 'adriana', 'carolina', 'andrea',
@@ -143,20 +147,51 @@ try:
                 return True
         return False
     
+    def extraer_dias(valor):
+        if pd.isna(valor):
+            return None
+        if isinstance(valor, (int, float)):
+            return int(valor)
+        # Manejar casos como "42 horas", "36 horas"
+        val_str = str(valor).lower().strip()
+        if 'hora' in val_str:
+            try:
+                horas = int(''.join(filter(str.isdigit, val_str)))
+                return max(1, horas // 24)  # Convertir a días, mínimo 1
+            except:
+                return 1
+        try:
+            return int(float(val_str))
+        except:
+            return None
+    
     fallecidos_data = []
+    mes_actual = None
     for i, row in df_mort.iterrows():
         nombre = str(row[0]).strip() if pd.notna(row[0]) else ''
-        edad = row[1]
         
-        if nombre.upper().replace(' ', '') in [m.upper() for m in meses_separadores]:
+        # Detectar separador de mes
+        nombre_upper = nombre.upper().replace(' ', '')
+        if nombre_upper in [m.upper() for m in meses_separadores]:
+            mes_actual = meses_map.get(nombre_upper, None)
             continue
+        
+        edad = row[1]
+        dias_estancia = extraer_dias(row[2])
+        
         if not nombre or nombre.upper() == 'NAN':
             continue
         if not pd.notna(edad) or not isinstance(edad, (int, float)):
             continue
         
         sexo = 'Mujer' if es_nombre_femenino(nombre) else 'Hombre'
-        fallecidos_data.append({'Nombre': nombre, 'Edad': int(edad), 'Sexo': sexo})
+        fallecidos_data.append({
+            'Nombre': nombre, 
+            'Edad': int(edad), 
+            'Sexo': sexo, 
+            'Dias_Estancia': dias_estancia,
+            'Mes': mes_actual
+        })
     
     df_fallecidos = pd.DataFrame(fallecidos_data)
     print(f"✅ Datos de fallecidos cargados: {len(df_fallecidos)} pacientes")
@@ -567,12 +602,28 @@ def render_tab_content(tab):
             datos_mortalidad_trauma = safe_get_row('% mortalidad en trauma', meses_disponibles, silent=True)
             mortalidad_trauma = datos_mortalidad_trauma.sum() / 10 if isinstance(datos_mortalidad_trauma, pd.Series) else 0
             
+            # Calcular estadísticas de días de estancia de fallecidos
+            dias_estancia_validos = df_fallecidos['Dias_Estancia'].dropna() if not df_fallecidos.empty else pd.Series([0])
+            if len(dias_estancia_validos) == 0:
+                dias_estancia_validos = pd.Series([0])
+            
+            promedio_dias = dias_estancia_validos.mean()
+            minimo_dias = dias_estancia_validos.min()
+            maximo_dias = dias_estancia_validos.max()
+            mediana_dias = dias_estancia_validos.median()
+            
+            # KPIs principales
             kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Oct", "#e74c3c", "💀")
             kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad_general:.2f}%", "Ene - Oct", "#c0392b", "⚰️")
             kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Oct", "#34495e", "🦠")
             kpi4 = create_kpi_card("% Mortalidad Trauma", f"{mortalidad_trauma:.2f}%", "Promedio", "#f39c12", "🚑")
             
-            fig_fallecidos = create_bar_chart('FALLECIDOS', 'Número de Fallecidos', color='#e74c3c', decimals=0)
+            # KPIs de días de estancia fallecidos
+            kpi_prom_dias = create_kpi_card("Promedio Días Estancia", f"{promedio_dias:.1f}", "Fallecidos", "#9b59b6", "📊")
+            kpi_min_dias = create_kpi_card("Mínimo Días", f"{int(minimo_dias)}", "Fallecidos", "#27ae60", "⬇️")
+            kpi_max_dias = create_kpi_card("Máximo Días", f"{int(maximo_dias)}", "Fallecidos", "#e67e22", "⬆️")
+            kpi_mediana_dias = create_kpi_card("Mediana Días", f"{mediana_dias:.1f}", "Fallecidos", "#3498db", "📈")
+            
             fig_mortalidad = create_line_chart('% DE MORATLIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=2)
             fig_trauma = create_grouped_bar_chart(
                 ['Pacientes con diagnóstico de Trauma', 'Pacientes fallecidos por Trauma'],
@@ -629,7 +680,13 @@ def render_tab_content(tab):
             
             return html.Div([
                 dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_fallecidos), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_mortalidad), xs=12, md=6)]),
+                html.H6("Días de Estancia - Fallecidos", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '15px', 'marginTop': '10px'}),
+                dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=3), dbc.Col(kpi_min_dias, xs=12, md=3), dbc.Col(kpi_max_dias, xs=12, md=3), dbc.Col(kpi_mediana_dias, xs=12, md=3)], className="mb-4"),
+                dbc.Row([
+                    dbc.Col(xs=12, md=2),
+                    dbc.Col(dcc.Graph(figure=fig_mortalidad), xs=12, md=8),
+                    dbc.Col(xs=12, md=2)
+                ], className="mb-4", justify="center"),
                 dbc.Row([dbc.Col(dcc.Graph(figure=fig_trauma), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_edad_sexo), xs=12, md=6)], className="mt-3")
             ])
         except Exception as e:
