@@ -757,21 +757,23 @@ def render_tab_content(tab):
     return html.Div([html.H5("Selecciona una pestaña", style={'color': '#ffffff'})])
 
 
-# Callback para seleccionar todos los meses
+# Callback para seleccionar todos los meses y actualizar contenido
 @app.callback(
-    Output('filtro-mes-inicio', 'value'),
-    Input('btn-todos-meses', 'n_clicks'),
-    prevent_initial_call=True
+    [Output('filtro-mes-inicio', 'value'),
+     Output('resumen-content', 'children')],
+    [Input('btn-todos-meses', 'n_clicks'),
+     Input('btn-aplicar-filtros', 'n_clicks')],
+    [dash.dependencies.State('filtro-mes-inicio', 'value')],
+    prevent_initial_call=False
 )
-def seleccionar_todos_meses(n_clicks):
-    if n_clicks:
-        return meses_disponibles
-    return dash.no_update
-
-
-@app.callback(Output('resumen-content', 'children'), [Input('btn-aplicar-filtros', 'n_clicks')],
-    [dash.dependencies.State('filtro-mes-inicio', 'value')], prevent_initial_call=False)
-def actualizar_resumen(n_clicks, meses_seleccionados):
+def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
+    ctx = dash.callback_context
+    triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
+    
+    # Si se presionó "Todos los meses", usar todos los meses
+    if triggered_id == 'btn-todos-meses':
+        meses_seleccionados = meses_disponibles
+    
     try:
         # Manejar selección múltiple de meses
         if meses_seleccionados and isinstance(meses_seleccionados, list) and len(meses_seleccionados) > 0:
@@ -870,7 +872,7 @@ def actualizar_resumen(n_clicks, meses_seleccionados):
                 yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, legend=dict(orientation="h", y=-0.35, x=0.5, xanchor="center",
                 bgcolor='rgba(26,32,44,0.95)', font={'color': '#ffffff'}), hoverlabel=dict(bgcolor='white', font_color='#000000'))
 
-        return html.Div([
+        return meses_filtrados, html.Div([
             dbc.Row([dbc.Col(kpi_ingresos, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi1, xs=12, sm=6, md=True, className="mb-3"),
                      dbc.Col(kpi2, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi3, xs=12, sm=6, md=True, className="mb-3"),
                      dbc.Col(kpi4, xs=12, sm=6, md=True, className="mb-3")], className="mb-3 g-3"),
@@ -882,7 +884,7 @@ def actualizar_resumen(n_clicks, meses_seleccionados):
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_morbilidad_total), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_genero), xs=12, md=6)])
         ])
     except Exception as e:
-        return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
+        return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
 if __name__ == '__main__':
