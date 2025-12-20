@@ -503,7 +503,7 @@ app.layout = html.Div([
                 ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '15px'})
             ]),
             html.Div([
-                dbc.Button("� Exxportar a Excel", color="success", size="sm", className="me-2", style={'borderRadius': '6px', 'fontWeight': '500'}),
+                dbc.Button("📤 Exportar a Excel", color="success", size="sm", className="me-2", style={'borderRadius': '6px', 'fontWeight': '500'}),
                 dbc.Button("📄 Exportar a CSV", color="primary", size="sm", style={'borderRadius': '6px', 'fontWeight': '500'}),
             ], style={'marginBottom': '20px'})
         ], className="fade-in"),
@@ -814,7 +814,7 @@ def actualizar_resumen(n_clicks, meses_seleccionados):
         kpi_ingresos = create_kpi_card("Total Ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db", "📥")
         kpi1 = create_kpi_card("% Ocupación Promedio", f"{promedio_ocupacional:.2f}%", rango_texto, "#2c3e50", "🏥")
         kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad:.2f}%", f"Total {rango_texto}", "#e74c3c", "💔")
-        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#27ae60", "⏱️")
+        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60", "⏱️")
         kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄")
         
         # EPS
@@ -865,7 +865,7 @@ def actualizar_resumen(n_clicks, meses_seleccionados):
             fig_morbilidad_genero = go.Figure(data=[
                 go.Bar(name='Hombres', x=df_morbilidad.index, y=df_morbilidad['Hombre'], marker_color='#3498db'),
                 go.Bar(name='Mujeres', x=df_morbilidad.index, y=df_morbilidad['Mujer'], marker_color='#e91e63')])
-            fig_morbilidad_genero.update_layout(title={'text': 'Morbilidad por Género', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+            fig_morbilidad_genero.update_layout(title={'text': 'Morbilidad por Sexo', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
                 barmode='group', plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -45},
                 yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, legend=dict(orientation="h", y=-0.35, x=0.5, xanchor="center",
                 bgcolor='rgba(26,32,44,0.95)', font={'color': '#ffffff'}), hoverlabel=dict(bgcolor='white', font_color='#000000'))
