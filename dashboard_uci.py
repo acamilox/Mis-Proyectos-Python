@@ -599,7 +599,7 @@ def render_tab_content(tab):
                 ['Pacientes con diagnóstico de Trauma', 'Pacientes fallecidos por Trauma'],
                 ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos', decimals=0)
 
-            # Gráfico de Edad y Sexo de Fallecidos
+            # Gráfico Pirámide Poblacional de Edad y Sexo de Fallecidos
             fig_edad_sexo = go.Figure()
             if not df_fallecidos.empty:
                 bins = [0, 40, 50, 60, 70, 80, 90, 100]
@@ -608,19 +608,45 @@ def render_tab_content(tab):
                 edad_sexo = df_fallecidos.groupby(['Rango_Edad', 'Sexo']).size().unstack(fill_value=0)
                 if 'Hombre' not in edad_sexo.columns: edad_sexo['Hombre'] = 0
                 if 'Mujer' not in edad_sexo.columns: edad_sexo['Mujer'] = 0
-                fig_edad_sexo = go.Figure(data=[
-                    go.Bar(name='Hombres', x=edad_sexo.index.astype(str), y=edad_sexo['Hombre'], 
-                           marker_color='#3498db', hovertemplate='<b>%{x}</b><br>Hombres: %{y}<extra></extra>'),
-                    go.Bar(name='Mujeres', x=edad_sexo.index.astype(str), y=edad_sexo['Mujer'], 
-                           marker_color='#e91e63', hovertemplate='<b>%{x}</b><br>Mujeres: %{y}<extra></extra>')
-                ])
+                
+                # Calcular totales y porcentajes
+                total_fallecidos_chart = len(df_fallecidos)
+                hombres_vals = edad_sexo['Hombre'].values
+                mujeres_vals = edad_sexo['Mujer'].values
+                hombres_pct = [(v / total_fallecidos_chart * 100) if total_fallecidos_chart > 0 else 0 for v in hombres_vals]
+                mujeres_pct = [(v / total_fallecidos_chart * 100) if total_fallecidos_chart > 0 else 0 for v in mujeres_vals]
+                
+                # Pirámide: hombres a la izquierda (valores negativos), mujeres a la derecha
+                fig_edad_sexo = go.Figure()
+                fig_edad_sexo.add_trace(go.Bar(
+                    name='Hombres', y=edad_sexo.index.astype(str), x=[-v for v in hombres_vals],
+                    orientation='h', marker_color='#3498db',
+                    text=[f'{int(v)} ({p:.1f}%)' for v, p in zip(hombres_vals, hombres_pct)],
+                    textposition='inside', textfont=dict(color='white', size=11),
+                    hovertemplate='<b>%{y}</b><br>Hombres: %{customdata[0]} (%{customdata[1]:.1f}%)<extra></extra>',
+                    customdata=list(zip(hombres_vals, hombres_pct))
+                ))
+                fig_edad_sexo.add_trace(go.Bar(
+                    name='Mujeres', y=edad_sexo.index.astype(str), x=mujeres_vals,
+                    orientation='h', marker_color='#e91e63',
+                    text=[f'{int(v)} ({p:.1f}%)' for v, p in zip(mujeres_vals, mujeres_pct)],
+                    textposition='inside', textfont=dict(color='white', size=11),
+                    hovertemplate='<b>%{y}</b><br>Mujeres: %{customdata[0]} (%{customdata[1]:.1f}%)<extra></extra>',
+                    customdata=list(zip(mujeres_vals, mujeres_pct))
+                ))
+                
+                max_val = max(max(hombres_vals), max(mujeres_vals)) if len(hombres_vals) > 0 else 5
                 fig_edad_sexo.update_layout(
-                    title={'text': 'Edad y Sexo de Fallecidos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                    barmode='group', plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
-                    xaxis={'title': 'Rango de Edad', 'gridcolor': '#4a5568', 'color': '#e2e8f0'},
-                    yaxis={'title': 'Cantidad', 'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1},
-                    legend=dict(orientation="h", y=-0.2, x=0.5, xanchor="center", bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}),
-                    hoverlabel=dict(bgcolor='white', font_color='#000000'))
+                    title={'text': 'Pirámide de Edad y Sexo - Fallecidos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                    barmode='relative', plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
+                    xaxis={'title': '← Hombres | Mujeres →', 'gridcolor': '#4a5568', 'color': '#e2e8f0',
+                           'range': [-(max_val + 2), max_val + 2], 'tickvals': list(range(-int(max_val)-1, int(max_val)+2)),
+                           'ticktext': [str(abs(x)) for x in range(-int(max_val)-1, int(max_val)+2)]},
+                    yaxis={'title': 'Rango de Edad', 'gridcolor': '#4a5568', 'color': '#e2e8f0'},
+                    legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}),
+                    hoverlabel=dict(bgcolor='white', font_color='#000000'),
+                    margin=dict(l=50, r=50, t=60, b=60)
+                )
             
             return html.Div([
                 dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
