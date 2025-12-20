@@ -510,8 +510,8 @@ app.layout = html.Div([
         
         # Tabs
         dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
-            dbc.Tab(label='� GResumen general', tab_id='tab-resumen'),
-            dbc.Tab(label='� Goestión y calidad', tab_id='tab-gestion'),
+            dbc.Tab(label='✅ Resumen general', tab_id='tab-resumen'),
+            dbc.Tab(label='📦 Gestión y calidad', tab_id='tab-gestion'),
             dbc.Tab(label='💀 Mortalidad', tab_id='tab-mortalidad'),
             dbc.Tab(label='🏥 Especialidades y FPS', tab_id='tab-especialidades'),
         ], style={'marginBottom': '0', 'borderBottom': 'none', 'backgroundColor': 'rgba(19,34,56,0.8)', 'borderRadius': '12px 12px 0 0', 'padding': '0 10px'}),
@@ -545,28 +545,25 @@ def render_tab_content(tab):
             filtros = html.Div([
                 dbc.Row([
                     dbc.Col([
-                        html.Label("📅 Mes:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        html.Label("📅 Meses (selecciona hasta 3):", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
                         dcc.Dropdown(
                             id='filtro-mes-inicio',
                             options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
-                            value='Oct',
-                            clearable=False
+                            value=['Agos', 'Sep', 'Oct'],
+                            multi=True,
+                            placeholder="Selecciona meses..."
                         )
-                    ], xs=12, md=4),
-                    dbc.Col([
-                        html.Label("📆 Año:", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
-                        dcc.Dropdown(
-                            id='filtro-anio',
-                            options=[{'label': '2025', 'value': '2025'}],
-                            value='2025',
-                            clearable=False
-                        )
-                    ], xs=12, md=4),
+                    ], xs=12, md=6),
                     dbc.Col([
                         html.Label(" ", style={'color': 'transparent', 'marginBottom': '8px', 'display': 'block'}),
                         dbc.Button("🔍 Aplicar Filtros", id='btn-aplicar-filtros', color="success", className="w-100",
                                   style={'borderRadius': '8px', 'fontWeight': '600', 'height': '38px'})
-                    ], xs=12, md=4),
+                    ], xs=12, md=3),
+                    dbc.Col([
+                        html.Label(" ", style={'color': 'transparent', 'marginBottom': '8px', 'display': 'block'}),
+                        dbc.Button("📊 Todos los meses", id='btn-todos-meses', color="secondary", className="w-100",
+                                  style={'borderRadius': '8px', 'fontWeight': '500', 'height': '38px'})
+                    ], xs=12, md=3),
                 ], className="mb-2"),
             ], style={'background': 'linear-gradient(145deg, #132238 0%, #1a365d 100%)', 'padding': '20px', 'borderRadius': '15px', 'marginBottom': '25px'})
             
@@ -734,12 +731,36 @@ def render_tab_content(tab):
     return html.Div([html.H5("Selecciona una pestaña", style={'color': '#ffffff'})])
 
 
+# Callback para seleccionar todos los meses
+@app.callback(
+    Output('filtro-mes-inicio', 'value'),
+    Input('btn-todos-meses', 'n_clicks'),
+    prevent_initial_call=True
+)
+def seleccionar_todos_meses(n_clicks):
+    if n_clicks:
+        return meses_disponibles
+    return dash.no_update
+
+
 @app.callback(Output('resumen-content', 'children'), [Input('btn-aplicar-filtros', 'n_clicks')],
-    [dash.dependencies.State('filtro-mes-inicio', 'value'), dash.dependencies.State('filtro-anio', 'value')], prevent_initial_call=False)
-def actualizar_resumen(n_clicks, mes_seleccionado, anio):
+    [dash.dependencies.State('filtro-mes-inicio', 'value')], prevent_initial_call=False)
+def actualizar_resumen(n_clicks, meses_seleccionados):
     try:
-        meses_filtrados = [mes_seleccionado] if mes_seleccionado and mes_seleccionado in meses_disponibles else meses_disponibles
-        rango_texto = meses_completos.get(mes_seleccionado, mes_seleccionado) if mes_seleccionado else "Todos"
+        # Manejar selección múltiple de meses
+        if meses_seleccionados and isinstance(meses_seleccionados, list) and len(meses_seleccionados) > 0:
+            meses_filtrados = [m for m in meses_seleccionados if m in meses_disponibles]
+        else:
+            meses_filtrados = meses_disponibles
+        
+        # Crear texto del rango
+        if len(meses_filtrados) == 1:
+            rango_texto = meses_completos.get(meses_filtrados[0], meses_filtrados[0])
+        elif len(meses_filtrados) == len(meses_disponibles):
+            rango_texto = "Ene - Oct"
+        else:
+            rango_texto = ", ".join([meses_completos.get(m, m)[:3] for m in meses_filtrados])
+        
         suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
         suma_col = suma_col[0] if suma_col else '∑'
         
