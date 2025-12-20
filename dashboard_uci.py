@@ -178,9 +178,50 @@ try:
                 evento = str(cell.value).strip()
                 eventos_azules.append(evento)
     
-    # Crear DataFrame con cada evento individual (sin agrupar)
-    df_eventos_adversos = pd.DataFrame({'Evento': eventos_azules, 'Cantidad': [1] * len(eventos_azules)})
-    print(f"✅ Datos de eventos adversos cargados: {len(eventos_azules)} eventos")
+    # Agrupar eventos similares para el Pareto
+    def categorizar_evento(e):
+        e_lower = e.lower()
+        if 'tubo' in e_lower or 'tórax' in e_lower:
+            return 'Desplazamiento tubo tórax'
+        if 'gastrostom' in e_lower:
+            return 'Desplazamiento sonda gastrostomía'
+        if 'línea arterial' in e_lower or 'linea arterial' in e_lower:
+            return 'Desplazamiento línea arterial'
+        if 'hemodiálisis' in e_lower or 'hemodialisis' in e_lower:
+            return 'Desplazamiento catéter hemodiálisis'
+        if 'venoso central' in e_lower or 'cvc' in e_lower.replace(' ', ''):
+            return 'Desplazamiento CVC'
+        if 'nefrostom' in e_lower:
+            return 'Desplazamiento nefrostomía'
+        if 'biliar' in e_lower or 'transpariet' in e_lower:
+            return 'Desplazamiento derivación biliar'
+        if 'lecash' in e_lower:
+            return 'LECASH'
+        if 'marsi' in e_lower:
+            return 'Lesión MARSI'
+        if 'autoretiro' in e_lower or 'ventriculostom' in e_lower:
+            return 'Autoretiro ventriculostomía'
+        if 'caida' in e_lower or 'caída' in e_lower:
+            return 'Caída'
+        if 'administración' in e_lower or 'contraste' in e_lower:
+            return 'Error administración medicamentos'
+        if 'retiro' in e_lower and 'cvc' in e_lower.lower():
+            return 'Error retiro CVC'
+        if 'medicamento' in e_lower or 'problema' in e_lower:
+            return 'Problema con medicamento'
+        return e[:30]
+    
+    eventos_categorizados = [categorizar_evento(e) for e in eventos_azules]
+    df_eventos_adversos = pd.Series(eventos_categorizados).value_counts().reset_index()
+    df_eventos_adversos.columns = ['Evento', 'Cantidad']
+    df_eventos_adversos = df_eventos_adversos.sort_values('Cantidad', ascending=False).reset_index(drop=True)
+    
+    # Calcular porcentaje acumulado para Pareto
+    total = df_eventos_adversos['Cantidad'].sum()
+    df_eventos_adversos['Porcentaje'] = (df_eventos_adversos['Cantidad'] / total * 100).round(1)
+    df_eventos_adversos['Acumulado'] = df_eventos_adversos['Porcentaje'].cumsum()
+    
+    print(f"✅ Datos de eventos adversos cargados: {len(eventos_azules)} eventos en {len(df_eventos_adversos)} categorías")
 except Exception as e:
     print(f"⚠️ Error cargando eventos adversos: {e}")
 
@@ -709,26 +750,46 @@ def render_tab_content(tab):
                     yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
                     hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
-            # Gráfico de Eventos Adversos - Treemap
+            # Gráfico de Pareto - Eventos Adversos
             fig_eventos = go.Figure()
             if not df_eventos_adversos.empty:
                 colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#16a085', '#d35400', '#7f8c8d', '#2980b9', '#e91e63']
-                fig_eventos = go.Figure(data=[go.Treemap(
-                    labels=df_eventos_adversos['Evento'],
-                    values=df_eventos_adversos['Cantidad'],
-                    parents=[''] * len(df_eventos_adversos),
-                    marker=dict(colors=colors_eventos[:len(df_eventos_adversos)], line=dict(width=2, color='#1a202c')),
-                    textinfo='label',
-                    textfont=dict(size=11, color='white'),
-                    hovertemplate='<b>%{label}</b><extra></extra>',
-                    tiling=dict(packing='squarify')
-                )])
+                
+                # Barras de frecuencia
+                fig_eventos.add_trace(go.Bar(
+                    x=df_eventos_adversos['Evento'],
+                    y=df_eventos_adversos['Cantidad'],
+                    name='Frecuencia',
+                    marker_color=colors_eventos[:len(df_eventos_adversos)],
+                    hovertemplate='<b>%{x}</b><br>Casos: %{y}<br>%{customdata:.1f}% del total<extra></extra>',
+                    customdata=df_eventos_adversos['Porcentaje'],
+                    yaxis='y'
+                ))
+                
+                # Línea de porcentaje acumulado
+                fig_eventos.add_trace(go.Scatter(
+                    x=df_eventos_adversos['Evento'],
+                    y=df_eventos_adversos['Acumulado'],
+                    name='% Acumulado',
+                    mode='lines+markers',
+                    line=dict(color='#ffffff', width=3),
+                    marker=dict(size=8, color='#ffffff', line=dict(width=2, color='#e74c3c')),
+                    hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>',
+                    yaxis='y2'
+                ))
+                
             fig_eventos.update_layout(
-                title={'text': 'Otros Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
-                paper_bgcolor='#2d3748',
-                margin=dict(l=10, r=10, t=50, b=10),
-                height=400,
-                hoverlabel=dict(bgcolor='white', font_color='#000000', font_size=12)
+                title={'text': 'Diagrama de Pareto - Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
+                xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -35, 'tickfont': {'size': 9}},
+                yaxis={'title': 'Frecuencia', 'gridcolor': '#4a5568', 'color': '#e2e8f0', 'side': 'left', 'dtick': 1},
+                yaxis2={'title': '% Acumulado', 'overlaying': 'y', 'side': 'right', 'range': [0, 105], 
+                        'color': '#ffffff', 'gridcolor': 'rgba(255,255,255,0.1)', 'dtick': 20},
+                margin=dict(l=50, r=50, t=50, b=120),
+                height=450,
+                legend=dict(orientation="h", y=-0.35, x=0.5, xanchor="center", bgcolor='rgba(0,0,0,0.5)', font={'color': '#ffffff'}),
+                hoverlabel=dict(bgcolor='white', font_color='#000000', font_size=12),
+                showlegend=True
             )
 
             return html.Div([
