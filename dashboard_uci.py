@@ -178,50 +178,9 @@ try:
                 evento = str(cell.value).strip()
                 eventos_azules.append(evento)
     
-    # Agrupar eventos similares para el Pareto
-    def categorizar_evento(e):
-        e_lower = e.lower()
-        if 'tubo' in e_lower or 'tórax' in e_lower:
-            return 'Desplazamiento tubo tórax'
-        if 'gastrostom' in e_lower:
-            return 'Desplazamiento sonda gastrostomía'
-        if 'línea arterial' in e_lower or 'linea arterial' in e_lower:
-            return 'Desplazamiento línea arterial'
-        if 'hemodiálisis' in e_lower or 'hemodialisis' in e_lower:
-            return 'Desplazamiento catéter hemodiálisis'
-        if 'venoso central' in e_lower or 'cvc' in e_lower.replace(' ', ''):
-            return 'Desplazamiento CVC'
-        if 'nefrostom' in e_lower:
-            return 'Desplazamiento nefrostomía'
-        if 'biliar' in e_lower or 'transpariet' in e_lower:
-            return 'Desplazamiento derivación biliar'
-        if 'lecash' in e_lower:
-            return 'LECASH'
-        if 'marsi' in e_lower:
-            return 'Lesión MARSI'
-        if 'autoretiro' in e_lower or 'ventriculostom' in e_lower:
-            return 'Autoretiro ventriculostomía'
-        if 'caida' in e_lower or 'caída' in e_lower:
-            return 'Caída'
-        if 'administración' in e_lower or 'contraste' in e_lower:
-            return 'Error administración medicamentos'
-        if 'retiro' in e_lower and 'cvc' in e_lower.lower():
-            return 'Error retiro CVC'
-        if 'medicamento' in e_lower or 'problema' in e_lower:
-            return 'Problema con medicamento'
-        return e[:30]
-    
-    eventos_categorizados = [categorizar_evento(e) for e in eventos_azules]
-    df_eventos_adversos = pd.Series(eventos_categorizados).value_counts().reset_index()
-    df_eventos_adversos.columns = ['Evento', 'Cantidad']
-    df_eventos_adversos = df_eventos_adversos.sort_values('Cantidad', ascending=False).reset_index(drop=True)
-    
-    # Calcular porcentaje acumulado para Pareto
-    total = df_eventos_adversos['Cantidad'].sum()
-    df_eventos_adversos['Porcentaje'] = (df_eventos_adversos['Cantidad'] / total * 100).round(1)
-    df_eventos_adversos['Acumulado'] = df_eventos_adversos['Porcentaje'].cumsum()
-    
-    print(f"✅ Datos de eventos adversos cargados: {len(eventos_azules)} eventos en {len(df_eventos_adversos)} categorías")
+    # Crear DataFrame con cada evento individual (sin agrupar)
+    df_eventos_adversos = pd.DataFrame({'Evento': eventos_azules, 'Cantidad': [1] * len(eventos_azules)})
+    print(f"✅ Datos de eventos adversos cargados: {len(eventos_azules)} eventos")
 except Exception as e:
     print(f"⚠️ Error cargando eventos adversos: {e}")
 
@@ -739,7 +698,7 @@ def render_tab_content(tab):
             fig_istu = create_line_chart('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa de ISTU AC', color='#f39c12', silent=True, decimals=2)
             fig_lesiones = create_line_chart('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión', color='#9b59b6', silent=True, decimals=2)
 
-            # Gráfico de Gérmenes Aislados
+            # Gráfico de Gérmenes Aislados (centrado)
             fig_germenes = go.Figure()
             if not df_germenes.empty:
                 colors_germenes = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b', '#27ae60', '#8e44ad', '#2980b9', '#d35400', '#7f8c8d']
@@ -747,49 +706,37 @@ def render_tab_content(tab):
                     marker_color=colors_germenes[:len(df_germenes)], hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>')])
                 fig_germenes.update_layout(title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
                     plot_bgcolor='#1a202c', paper_bgcolor='#2d3748', xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -45},
-                    yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'}, margin=dict(l=50, r=30, t=50, b=100),
-                    hoverlabel=dict(bgcolor='white', font_color='#000000'))
+                    yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1}, margin=dict(l=50, r=50, t=50, b=100),
+                    height=350, hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
-            # Gráfico de Pareto - Eventos Adversos
+            # Gráfico de Eventos Adversos - Barras horizontales expandido
             fig_eventos = go.Figure()
             if not df_eventos_adversos.empty:
                 colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#16a085', '#d35400', '#7f8c8d', '#2980b9', '#e91e63']
                 
-                # Barras de frecuencia
-                fig_eventos.add_trace(go.Bar(
-                    x=df_eventos_adversos['Evento'],
-                    y=df_eventos_adversos['Cantidad'],
-                    name='Frecuencia',
-                    marker_color=colors_eventos[:len(df_eventos_adversos)],
-                    hovertemplate='<b>%{x}</b><br>Casos: %{y}<br>%{customdata:.1f}% del total<extra></extra>',
-                    customdata=df_eventos_adversos['Porcentaje'],
-                    yaxis='y'
-                ))
+                # Invertir orden para que el primero quede arriba
+                df_eventos_plot = df_eventos_adversos.iloc[::-1].reset_index(drop=True)
                 
-                # Línea de porcentaje acumulado
-                fig_eventos.add_trace(go.Scatter(
-                    x=df_eventos_adversos['Evento'],
-                    y=df_eventos_adversos['Acumulado'],
-                    name='% Acumulado',
-                    mode='lines+markers',
-                    line=dict(color='#ffffff', width=3),
-                    marker=dict(size=8, color='#ffffff', line=dict(width=2, color='#e74c3c')),
-                    hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>',
-                    yaxis='y2'
-                ))
+                fig_eventos = go.Figure(data=[go.Bar(
+                    y=df_eventos_plot['Evento'],
+                    x=df_eventos_plot['Cantidad'],
+                    orientation='h',
+                    marker_color=colors_eventos[:len(df_eventos_plot)][::-1],
+                    text=df_eventos_plot['Cantidad'],
+                    textposition='outside',
+                    textfont=dict(color='#ffffff', size=12),
+                    hovertemplate='<b>%{y}</b><br>Casos: %{x}<extra></extra>'
+                )])
                 
             fig_eventos.update_layout(
-                title={'text': 'Diagrama de Pareto - Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                title={'text': 'Otros Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
                 plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
-                xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickangle': -35, 'tickfont': {'size': 9}},
-                yaxis={'title': 'Frecuencia', 'gridcolor': '#4a5568', 'color': '#e2e8f0', 'side': 'left', 'dtick': 1},
-                yaxis2={'title': '% Acumulado', 'overlaying': 'y', 'side': 'right', 'range': [0, 105], 
-                        'color': '#ffffff', 'gridcolor': 'rgba(255,255,255,0.1)', 'dtick': 20},
-                margin=dict(l=50, r=50, t=50, b=120),
-                height=450,
-                legend=dict(orientation="h", y=-0.35, x=0.5, xanchor="center", bgcolor='rgba(0,0,0,0.5)', font={'color': '#ffffff'}),
+                xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1, 'range': [0, 1.5]},
+                yaxis={'gridcolor': 'rgba(74,85,104,0.3)', 'color': '#e2e8f0', 'tickfont': {'size': 11}},
+                margin=dict(l=380, r=50, t=50, b=30),
+                height=550,
                 hoverlabel=dict(bgcolor='white', font_color='#000000', font_size=12),
-                showlegend=True
+                bargap=0.3
             )
 
             return html.Div([
@@ -800,7 +747,14 @@ def render_tab_content(tab):
                 dbc.Row([dbc.Col(dcc.Graph(figure=fig_bacteriemia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_nav), xs=12, md=6)]),
                 dbc.Row([dbc.Col(dcc.Graph(figure=fig_istu), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_lesiones), xs=12, md=6)], className="mt-3"),
                 html.H5("Gérmenes Aislados y Eventos Adversos", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '40px', 'marginBottom': '20px', 'textAlign': 'center'}),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_germenes), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_eventos), xs=12, md=6)], className="mt-3")
+                dbc.Row([
+                    dbc.Col(xs=12, md=2),
+                    dbc.Col(dcc.Graph(figure=fig_germenes), xs=12, md=8),
+                    dbc.Col(xs=12, md=2)
+                ], className="mb-4", justify="center"),
+                dbc.Row([
+                    dbc.Col(dcc.Graph(figure=fig_eventos), xs=12)
+                ])
             ])
         except Exception as e:
             return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
