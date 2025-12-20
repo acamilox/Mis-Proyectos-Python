@@ -1,12 +1,16 @@
 ﻿# -*- coding: utf-8 -*-
 import dash
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from openpyxl import load_workbook
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl.utils.dataframe import dataframe_to_rows
 import os
+from io import BytesIO
+from datetime import datetime
 
 # Obtener directorio del script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -517,8 +521,10 @@ app.layout = html.Div([
                 ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '15px'})
             ]),
             html.Div([
-                dbc.Button("📤 Exportar a Excel", color="success", size="sm", className="me-2", style={'borderRadius': '6px', 'fontWeight': '500'}),
-                dbc.Button("📄 Exportar a CSV", color="primary", size="sm", style={'borderRadius': '6px', 'fontWeight': '500'}),
+                dbc.Button("📤 Exportar a Excel", id="btn-export-excel", color="success", size="sm", className="me-2", style={'borderRadius': '6px', 'fontWeight': '500'}),
+                dbc.Button("📄 Exportar a CSV", id="btn-export-csv", color="primary", size="sm", style={'borderRadius': '6px', 'fontWeight': '500'}),
+                dcc.Download(id="download-excel"),
+                dcc.Download(id="download-csv"),
             ], style={'marginBottom': '20px'})
         ], className="fade-in"),
         
@@ -569,16 +575,14 @@ def render_tab_content(tab):
                         )
                     ], xs=12, md=6),
                     dbc.Col([
-                        html.Label(" ", style={'color': 'transparent', 'marginBottom': '8px', 'display': 'block'}),
                         dbc.Button("🔍 Aplicar Filtros", id='btn-aplicar-filtros', color="success", className="w-100",
-                                  style={'borderRadius': '8px', 'fontWeight': '600', 'height': '38px'})
+                                  style={'borderRadius': '8px', 'fontWeight': '600', 'height': '38px', 'marginTop': '28px'})
                     ], xs=12, md=3),
                     dbc.Col([
-                        html.Label(" ", style={'color': 'transparent', 'marginBottom': '8px', 'display': 'block'}),
                         dbc.Button("📊 Todos los meses", id='btn-todos-meses', color="secondary", className="w-100",
-                                  style={'borderRadius': '8px', 'fontWeight': '500', 'height': '38px'})
+                                  style={'borderRadius': '8px', 'fontWeight': '500', 'height': '38px', 'marginTop': '28px'})
                     ], xs=12, md=3),
-                ], className="mb-2"),
+                ], className="mb-2", align="end"),
             ], style={'background': 'linear-gradient(145deg, #132238 0%, #1a365d 100%)', 'padding': '20px', 'borderRadius': '15px', 'marginBottom': '25px'})
             
             return html.Div([filtros, html.Div(id='resumen-content')])
@@ -987,6 +991,213 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         ])
     except Exception as e:
         return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
+
+
+# --- FUNCIÓN PARA GENERAR DATOS DE EXPORTACIÓN ---
+def generar_datos_exportacion():
+    """Genera un diccionario con todos los datos organizados para exportar"""
+    datos = {}
+    suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
+    suma_col = suma_col[0] if suma_col else '∑'
+    
+    # 1. Resumen General
+    resumen = []
+    indicadores_resumen = [
+        ('% OCUPACIONAL', '% Ocupación'),
+        ('NUMERO DE INGRESOS DEL MES', 'Ingresos'),
+        ('NÚMERO DE EGRESOS DEL MES', 'Egresos'),
+        ('FALLECIDOS', 'Fallecidos'),
+        ('PROMEDIO ESTANCIA', 'Estancia Promedio (días)'),
+        ('GIRO CAMA', 'Giro de Cama'),
+    ]
+    for row_name, label in indicadores_resumen:
+        fila = {'Indicador': label}
+        data = safe_get_row(row_name, meses_disponibles, silent=True)
+        for i, mes in enumerate(meses_disponibles):
+            fila[meses_completos.get(mes, mes)] = data.iloc[i] if isinstance(data, pd.Series) else 0
+        total = safe_get_row(row_name, suma_col, silent=True)
+        fila['Total'] = total if not pd.isna(total) else 0
+        resumen.append(fila)
+    datos['Resumen General'] = pd.DataFrame(resumen)
+    
+    # 2. EPS
+    eps_data = []
+    eps_list = ['FAMISANAR', 'COMPENSAR', 'SALUD TOTAL', 'SANITAS', 'NUEVA EPS', 'SURA']
+    for eps in eps_list:
+        fila = {'EPS': eps}
+        data = safe_get_row(eps, meses_disponibles, silent=True)
+        for i, mes in enumerate(meses_disponibles):
+            fila[meses_completos.get(mes, mes)] = data.iloc[i] if isinstance(data, pd.Series) else 0
+        total = safe_get_row(eps, suma_col, silent=True)
+        fila['Total'] = total if not pd.isna(total) else 0
+        eps_data.append(fila)
+    datos['EPS'] = pd.DataFrame(eps_data)
+    
+    # 3. Especialidades
+    esp_data = []
+    especialidades = ['MEDICINA INTERNA', 'CIRUGIA GENERAL', 'NEUROCIRUGIA', 'ORTOPEDIA']
+    for esp in especialidades:
+        fila = {'Especialidad': esp.title()}
+        data = safe_get_row(esp, meses_disponibles, silent=True)
+        for i, mes in enumerate(meses_disponibles):
+            fila[meses_completos.get(mes, mes)] = data.iloc[i] if isinstance(data, pd.Series) else 0
+        total = safe_get_row(esp, suma_col, silent=True)
+        fila['Total'] = total if not pd.isna(total) else 0
+        esp_data.append(fila)
+    datos['Especialidades'] = pd.DataFrame(esp_data)
+    
+    # 4. Indicadores de Calidad
+    calidad_data = []
+    indicadores_calidad = [
+        ('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', 'Tasa ITS AC'),
+        ('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV'),
+        ('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa ISTU AC'),
+        ('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión'),
+    ]
+    for row_name, label in indicadores_calidad:
+        fila = {'Indicador': label}
+        data = safe_get_row(row_name, meses_disponibles, silent=True)
+        for i, mes in enumerate(meses_disponibles):
+            fila[meses_completos.get(mes, mes)] = data.iloc[i] if isinstance(data, pd.Series) else 0
+        calidad_data.append(fila)
+    datos['Indicadores Calidad'] = pd.DataFrame(calidad_data)
+    
+    # 5. Mortalidad
+    mort_data = []
+    indicadores_mort = [
+        ('FALLECIDOS', 'Total Fallecidos'),
+        ('FALLECIDOS COVID-19', 'Fallecidos COVID-19'),
+        ('% DE MORATLIDAD GENERAL', '% Mortalidad General'),
+        ('Pacientes con diagnóstico de Trauma', 'Pacientes Trauma'),
+        ('Pacientes fallecidos por Trauma', 'Fallecidos Trauma'),
+    ]
+    for row_name, label in indicadores_mort:
+        fila = {'Indicador': label}
+        data = safe_get_row(row_name, meses_disponibles, silent=True)
+        for i, mes in enumerate(meses_disponibles):
+            fila[meses_completos.get(mes, mes)] = data.iloc[i] if isinstance(data, pd.Series) else 0
+        mort_data.append(fila)
+    datos['Mortalidad'] = pd.DataFrame(mort_data)
+    
+    # 6. Morbilidad
+    if not df_morbilidad.empty:
+        datos['Morbilidad'] = df_morbilidad.reset_index().rename(columns={'index': 'Diagnóstico'})
+    
+    # 7. Gérmenes Aislados
+    if not df_germenes.empty:
+        datos['Gérmenes Aislados'] = df_germenes.copy()
+    
+    # 8. Eventos Adversos
+    if not df_eventos_adversos.empty:
+        datos['Eventos Adversos'] = df_eventos_adversos.copy()
+    
+    # 9. Fallecidos detalle
+    if not df_fallecidos.empty:
+        df_fall_export = df_fallecidos[['Nombre', 'Edad', 'Sexo', 'Dias_Estancia', 'Mes']].copy()
+        df_fall_export.columns = ['Nombre', 'Edad', 'Sexo', 'Días Estancia', 'Mes']
+        datos['Detalle Fallecidos'] = df_fall_export
+    
+    return datos
+
+
+# --- CALLBACK EXPORTAR A EXCEL ---
+@app.callback(
+    Output("download-excel", "data"),
+    Input("btn-export-excel", "n_clicks"),
+    prevent_initial_call=True
+)
+def exportar_excel(n_clicks):
+    if not n_clicks:
+        return dash.no_update
+    
+    datos = generar_datos_exportacion()
+    output = BytesIO()
+    
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        for nombre_hoja, df_hoja in datos.items():
+            df_hoja.to_excel(writer, sheet_name=nombre_hoja[:31], index=False)
+            
+            # Aplicar estilos
+            ws = writer.sheets[nombre_hoja[:31]]
+            
+            # Estilos
+            header_fill = PatternFill(start_color="1a365d", end_color="1a365d", fill_type="solid")
+            header_font = Font(bold=True, color="FFFFFF", size=11)
+            cell_border = Border(
+                left=Side(style='thin', color='CCCCCC'),
+                right=Side(style='thin', color='CCCCCC'),
+                top=Side(style='thin', color='CCCCCC'),
+                bottom=Side(style='thin', color='CCCCCC')
+            )
+            
+            # Aplicar estilos a encabezados
+            for cell in ws[1]:
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = cell_border
+            
+            # Aplicar estilos a datos y ajustar ancho de columnas
+            for col_idx, col in enumerate(ws.columns, 1):
+                max_length = 0
+                for row_idx, cell in enumerate(col, 1):
+                    if row_idx > 1:  # Datos
+                        cell.alignment = Alignment(horizontal='center', vertical='center')
+                        cell.border = cell_border
+                        # Formato numérico
+                        if isinstance(cell.value, float):
+                            cell.number_format = '#,##0.00'
+                        elif isinstance(cell.value, int):
+                            cell.number_format = '#,##0'
+                    # Calcular ancho
+                    try:
+                        if cell.value:
+                            max_length = max(max_length, len(str(cell.value)))
+                    except:
+                        pass
+                # Ajustar ancho de columna
+                ws.column_dimensions[col[0].column_letter].width = min(max_length + 3, 40)
+            
+            # Primera columna alineada a la izquierda
+            for row in ws.iter_rows(min_row=2, max_col=1):
+                for cell in row:
+                    cell.alignment = Alignment(horizontal='left', vertical='center')
+    
+    output.seek(0)
+    fecha = datetime.now().strftime("%Y%m%d_%H%M")
+    return dcc.send_bytes(output.getvalue(), f"Dashboard_UCI_{fecha}.xlsx")
+
+
+# --- CALLBACK EXPORTAR A CSV ---
+@app.callback(
+    Output("download-csv", "data"),
+    Input("btn-export-csv", "n_clicks"),
+    prevent_initial_call=True
+)
+def exportar_csv(n_clicks):
+    if not n_clicks:
+        return dash.no_update
+    
+    datos = generar_datos_exportacion()
+    output = BytesIO()
+    
+    # Combinar todos los DataFrames en un solo CSV con separadores
+    lineas = []
+    lineas.append("DASHBOARD UCI ADULTOS 2025 - REPORTE DE DATOS")
+    lineas.append(f"Fecha de generación: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+    lineas.append("")
+    
+    for nombre_seccion, df_seccion in datos.items():
+        lineas.append("=" * 80)
+        lineas.append(nombre_seccion.upper())
+        lineas.append("=" * 80)
+        lineas.append(df_seccion.to_csv(index=False, sep=';', decimal=','))
+        lineas.append("")
+    
+    contenido = "\n".join(lineas)
+    
+    fecha = datetime.now().strftime("%Y%m%d_%H%M")
+    return dict(content=contenido, filename=f"Dashboard_UCI_{fecha}.csv")
 
 
 if __name__ == '__main__':
