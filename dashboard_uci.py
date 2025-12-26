@@ -623,9 +623,7 @@ def render_tab_content(tab):
             
             # KPIs de días de estancia fallecidos
             kpi_prom_dias = create_kpi_card("Promedio Días Estancia", f"{promedio_dias:.1f}", "Fallecidos", "#9b59b6", "📊")
-            kpi_min_dias = create_kpi_card("Mínimo Días", f"{int(minimo_dias)}", "Fallecidos", "#27ae60", "⬇️")
-            kpi_max_dias = create_kpi_card("Máximo Días", f"{int(maximo_dias)}", "Fallecidos", "#e67e22", "⬆️")
-            kpi_mediana_dias = create_kpi_card("Mediana Días", f"{mediana_dias:.1f}", "Fallecidos", "#3498db", "📈")
+            kpi_mediana_dias = create_kpi_card("Mediana Días de Estancia", f"{mediana_dias:.1f}", "Fallecidos", "#3498db", "📈")
             
             fig_mortalidad = create_line_chart('% DE MORATLIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=2)
             fig_trauma = create_grouped_bar_chart(
@@ -684,7 +682,7 @@ def render_tab_content(tab):
             return html.Div([
                 dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
                 html.H6("Días de Estancia - Fallecidos", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '15px', 'marginTop': '10px'}),
-                dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=3), dbc.Col(kpi_min_dias, xs=12, md=3), dbc.Col(kpi_max_dias, xs=12, md=3), dbc.Col(kpi_mediana_dias, xs=12, md=3)], className="mb-4"),
+                dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=6), dbc.Col(kpi_mediana_dias, xs=12, md=6)], className="mb-4"),
                 dbc.Row([
                     dbc.Col(xs=12, md=2),
                     dbc.Col(dcc.Graph(figure=fig_mortalidad), xs=12, md=8),
@@ -703,37 +701,37 @@ def render_tab_content(tab):
             total_medicina = safe_get_row('MEDICINA INTERNA', suma_col, silent=True)
             total_cirugia = safe_get_row('CIRUGIA GENERAL', suma_col, silent=True)
             total_neuro = safe_get_row('NEUROCIRUGIA', suma_col, silent=True)
-            total_orto = safe_get_row('ORTOPEDIA', suma_col, silent=True)
+            total_neurologia = safe_get_row('NEUROLOGIA', suma_col, silent=True)
             
             if pd.isna(total_medicina): total_medicina = 0
             if pd.isna(total_cirugia): total_cirugia = 0
             if pd.isna(total_neuro): total_neuro = 0
-            if pd.isna(total_orto): total_orto = 0
+            if pd.isna(total_neurologia): total_neurologia = 0
             
             # Calcular total de especialidades y porcentajes
-            total_especialidades = total_medicina + total_cirugia + total_neuro + total_orto
+            total_especialidades = total_medicina + total_cirugia + total_neuro + total_neurologia
             if total_especialidades == 0: total_especialidades = 1
             
             pct_medicina = (total_medicina / total_especialidades * 100)
             pct_cirugia = (total_cirugia / total_especialidades * 100)
             pct_neuro = (total_neuro / total_especialidades * 100)
-            pct_orto = (total_orto / total_especialidades * 100)
+            pct_neurologia = (total_neurologia / total_especialidades * 100)
             
-            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{pct_medicina:.1f}% del total", "#3498db", "⚕️")
-            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{pct_cirugia:.1f}% del total", "#27ae60", "🔪")
+            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{pct_medicina:.1f}% del total", "#3498db", "🩺")
+            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{pct_cirugia:.1f}% del total", "#27ae60", "💉")
             kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", f"{pct_neuro:.1f}% del total", "#16a085", "🧠")
-            kpi4 = create_kpi_card("Ortopedia", f"{int(total_orto)}", f"{pct_orto:.1f}% del total", "#9b59b6", "🦴")
+            kpi4 = create_kpi_card("Neurología", f"{int(total_neurologia)}", f"{pct_neurologia:.1f}% del total", "#9b59b6", "🧬")
             
             fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina Interna', color='#3498db', silent=True, decimals=0)
             fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía General', color='#27ae60', silent=True, decimals=0)
             fig_neuro = create_bar_chart('NEUROCIRUGIA', 'Neurocirugía', color='#16a085', silent=True, decimals=0)
-            fig_orto = create_bar_chart('ORTOPEDIA', 'Ortopedia', color='#9b59b6', silent=True, decimals=0)
+            fig_neurologia = create_bar_chart('NEUROLOGIA', 'Neurología', color='#9b59b6', silent=True, decimals=0)
             
             return html.Div([
                 html.H5("Principales Especialidades", style={'color': '#ffffff', 'fontWeight': '600', 'marginBottom': '20px'}),
                 dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
                 dbc.Row([dbc.Col(dcc.Graph(figure=fig_medicina), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_cirugia), xs=12, md=6)], className="mb-4"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_neuro), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_orto), xs=12, md=6)])
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_neuro), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_neurologia), xs=12, md=6)])
             ])
         except Exception as e:
             return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
@@ -1034,7 +1032,7 @@ def generar_datos_exportacion():
     
     # 3. Especialidades
     esp_data = []
-    especialidades = ['MEDICINA INTERNA', 'CIRUGIA GENERAL', 'NEUROCIRUGIA', 'ORTOPEDIA']
+    especialidades = ['MEDICINA INTERNA', 'CIRUGIA GENERAL', 'NEUROCIRUGIA', 'NEUROLOGIA']
     for esp in especialidades:
         fila = {'Especialidad': esp.title()}
         data = safe_get_row(esp, meses_disponibles, silent=True)
