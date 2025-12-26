@@ -568,7 +568,7 @@ def render_tab_content(tab):
                         dcc.Dropdown(
                             id='filtro-mes-inicio',
                             options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
-                            value=['Agos', 'Sep', 'Oct'],
+                            value=meses_disponibles,
                             multi=True,
                             placeholder="Selecciona meses..."
                         )
