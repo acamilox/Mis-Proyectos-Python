@@ -559,7 +559,7 @@ app.layout = html.Div([
             dbc.Tab(label='✅ Resumen general', tab_id='tab-resumen'),
             dbc.Tab(label='📦 Gestión y calidad', tab_id='tab-gestion'),
             dbc.Tab(label='🏥 Especialidades y FPS', tab_id='tab-especialidades'),
-            dbc.Tab(label='💀 Mortalidad', tab_id='tab-mortalidad'),
+            dbc.Tab(label='✝️ Mortalidad', tab_id='tab-mortalidad'),
         ], style={'marginBottom': '0', 'borderBottom': 'none', 'backgroundColor': 'rgba(19,34,56,0.8)', 'borderRadius': '12px 12px 0 0', 'padding': '0 10px'}),
         
         html.Div(id='tab-content', className="tab-content"),
