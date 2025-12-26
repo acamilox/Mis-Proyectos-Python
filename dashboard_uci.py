@@ -652,7 +652,7 @@ def render_tab_content(tab):
             kpi_prom_dias = create_kpi_card("Promedio Días Estancia", f"{promedio_dias:.1f}", "Fallecidos", "#9b59b6", "📊")
             kpi_mediana_dias = create_kpi_card("Mediana Días de Estancia", f"{mediana_dias:.1f}", "Fallecidos", "#3498db", "📈")
             
-            fig_mortalidad = create_line_chart('% DE MORATLIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=2)
+            fig_mortalidad = create_line_chart('% DE MORTALIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=2)
             fig_trauma = create_grouped_bar_chart(
                 ['Pacientes con diagnóstico de Trauma', 'Pacientes fallecidos por Trauma'],
                 ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos', decimals=0)
@@ -1092,7 +1092,7 @@ def generar_datos_exportacion():
     indicadores_mort = [
         ('FALLECIDOS', 'Total Fallecidos'),
         ('FALLECIDOS COVID-19', 'Fallecidos COVID-19'),
-        ('% DE MORATLIDAD GENERAL', '% Mortalidad General'),
+        ('% DE MORTALIDAD GENERAL', '% Mortalidad General'),
         ('Pacientes con diagnóstico de Trauma', 'Pacientes Trauma'),
         ('Pacientes fallecidos por Trauma', 'Fallecidos Trauma'),
     ]
