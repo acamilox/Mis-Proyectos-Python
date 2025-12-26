@@ -616,7 +616,7 @@ def render_tab_content(tab):
             mediana_dias = dias_estancia_validos.median()
             
             # KPIs principales
-            kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Dic", "#e74c3c", "💀")
+            kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Dic", "#e74c3c", "🕊️")
             kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad_general:.2f}%", "Ene - Dic", "#c0392b", "⚰️")
             kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Dic", "#34495e", "🦠")
             kpi4 = create_kpi_card("% Mortalidad Trauma", f"{mortalidad_trauma:.2f}%", "Promedio", "#f39c12", "🚑")
