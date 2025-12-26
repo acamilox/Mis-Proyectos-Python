@@ -202,24 +202,28 @@ try:
 except Exception as e:
     print(f"⚠️ Error cargando fallecidos: {e}")
 
-# --- CARGA DE OTROS EVENTOS ADVERSOS (celdas azules en columna E) ---
+# --- CARGA DE TODOS LOS EVENTOS ADVERSOS (columna E) ---
 df_eventos_adversos = pd.DataFrame()
 try:
     wb = load_workbook(EXCEL_PATH)
     ws = wb['EVENTOS ADVERSOS']
     
-    eventos_azules = []
-    for i in range(1, 150):
+    meses_sep = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
+                 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
+    
+    todos_eventos = []
+    for i in range(1, 200):
         cell = ws.cell(i, 5)
         if cell.value:
-            fill_color = cell.fill.fgColor.rgb if cell.fill.fgColor else None
-            if fill_color and fill_color == 'FF00B0F0':
-                evento = str(cell.value).strip()
-                eventos_azules.append(evento)
+            evento = str(cell.value).strip()
+            # Excluir filas de meses y valores vacíos
+            if evento.upper() not in meses_sep and evento and evento.upper() != 'NAN':
+                todos_eventos.append(evento)
     
-    # Crear DataFrame con cada evento individual (sin agrupar)
-    df_eventos_adversos = pd.DataFrame({'Evento': eventos_azules, 'Cantidad': [1] * len(eventos_azules)})
-    print(f"✅ Datos de eventos adversos cargados: {len(eventos_azules)} eventos")
+    # Agrupar eventos similares y contar
+    df_eventos_adversos = pd.Series(todos_eventos).value_counts().reset_index()
+    df_eventos_adversos.columns = ['Evento', 'Cantidad']
+    print(f"✅ Datos de eventos adversos cargados: {len(todos_eventos)} eventos, {len(df_eventos_adversos)} tipos")
 except Exception as e:
     print(f"⚠️ Error cargando eventos adversos: {e}")
 
