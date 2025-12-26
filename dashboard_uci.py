@@ -211,19 +211,42 @@ try:
     meses_sep = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
                  'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
     
+    def categorizar_evento(e):
+        e_lower = e.lower()
+        if 'autoextubación' in e_lower or 'autoextubacion' in e_lower:
+            return 'Autoextubación'
+        if 'lpp' in e_lower or 'lesion' in e_lower and 'presion' in e_lower:
+            return 'LPP (Lesiones por Presión)'
+        if 'desplazamiento' in e_lower:
+            return 'Desplazamiento de dispositivos'
+        if 'autoretiro' in e_lower:
+            return 'Autoretiro de dispositivos'
+        if 'lecash' in e_lower:
+            return 'LECASH'
+        if 'marsi' in e_lower:
+            return 'Lesión MARSI'
+        if 'error' in e_lower or 'medicamento' in e_lower:
+            return 'Errores de medicación'
+        if 'caida' in e_lower or 'caída' in e_lower:
+            return 'Caídas'
+        if 'flebitis' in e_lower:
+            return 'Flebitis'
+        if 'neumotórax' in e_lower or 'neumotorax' in e_lower:
+            return 'Neumotórax'
+        return 'Otros'
+    
     todos_eventos = []
     for i in range(1, 200):
         cell = ws.cell(i, 5)
         if cell.value:
             evento = str(cell.value).strip()
-            # Excluir filas de meses y valores vacíos
             if evento.upper() not in meses_sep and evento and evento.upper() != 'NAN':
-                todos_eventos.append(evento)
+                todos_eventos.append(categorizar_evento(evento))
     
-    # Agrupar eventos similares y contar
+    # Agrupar eventos y contar
     df_eventos_adversos = pd.Series(todos_eventos).value_counts().reset_index()
     df_eventos_adversos.columns = ['Evento', 'Cantidad']
-    print(f"✅ Datos de eventos adversos cargados: {len(todos_eventos)} eventos, {len(df_eventos_adversos)} tipos")
+    print(f"✅ Datos de eventos adversos cargados: {len(todos_eventos)} eventos, {len(df_eventos_adversos)} categorías")
 except Exception as e:
     print(f"⚠️ Error cargando eventos adversos: {e}")
 
@@ -811,12 +834,12 @@ def render_tab_content(tab):
                     yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1}, margin=dict(l=50, r=50, t=50, b=120),
                     height=450, hoverlabel=dict(bgcolor='white', font_color='#000000'))
             
-            # Gráfico de Eventos Adversos - Barras horizontales expandido
+            # Gráfico de Eventos Adversos - Barras horizontales
             fig_eventos = go.Figure()
             if not df_eventos_adversos.empty:
-                colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad', '#16a085', '#d35400', '#7f8c8d', '#2980b9', '#e91e63']
+                colors_eventos = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#c0392b', '#27ae60', '#8e44ad']
                 
-                # Invertir orden para que el primero quede arriba
+                # Invertir orden para que el mayor quede arriba
                 df_eventos_plot = df_eventos_adversos.iloc[::-1].reset_index(drop=True)
                 
                 fig_eventos = go.Figure(data=[go.Bar(
@@ -826,19 +849,20 @@ def render_tab_content(tab):
                     marker_color=colors_eventos[:len(df_eventos_plot)][::-1],
                     text=df_eventos_plot['Cantidad'],
                     textposition='outside',
-                    textfont=dict(color='#ffffff', size=12),
+                    textfont=dict(color='#ffffff', size=14, family='Arial Black'),
                     hovertemplate='<b>%{y}</b><br>Casos: %{x}<extra></extra>'
                 )])
-                
+            
+            max_val = df_eventos_adversos['Cantidad'].max() if not df_eventos_adversos.empty else 10
             fig_eventos.update_layout(
-                title={'text': 'Otros Eventos Adversos', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
                 plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
-                xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1, 'range': [0, 1.5]},
-                yaxis={'gridcolor': 'rgba(74,85,104,0.3)', 'color': '#e2e8f0', 'tickfont': {'size': 11}},
-                margin=dict(l=380, r=50, t=50, b=30),
-                height=550,
+                xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 2, 'range': [0, max_val + 3]},
+                yaxis={'gridcolor': 'rgba(74,85,104,0.3)', 'color': '#e2e8f0', 'tickfont': {'size': 12}},
+                margin=dict(l=220, r=50, t=50, b=30),
+                height=400,
                 hoverlabel=dict(bgcolor='white', font_color='#000000', font_size=12),
-                bargap=0.3
+                bargap=0.25
             )
 
             return html.Div([
