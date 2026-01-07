@@ -3,7 +3,7 @@ services:
     name: dashboard-uci
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn src.dashboard_uci:server --bind 0.0.0.0:$PORT
+    startCommand: gunicorn dashboard_uci:server --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
