@@ -14,7 +14,8 @@ from datetime import datetime
 
 # Obtener directorio del script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-EXCEL_PATH = os.path.join(BASE_DIR, 'datos_iaas.xlsx')
+# El Excel está en la carpeta data/ (un nivel arriba de src/)
+EXCEL_PATH = os.path.join(os.path.dirname(BASE_DIR), 'data', 'datos_iaas.xlsx')
 
 # Inicializar df globalmente
 df = pd.DataFrame()

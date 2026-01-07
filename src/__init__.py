@@ -1,0 +1,1 @@
+# Dashboard UCI - Módulo principal
