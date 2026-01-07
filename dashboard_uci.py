@@ -591,7 +591,7 @@ def render_tab_content(tab):
             filtros = html.Div([
                 dbc.Row([
                     dbc.Col([
-                        html.Label("📅 Meses (selecciona hasta 3):", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        html.Label("📅 Meses", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
                         dcc.Dropdown(
                             id='filtro-mes-inicio',
                             options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
