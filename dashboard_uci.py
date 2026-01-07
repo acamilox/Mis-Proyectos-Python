@@ -927,8 +927,12 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         promedio_ocupacional = datos_ocupacional[datos_ocupacional > 0].mean() if len(datos_ocupacional[datos_ocupacional > 0]) > 0 else 0
         datos_ingresos_kpi = safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         total_ingresos = datos_ingresos_kpi.sum() if isinstance(datos_ingresos_kpi, pd.Series) else datos_ingresos_kpi
-        datos_fallecidos = safe_get_row('FALLECIDOS', meses_filtrados)
-        total_fallecidos = datos_fallecidos.sum() if isinstance(datos_fallecidos, pd.Series) else datos_fallecidos
+        # Usar datos de fallecidos de la hoja MORTALIDAD (más precisa que ESTADISTICA)
+        if not df_fallecidos.empty:
+            total_fallecidos = len(df_fallecidos[df_fallecidos['Mes'].isin(meses_filtrados)])
+        else:
+            datos_fallecidos = safe_get_row('FALLECIDOS', meses_filtrados)
+            total_fallecidos = datos_fallecidos.sum() if isinstance(datos_fallecidos, pd.Series) else datos_fallecidos
         datos_egresos = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
         total_egresos = datos_egresos.sum() if isinstance(datos_egresos, pd.Series) else datos_egresos
         datos_estancia = safe_get_row('PROMEDIO ESTANCIA', meses_filtrados)
