@@ -747,7 +747,7 @@ def render_tab_content(tab):
             pct_neurologia = (total_neurologia / total_especialidades * 100)
             
             kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{pct_medicina:.1f}% del total", "#3498db", "🩺")
-            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{pct_cirugia:.1f}% del total", "#27ae60", "�")
+            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{pct_cirugia:.1f}% del total", "#27ae60", "💉")
             kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", f"{pct_neuro:.1f}% del total", "#16a085", "🧠")
             kpi4 = create_kpi_card("Neurología", f"{int(total_neurologia)}", f"{pct_neurologia:.1f}% del total", "#9b59b6", "🧬")
             
