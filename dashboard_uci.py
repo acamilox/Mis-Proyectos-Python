@@ -620,8 +620,10 @@ def render_tab_content(tab):
             suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
             suma_col = suma_col[0] if suma_col else '∑'
             
-            # Usar el conteo real de la hoja MORTALIDAD
-            total_fallecidos = len(df_fallecidos) if not df_fallecidos.empty else 0
+            # Usar el valor de la hoja ESTADISTICA (columna suma)
+            total_fallecidos = safe_get_row('FALLECIDOS', suma_col)
+            if pd.isna(total_fallecidos) or total_fallecidos == 0:
+                total_fallecidos = len(df_fallecidos) if not df_fallecidos.empty else 0
             fallecidos_covid = safe_get_row('FALLECIDOS COVID-19', suma_col)
             total_egresos = safe_get_row('NÚMERO DE EGRESOS DEL MES', suma_col)
             
