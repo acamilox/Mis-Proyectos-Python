@@ -441,38 +441,36 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊"):
             html.Div([
                 html.Div([
                     html.Span(icon, style={
-                        'fontSize': '32px', 
-                        'filter': 'drop-shadow(0 0 8px rgba(255,255,255,0.3))'
+                        'fontSize': '28px', 
+                        'filter': 'drop-shadow(0 0 6px rgba(255,255,255,0.2))'
                     })
                 ], style={
-                    'width': '56px', 'height': '56px', 'borderRadius': '16px',
-                    'background': f'linear-gradient(135deg, {accent_color}40 0%, {accent_color}20 100%)',
+                    'width': '52px', 'height': '52px', 'borderRadius': '14px',
+                    'background': f'linear-gradient(135deg, {accent_color}30 0%, {accent_color}15 100%)',
                     'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center',
-                    'marginBottom': '16px', 'border': f'1px solid {accent_color}50'
+                    'marginBottom': '14px', 'border': f'1px solid {accent_color}40'
                 }),
                 html.H6(capitalizar_texto(title), style={
-                    'color': '#94a3b8', 'fontSize': '12px', 'marginBottom': '8px', 
-                    'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '1px'
+                    'color': '#94a3b8', 'fontSize': '11px', 'marginBottom': '8px', 
+                    'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px'
                 }),
                 html.H2(value, style={
-                    'color': '#f8fafc', 'fontWeight': '800', 
-                    'marginBottom': '6px', 'fontSize': '32px', 'lineHeight': '1',
-                    'background': f'linear-gradient(135deg, #ffffff 0%, {accent_color} 100%)',
-                    'WebkitBackgroundClip': 'text', 'WebkitTextFillColor': 'transparent',
-                    'backgroundClip': 'text'
+                    'color': accent_color, 'fontWeight': '700', 
+                    'marginBottom': '6px', 'fontSize': '28px', 'lineHeight': '1',
+                    'textShadow': f'0 0 20px {accent_color}50'
                 }),
                 html.P(capitalizar_texto(subtitle), style={
-                    'color': '#64748b', 'fontSize': '13px', 'margin': '0', 'fontWeight': '500'
+                    'color': '#64748b', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
                 })
             ], style={'textAlign': 'center'})
-        ], style={'padding': '24px 20px'}),
+        ], style={'padding': '20px 16px'}),
         className="kpi-card h-100",
         style={
             'border': 'none',
-            'borderRadius': '20px', 
-            'boxShadow': f'0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px {accent_color}20, inset 0 1px 0 rgba(255,255,255,0.05)',
+            'borderRadius': '16px', 
+            'boxShadow': f'0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px {accent_color}15',
             'background': 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
-            'transition': 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', 
+            'transition': 'all 0.3s ease', 
             'height': '100%',
             'position': 'relative',
             'overflow': 'hidden'
@@ -504,80 +502,40 @@ app.index_string = '''
                 background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
                 color: #f1f5f9;
                 min-height: 100vh;
-                overflow-x: hidden;
-            }
-            
-            body::before {
-                content: '';
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: 
-                    radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                    radial-gradient(ellipse at 80% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-                    radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
-                pointer-events: none;
-                z-index: -1;
             }
             
             @keyframes fadeInUp {
-                from { opacity: 0; transform: translateY(30px); }
+                from { opacity: 0; transform: translateY(20px); }
                 to { opacity: 1; transform: translateY(0); }
             }
             
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.7; }
-            }
-            
-            @keyframes shimmer {
-                0% { background-position: -200% 0; }
-                100% { background-position: 200% 0; }
-            }
-            
             .kpi-card {
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                border-radius: 20px !important;
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                position: relative;
-                overflow: hidden;
-            }
-            
-            .kpi-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 1px;
-                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                transition: all 0.3s ease;
+                border-radius: 16px !important;
+                backdrop-filter: blur(10px);
             }
             
             .kpi-card:hover {
-                transform: translateY(-8px) scale(1.02);
-                box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.3), 0 0 60px rgba(99,102,241,0.1) !important;
+                transform: translateY(-4px);
+                box-shadow: 0 12px 30px rgba(0,0,0,0.4) !important;
             }
             
-            .fade-in { animation: fadeInUp 0.8s ease-out; }
+            .fade-in { animation: fadeInUp 0.6s ease-out; }
             
             .nav-tabs {
                 border-bottom: none !important;
-                gap: 8px;
+                gap: 6px;
             }
             
             .nav-tabs .nav-link {
                 color: #94a3b8;
                 border: none;
-                border-radius: 12px;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                background: rgba(30, 41, 59, 0.5);
+                border-radius: 10px;
+                transition: all 0.3s ease;
+                background: rgba(30, 41, 59, 0.6);
                 font-weight: 500;
-                padding: 14px 20px;
+                padding: 12px 18px;
                 font-size: 14px;
-                backdrop-filter: blur(10px);
                 border: 1px solid transparent;
             }
             
@@ -585,88 +543,86 @@ app.index_string = '''
                 color: #f1f5f9;
                 background: rgba(99, 102, 241, 0.15);
                 border-color: rgba(99, 102, 241, 0.3);
-                transform: translateY(-2px);
             }
             
             .nav-tabs .nav-link.active {
                 color: #f1f5f9;
-                background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%);
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.15) 100%);
                 font-weight: 600;
-                border-color: rgba(99, 102, 241, 0.5);
-                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+                border-color: rgba(99, 102, 241, 0.4);
             }
             
             .tab-content {
-                background: rgba(15, 23, 42, 0.6);
-                border-radius: 20px;
-                padding: 30px;
-                backdrop-filter: blur(20px);
-                border: 1px solid rgba(51, 65, 85, 0.5);
-                margin-top: 16px;
+                background: rgba(15, 23, 42, 0.5);
+                border-radius: 16px;
+                padding: 24px;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(51, 65, 85, 0.4);
+                margin-top: 12px;
             }
             
             /* Dropdown styles */
             .Select-control { 
                 background: rgba(30, 41, 59, 0.9) !important; 
                 border: 1px solid rgba(99, 102, 241, 0.3) !important; 
-                border-radius: 12px !important;
-                min-height: 44px !important;
+                border-radius: 10px !important;
+                min-height: 42px !important;
             }
             .Select-control:hover {
-                border-color: rgba(99, 102, 241, 0.6) !important;
+                border-color: rgba(99, 102, 241, 0.5) !important;
             }
             .Select-value-label, .Select-placeholder, .Select-value { color: #f1f5f9 !important; }
             .Select-menu-outer { 
                 background: #1e293b !important; 
                 border: 1px solid rgba(99, 102, 241, 0.3) !important;
-                border-radius: 12px !important;
+                border-radius: 10px !important;
                 margin-top: 4px !important;
-                overflow: hidden;
             }
             .Select-option { 
                 background: #1e293b !important; 
                 color: #f1f5f9 !important;
-                padding: 12px 16px !important;
+                padding: 10px 14px !important;
             }
             .Select-option:hover, .Select-option.is-focused { 
-                background: rgba(99, 102, 241, 0.3) !important; 
+                background: rgba(99, 102, 241, 0.25) !important; 
             }
             .Select-option.is-selected { 
-                background: rgba(99, 102, 241, 0.5) !important; 
+                background: rgba(99, 102, 241, 0.4) !important; 
             }
             
             /* Button styles */
             .btn {
-                border-radius: 12px !important;
+                border-radius: 10px !important;
                 font-weight: 600 !important;
-                padding: 10px 20px !important;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                font-size: 14px !important;
+                transition: all 0.3s ease !important;
                 border: none !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
             
             .btn-success {
                 background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
             }
             
             .btn-success:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
             }
             
             .btn-primary {
                 background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-                box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
             }
             
             .btn-primary:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
             }
             
             .btn-secondary {
                 background: rgba(51, 65, 85, 0.8) !important;
-                border: 1px solid rgba(148, 163, 184, 0.3) !important;
+                border: 1px solid rgba(148, 163, 184, 0.2) !important;
             }
             
             .btn-secondary:hover {
@@ -681,15 +637,15 @@ app.index_string = '''
             
             /* Scrollbar */
             ::-webkit-scrollbar {
-                width: 8px;
-                height: 8px;
+                width: 6px;
+                height: 6px;
             }
             ::-webkit-scrollbar-track {
                 background: #0f172a;
             }
             ::-webkit-scrollbar-thumb {
                 background: #334155;
-                border-radius: 4px;
+                border-radius: 3px;
             }
             ::-webkit-scrollbar-thumb:hover {
                 background: #475569;
@@ -697,16 +653,19 @@ app.index_string = '''
             
             /* Graph containers */
             .js-plotly-plot {
-                border-radius: 16px;
+                border-radius: 12px;
                 overflow: hidden;
             }
             
             /* Section titles */
-            h5, h6 {
-                background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+            h5 {
+                color: #f1f5f9 !important;
+                -webkit-text-fill-color: #f1f5f9 !important;
+            }
+            
+            h6 {
+                color: #cbd5e1 !important;
+                -webkit-text-fill-color: #cbd5e1 !important;
             }
         </style>
     </head>
@@ -727,31 +686,19 @@ app.layout = html.Div([
         html.Div([
             html.Div([
                 html.Div([
-                    html.Div([
-                        html.Img(src='/assets/Logo.png', style={
-                            'height': '80px', 'marginRight': '24px', 
-                            'filter': 'drop-shadow(0 8px 16px rgba(0,0,0,0.4))',
-                            'borderRadius': '16px'
-                        })
-                    ], style={
-                        'background': 'rgba(255,255,255,0.05)',
-                        'padding': '12px',
-                        'borderRadius': '20px',
-                        'border': '1px solid rgba(255,255,255,0.1)'
+                    html.Img(src='/assets/Logo.png', style={
+                        'height': '70px', 
+                        'filter': 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
                     }),
                     html.Div([
                         html.H1("DASHBOARD UCI ADULTOS 2025", style={
-                            'color': '#f8fafc', 'fontWeight': '800', 'marginBottom': '8px',
-                            'fontSize': '26px', 'letterSpacing': '-0.5px', 'margin': '0',
-                            'background': 'linear-gradient(135deg, #f8fafc 0%, #6366f1 100%)',
-                            'WebkitBackgroundClip': 'text', 'WebkitTextFillColor': 'transparent',
-                            'backgroundClip': 'text'
+                            'color': '#f8fafc', 'fontWeight': '700', 'marginBottom': '4px',
+                            'fontSize': '24px', 'letterSpacing': '-0.3px', 'margin': '0'
                         }),
                         html.P("Sistema de Monitoreo y Análisis de Indicadores", style={
-                            'color': '#64748b', 'fontSize': '14px', 'marginBottom': '0', 'fontWeight': '500',
-                            'letterSpacing': '0.5px'
+                            'color': '#64748b', 'fontSize': '13px', 'marginBottom': '0', 'fontWeight': '500'
                         })
-                    ])
+                    ], style={'marginLeft': '20px'})
                 ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '20px'})
             ]),
             html.Div([
@@ -810,31 +757,33 @@ def render_tab_content(tab):
                 dbc.Row([
                     dbc.Col([
                         html.Label("📅 Seleccionar Meses", style={
-                            'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '10px', 
-                            'fontSize': '13px', 'letterSpacing': '0.5px'
+                            'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '8px', 
+                            'fontSize': '13px', 'display': 'block'
                         }),
                         dcc.Dropdown(
                             id='filtro-mes-inicio',
                             options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
                             value=meses_disponibles,
                             multi=True,
-                            placeholder="Selecciona meses..."
+                            placeholder="Selecciona meses...",
+                            style={'minHeight': '42px'}
                         )
                     ], xs=12, md=6),
                     dbc.Col([
+                        html.Label(" ", style={'marginBottom': '8px', 'fontSize': '13px', 'display': 'block', 'visibility': 'hidden'}),
                         dbc.Button("🔍 Aplicar Filtros", id='btn-aplicar-filtros', color="success", className="w-100",
-                                  style={'height': '44px', 'marginTop': '28px'})
-                    ], xs=12, md=3),
+                                  style={'height': '42px'})
+                    ], xs=6, md=3),
                     dbc.Col([
+                        html.Label(" ", style={'marginBottom': '8px', 'fontSize': '13px', 'display': 'block', 'visibility': 'hidden'}),
                         dbc.Button("📊 Todos los meses", id='btn-todos-meses', color="secondary", className="w-100",
-                                  style={'height': '44px', 'marginTop': '28px'})
-                    ], xs=12, md=3),
-                ], className="mb-2", align="end"),
+                                  style={'height': '42px'})
+                    ], xs=6, md=3),
+                ], className="g-3", align="start"),
             ], style={
                 'background': 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.9) 100%)',
-                'padding': '24px', 'borderRadius': '20px', 'marginBottom': '28px',
-                'border': '1px solid rgba(99,102,241,0.2)',
-                'boxShadow': '0 4px 24px rgba(0,0,0,0.2)'
+                'padding': '20px', 'borderRadius': '16px', 'marginBottom': '24px',
+                'border': '1px solid rgba(99,102,241,0.2)'
             })
             
             return html.Div([filtros, html.Div(id='resumen-content')])
