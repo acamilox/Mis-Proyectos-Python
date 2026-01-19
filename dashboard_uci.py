@@ -250,6 +250,30 @@ try:
 except Exception as e:
     print(f"⚠️ Error cargando eventos adversos: {e}")
 
+# --- CARGA DE DATOS GRAM - SOT (Trasplantes/Donaciones) ---
+df_gram_sot = pd.DataFrame()
+try:
+    df_gram_raw = pd.read_excel(EXCEL_PATH, sheet_name='GRAM - SOT', header=None)
+    meses_gram = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Agos', 'Sep', 'Oct', 'Nov', 'Dic']
+    meses_map_gram = {
+        'enero': 'Ene', 'febrero': 'Feb', 'marzo': 'Mar', 'abril': 'Abr',
+        'mayo': 'May', 'junio': 'Jun', 'julio': 'Jul', 'agosto': 'Agos',
+        'septiembre': 'Sep', 'octubre': 'Oct', 'noviembre': 'Nov', 'diciembre': 'Dic'
+    }
+    gram_data = {}
+    for i, row in df_gram_raw.iterrows():
+        mes_raw = str(row[0]).strip().lower() if pd.notna(row[0]) else ''
+        mes_key = meses_map_gram.get(mes_raw, None)
+        if mes_key:
+            valor = row[1] if pd.notna(row[1]) else 0
+            gram_data[mes_key] = int(valor) if pd.notna(valor) else 0
+    
+    df_gram_sot = pd.DataFrame([gram_data])
+    df_gram_sot = df_gram_sot.reindex(columns=meses_gram, fill_value=0)
+    print(f"✅ Datos GRAM-SOT cargados: {df_gram_sot.values.sum()} total")
+except Exception as e:
+    print(f"⚠️ Error cargando GRAM-SOT: {e}")
+
 # Meses disponibles
 meses_disponibles = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Agos', 'Sep', 'Oct', 'Nov', 'Dic']
 
@@ -867,6 +891,29 @@ def render_tab_content(tab):
                 bargap=0.25
             )
 
+            # Gráfico GRAM-SOT (Donaciones/Trasplantes)
+            fig_gram_sot = go.Figure()
+            total_gram_sot = 0
+            if not df_gram_sot.empty:
+                gram_values = df_gram_sot.iloc[0].values.tolist()
+                total_gram_sot = sum([v for v in gram_values if pd.notna(v)])
+                fig_gram_sot = go.Figure(data=[go.Bar(
+                    x=meses_disponibles, y=gram_values,
+                    marker_color='#9b59b6',
+                    text=gram_values,
+                    textposition='outside',
+                    textfont=dict(color='#ffffff', size=12),
+                    hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>'
+                )])
+                fig_gram_sot.update_layout(
+                    title={'text': f'GRAM - SOT (Total: {int(total_gram_sot)})', 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5},
+                    plot_bgcolor='#1a202c', paper_bgcolor='#2d3748',
+                    xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'},
+                    yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'dtick': 1},
+                    margin=dict(l=50, r=30, t=60, b=40),
+                    hoverlabel=dict(bgcolor='white', font_color='#000000')
+                )
+
             return html.Div([
                 html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-3"),
                 dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
@@ -882,7 +929,13 @@ def render_tab_content(tab):
                 ], className="mb-4", justify="center"),
                 dbc.Row([
                     dbc.Col(dcc.Graph(figure=fig_eventos), xs=12)
-                ])
+                ]),
+                html.H5("GRAM - SOT", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '40px', 'marginBottom': '20px', 'textAlign': 'center'}),
+                dbc.Row([
+                    dbc.Col(xs=12, md=2),
+                    dbc.Col(dcc.Graph(figure=fig_gram_sot), xs=12, md=8),
+                    dbc.Col(xs=12, md=2)
+                ], justify="center")
             ])
         except Exception as e:
             return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
@@ -1122,7 +1175,15 @@ def generar_datos_exportacion():
     if not df_eventos_adversos.empty:
         datos['Eventos Adversos'] = df_eventos_adversos.copy()
     
-    # 9. Fallecidos detalle
+    # 9. GRAM-SOT
+    if not df_gram_sot.empty:
+        gram_export = {'Indicador': 'GRAM - SOT'}
+        for mes in meses_disponibles:
+            gram_export[meses_completos.get(mes, mes)] = df_gram_sot[mes].iloc[0] if mes in df_gram_sot.columns else 0
+        gram_export['Total'] = df_gram_sot.values.sum()
+        datos['GRAM-SOT'] = pd.DataFrame([gram_export])
+    
+    # 10. Fallecidos detalle
     if not df_fallecidos.empty:
         df_fall_export = df_fallecidos[['Nombre', 'Edad', 'Sexo', 'Dias_Estancia', 'Mes']].copy()
         df_fall_export.columns = ['Nombre', 'Edad', 'Sexo', 'Días Estancia', 'Mes']
