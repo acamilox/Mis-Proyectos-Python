@@ -283,24 +283,26 @@ meses_completos = {
     'Sep': 'Septiembre', 'Oct': 'Octubre', 'Nov': 'Noviembre', 'Dic': 'Diciembre'
 }
 
-# Paleta de colores - Tema Oscuro/Negro
+# Paleta de colores - Tema Premium Moderno
 COLOR_PALETTE = {
-    'primary': '#3498db',
-    'secondary': '#27ae60',
-    'accent': '#16a085',
-    'success': '#27ae60',
-    'danger': '#e74c3c',
-    'warning': '#f39c12',
-    'info': '#34495e',
-    'light': '#e2e8f0',
-    'dark': '#0a0a0a',
-    'muted': '#a0aec0',
-    'bg_primary': '#000000',
-    'bg_secondary': '#111111',
-    'bg_card': '#1a1a1a',
-    'text_primary': '#ffffff',
-    'text_secondary': '#e2e8f0',
-    'border': '#333333',
+    'primary': '#6366f1',      # Indigo vibrante
+    'secondary': '#10b981',    # Esmeralda
+    'accent': '#06b6d4',       # Cyan
+    'success': '#22c55e',      # Verde brillante
+    'danger': '#ef4444',       # Rojo coral
+    'warning': '#f59e0b',      # Ámbar
+    'info': '#8b5cf6',         # Violeta
+    'light': '#f1f5f9',
+    'dark': '#0f172a',
+    'muted': '#94a3b8',
+    'bg_primary': '#0f172a',   # Slate 900
+    'bg_secondary': '#1e293b', # Slate 800
+    'bg_card': '#1e293b',
+    'text_primary': '#f8fafc',
+    'text_secondary': '#cbd5e1',
+    'border': '#334155',
+    'gradient_start': '#0f172a',
+    'gradient_end': '#1e1b4b',
 }
 
 def capitalizar_texto(texto):
@@ -332,26 +334,31 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
     data = safe_get_row(row_name, meses_disponibles, silent=silent)
     fig = px.bar(x=meses_disponibles, y=data, title=title)
     
+    bar_color = color or COLOR_PALETTE['primary']
     if decimals == 0:
         hover_format = '<b>%{x}</b><br>Valor: %{y:.0f}<extra></extra>'
     else:
         hover_format = f'<b>%{{x}}</b><br>Valor: %{{y:.{decimals}f}}<extra></extra>'
     
     fig.update_traces(
-        marker_color=color or COLOR_PALETTE['primary'],
-        marker_line_color='rgba(255,255,255,0.1)',
+        marker_color=bar_color,
+        marker_line_color='rgba(255,255,255,0.2)',
         marker_line_width=1,
-        hovertemplate=hover_format
+        hovertemplate=hover_format,
+        marker=dict(
+            cornerradius=6,
+            pattern=dict(shape="", solidity=0.9)
+        )
     )
     fig.update_layout(
         showlegend=False,
-        plot_bgcolor='#1a202c',
-        paper_bgcolor='#2d3748',
-        title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
-        xaxis={'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0'},
-        yaxis={'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0', 'tickformat': 'd'},
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(30,41,59,0.8)',
+        title={'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
+        xaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'showline': False, 'color': '#94a3b8', 'tickfont': {'size': 11}},
+        yaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'showline': False, 'color': '#94a3b8', 'tickformat': 'd', 'tickfont': {'size': 11}},
         margin=dict(l=50, r=30, t=60, b=40),
-        hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000', bordercolor='#333333')
+        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9', bordercolor=bar_color)
     )
     return fig
 
@@ -359,19 +366,22 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
     data = safe_get_row(row_name, meses_disponibles, silent=silent)
     fig = px.line(x=meses_disponibles, y=data, title=title, markers=True)
     
+    line_color = color or COLOR_PALETTE['secondary']
     if decimals == 0:
         hover_format = '<b>%{x}</b><br>Valor: %{y:.0f}<extra></extra>'
     else:
         hover_format = f'<b>%{{x}}</b><br>Valor: %{{y:.{decimals}f}}<extra></extra>'
     
     fig.update_traces(
-        line_color=color or COLOR_PALETTE['secondary'],
+        line_color=line_color,
         line_width=3,
-        marker=dict(size=8, line=dict(width=2, color='#1a1a1a')),
-        hovertemplate=hover_format
+        marker=dict(size=10, color=line_color, line=dict(width=3, color='#0f172a')),
+        hovertemplate=hover_format,
+        fill='tozeroy',
+        fillcolor=f'rgba({int(line_color[1:3], 16)}, {int(line_color[3:5], 16)}, {int(line_color[5:7], 16)}, 0.1)'
     )
     
-    yaxis_config = {'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0'}
+    yaxis_config = {'gridcolor': 'rgba(148,163,184,0.1)', 'showline': False, 'color': '#94a3b8', 'tickfont': {'size': 11}}
     if isinstance(data, pd.Series):
         max_val = data.max() if not data.empty else 0
         if pd.notna(max_val) and max_val <= 5:
@@ -379,19 +389,19 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
     
     fig.update_layout(
         showlegend=False,
-        plot_bgcolor='#1a202c',
-        paper_bgcolor='#2d3748',
-        title={'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
-        xaxis={'gridcolor': '#4a5568', 'showline': True, 'linecolor': '#4a5568', 'color': '#e2e8f0'},
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(30,41,59,0.8)',
+        title={'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
+        xaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'showline': False, 'color': '#94a3b8', 'tickfont': {'size': 11}},
         yaxis=yaxis_config,
         margin=dict(l=50, r=30, t=60, b=40),
-        hoverlabel=dict(bgcolor='white', font_size=14, font_color='#000000', bordercolor='#333333')
+        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9', bordercolor=line_color)
     )
     return fig
 
 def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     fig = go.Figure()
-    colors = [COLOR_PALETTE['primary'], COLOR_PALETTE['secondary'], COLOR_PALETTE['accent'], COLOR_PALETTE['success']]
+    colors = ['#6366f1', '#10b981', '#06b6d4', '#f59e0b']
     
     for i, (row_name, label) in enumerate(zip(row_names, labels)):
         data = safe_get_row(row_name, meses_disponibles)
@@ -404,49 +414,68 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
         fig.add_trace(go.Bar(
             name=label, x=meses_disponibles, y=data,
             marker_color=colors[i % len(colors)],
+            marker_line_color='rgba(255,255,255,0.2)',
+            marker_line_width=1,
             hovertemplate=hover_template
         ))
     
     fig.update_layout(
-        title={'text': title, 'font': {'size': 16, 'color': '#ffffff'}, 'x': 0.5, 'xanchor': 'center'},
+        title={'text': title, 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
         barmode='group',
-        plot_bgcolor='#1a202c',
-        paper_bgcolor='#2d3748',
-        xaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0'},
-        yaxis={'gridcolor': '#4a5568', 'color': '#e2e8f0', 'tickformat': 'd'},
-        margin=dict(l=50, r=30, t=90, b=40),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(30,41,59,0.8)',
+        xaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'color': '#94a3b8', 'tickfont': {'size': 11}},
+        yaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'color': '#94a3b8', 'tickformat': 'd', 'tickfont': {'size': 11}},
+        margin=dict(l=50, r=30, t=70, b=50),
         legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5, 
-                   bgcolor='rgba(0,0,0,0.8)', font={'color': '#ffffff'}),
-        hoverlabel=dict(bgcolor='white', font_size=13, font_color='#000000', bordercolor='#333333')
+                   bgcolor='rgba(15,23,42,0.9)', font={'color': '#f1f5f9', 'size': 11}, bordercolor='#334155', borderwidth=1),
+        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9', bordercolor='#6366f1'),
+        bargap=0.2
     )
     return fig
 
 def create_kpi_card(title, value, subtitle="", color=None, icon="📊"):
+    accent_color = color or COLOR_PALETTE["primary"]
     return dbc.Card(
         dbc.CardBody([
             html.Div([
-                html.Span(icon, style={'fontSize': '28px', 'marginRight': '12px', 'flexShrink': '0'}),
                 html.Div([
-                    html.H6(capitalizar_texto(title), style={
-                        'color': '#a0aec0', 'fontSize': '13px', 'marginBottom': '8px', 
-                        'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px'
-                    }),
-                    html.H2(value, style={
-                        'color': '#ffffff', 'fontWeight': '700', 
-                        'marginBottom': '5px', 'fontSize': '28px', 'lineHeight': '1',
-                        'textShadow': f'0 0 20px {color or COLOR_PALETTE["primary"]}'
-                    }),
-                    html.P(capitalizar_texto(subtitle), style={
-                        'color': '#a0aec0', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
+                    html.Span(icon, style={
+                        'fontSize': '32px', 
+                        'filter': 'drop-shadow(0 0 8px rgba(255,255,255,0.3))'
                     })
-                ], style={'flex': '1', 'minWidth': '0', 'overflow': 'hidden'})
-            ], style={'display': 'flex', 'alignItems': 'center'})
-        ], style={'padding': '16px'}),
+                ], style={
+                    'width': '56px', 'height': '56px', 'borderRadius': '16px',
+                    'background': f'linear-gradient(135deg, {accent_color}40 0%, {accent_color}20 100%)',
+                    'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center',
+                    'marginBottom': '16px', 'border': f'1px solid {accent_color}50'
+                }),
+                html.H6(capitalizar_texto(title), style={
+                    'color': '#94a3b8', 'fontSize': '12px', 'marginBottom': '8px', 
+                    'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '1px'
+                }),
+                html.H2(value, style={
+                    'color': '#f8fafc', 'fontWeight': '800', 
+                    'marginBottom': '6px', 'fontSize': '32px', 'lineHeight': '1',
+                    'background': f'linear-gradient(135deg, #ffffff 0%, {accent_color} 100%)',
+                    'WebkitBackgroundClip': 'text', 'WebkitTextFillColor': 'transparent',
+                    'backgroundClip': 'text'
+                }),
+                html.P(capitalizar_texto(subtitle), style={
+                    'color': '#64748b', 'fontSize': '13px', 'margin': '0', 'fontWeight': '500'
+                })
+            ], style={'textAlign': 'center'})
+        ], style={'padding': '24px 20px'}),
         className="kpi-card h-100",
         style={
-            'border': 'none', 'borderLeft': f'4px solid {color or COLOR_PALETTE["primary"]}',
-            'borderRadius': '12px', 'boxShadow': '0 8px 32px rgba(0,0,0,0.3)',
-            'background': 'linear-gradient(145deg, #132238 0%, #1a365d 100%)', 'transition': 'all 0.3s ease', 'height': '100%'
+            'border': 'none',
+            'borderRadius': '20px', 
+            'boxShadow': f'0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px {accent_color}20, inset 0 1px 0 rgba(255,255,255,0.05)',
+            'background': 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
+            'transition': 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', 
+            'height': '100%',
+            'position': 'relative',
+            'overflow': 'hidden'
         }
     )
 
@@ -464,79 +493,220 @@ app.index_string = '''
         {%favicon%}
         {%css%}
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
             
-            body {
-                font-family: 'Inter', sans-serif !important;
-                background: linear-gradient(135deg, #0c1929 0%, #1a365d 25%, #1e3a5f 50%, #0f2744 75%, #0a1628 100%);
-                color: #e2e8f0;
-                min-height: 100vh;
+            * {
+                box-sizing: border-box;
             }
             
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
+            body {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+                background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+                color: #f1f5f9;
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+            
+            body::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: 
+                    radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                    radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+                pointer-events: none;
+                z-index: -1;
+            }
+            
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(30px); }
                 to { opacity: 1; transform: translateY(0); }
             }
             
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+            
+            @keyframes shimmer {
+                0% { background-position: -200% 0; }
+                100% { background-position: 200% 0; }
+            }
+            
             .kpi-card {
-                transition: all 0.3s ease;
-                border-radius: 12px !important;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 40px rgba(26,54,93,0.2) !important;
-                backdrop-filter: blur(10px);
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: 20px !important;
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .kpi-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             }
             
             .kpi-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 60px rgba(52,152,219,0.15) !important;
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.3), 0 0 60px rgba(99,102,241,0.1) !important;
             }
             
-            .fade-in { animation: fadeIn 0.6s ease-out; }
+            .fade-in { animation: fadeInUp 0.8s ease-out; }
             
             .nav-tabs {
                 border-bottom: none !important;
+                gap: 8px;
             }
             
             .nav-tabs .nav-link {
-                color: #a0aec0;
+                color: #94a3b8;
                 border: none;
-                border-bottom: 3px solid transparent;
-                transition: all 0.3s ease;
-                background: transparent;
+                border-radius: 12px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                background: rgba(30, 41, 59, 0.5);
                 font-weight: 500;
-                padding: 12px 16px;
-                margin-right: 8px;
-                border-radius: 8px 8px 0 0;
+                padding: 14px 20px;
+                font-size: 14px;
+                backdrop-filter: blur(10px);
+                border: 1px solid transparent;
             }
             
             .nav-tabs .nav-link:hover {
-                border-bottom: 3px solid #3498db;
-                color: #3498db;
-                background-color: rgba(52, 152, 219, 0.1);
+                color: #f1f5f9;
+                background: rgba(99, 102, 241, 0.15);
+                border-color: rgba(99, 102, 241, 0.3);
+                transform: translateY(-2px);
             }
             
             .nav-tabs .nav-link.active {
-                color: #3498db;
-                border-bottom: 3px solid #3498db;
-                background: rgba(52, 152, 219, 0.15);
+                color: #f1f5f9;
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%);
                 font-weight: 600;
+                border-color: rgba(99, 102, 241, 0.5);
+                box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
             }
             
             .tab-content {
-                background: transparent;
-                border-radius: 0 12px 12px 12px;
-                padding: 25px;
+                background: rgba(15, 23, 42, 0.6);
+                border-radius: 20px;
+                padding: 30px;
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(51, 65, 85, 0.5);
+                margin-top: 16px;
             }
             
-            .Select-control { background-color: rgba(19,34,56,0.9) !important; border-color: #1e3a5f !important; border-radius: 8px !important; }
-            .Select-value-label, .Select-placeholder, .Select-value { color: #ffffff !important; }
-            .Select-menu-outer { background-color: #132238 !important; border-color: #1e3a5f !important; }
-            .Select-option { background-color: #132238 !important; color: #ffffff !important; }
-            .Select-option:hover, .Select-option.is-focused { background-color: #3498db !important; color: #ffffff !important; }
-            .Select-option.is-selected { background-color: #3498db !important; color: #ffffff !important; }
+            /* Dropdown styles */
+            .Select-control { 
+                background: rgba(30, 41, 59, 0.9) !important; 
+                border: 1px solid rgba(99, 102, 241, 0.3) !important; 
+                border-radius: 12px !important;
+                min-height: 44px !important;
+            }
+            .Select-control:hover {
+                border-color: rgba(99, 102, 241, 0.6) !important;
+            }
+            .Select-value-label, .Select-placeholder, .Select-value { color: #f1f5f9 !important; }
+            .Select-menu-outer { 
+                background: #1e293b !important; 
+                border: 1px solid rgba(99, 102, 241, 0.3) !important;
+                border-radius: 12px !important;
+                margin-top: 4px !important;
+                overflow: hidden;
+            }
+            .Select-option { 
+                background: #1e293b !important; 
+                color: #f1f5f9 !important;
+                padding: 12px 16px !important;
+            }
+            .Select-option:hover, .Select-option.is-focused { 
+                background: rgba(99, 102, 241, 0.3) !important; 
+            }
+            .Select-option.is-selected { 
+                background: rgba(99, 102, 241, 0.5) !important; 
+            }
+            
+            /* Button styles */
+            .btn {
+                border-radius: 12px !important;
+                font-weight: 600 !important;
+                padding: 10px 20px !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                border: none !important;
+            }
+            
+            .btn-success {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+            }
+            
+            .btn-success:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+            }
+            
+            .btn-primary {
+                background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+                box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
+            }
+            
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+            }
+            
+            .btn-secondary {
+                background: rgba(51, 65, 85, 0.8) !important;
+                border: 1px solid rgba(148, 163, 184, 0.3) !important;
+            }
+            
+            .btn-secondary:hover {
+                background: rgba(71, 85, 105, 0.9) !important;
+                transform: translateY(-2px);
+            }
             
             .dashboard-footer {
-                background-color: transparent;
+                background: transparent;
                 padding: 0 0 20px 0;
+            }
+            
+            /* Scrollbar */
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #0f172a;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #475569;
+            }
+            
+            /* Graph containers */
+            .js-plotly-plot {
+                border-radius: 16px;
+                overflow: hidden;
+            }
+            
+            /* Section titles */
+            h5, h6 {
+                background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
             }
         </style>
     </head>
@@ -557,53 +727,77 @@ app.layout = html.Div([
         html.Div([
             html.Div([
                 html.Div([
-                    html.Img(src='/assets/Logo.png', style={'height': '90px', 'marginRight': '25px', 'filter': 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))'}),
+                    html.Div([
+                        html.Img(src='/assets/Logo.png', style={
+                            'height': '80px', 'marginRight': '24px', 
+                            'filter': 'drop-shadow(0 8px 16px rgba(0,0,0,0.4))',
+                            'borderRadius': '16px'
+                        })
+                    ], style={
+                        'background': 'rgba(255,255,255,0.05)',
+                        'padding': '12px',
+                        'borderRadius': '20px',
+                        'border': '1px solid rgba(255,255,255,0.1)'
+                    }),
                     html.Div([
                         html.H1("DASHBOARD UCI ADULTOS 2025", style={
-                            'color': '#ffffff', 'fontWeight': '700', 'marginBottom': '5px',
-                            'fontSize': '28px', 'letterSpacing': '0.5px', 'margin': '0',
-                            'textShadow': '0 0 30px rgba(52,152,219,0.5)'
+                            'color': '#f8fafc', 'fontWeight': '800', 'marginBottom': '8px',
+                            'fontSize': '26px', 'letterSpacing': '-0.5px', 'margin': '0',
+                            'background': 'linear-gradient(135deg, #f8fafc 0%, #6366f1 100%)',
+                            'WebkitBackgroundClip': 'text', 'WebkitTextFillColor': 'transparent',
+                            'backgroundClip': 'text'
                         }),
                         html.P("Sistema de Monitoreo y Análisis de Indicadores", style={
-                            'color': '#a0aec0', 'fontSize': '14px', 'marginBottom': '0', 'fontWeight': '400'
+                            'color': '#64748b', 'fontSize': '14px', 'marginBottom': '0', 'fontWeight': '500',
+                            'letterSpacing': '0.5px'
                         })
                     ])
-                ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '15px'})
+                ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '20px'})
             ]),
             html.Div([
-                dbc.Button("📤 Exportar a Excel", id="btn-export-excel", color="success", size="sm", className="me-2", style={'borderRadius': '6px', 'fontWeight': '500'}),
-                dbc.Button("📄 Exportar a CSV", id="btn-export-csv", color="primary", size="sm", style={'borderRadius': '6px', 'fontWeight': '500'}),
+                dbc.Button("📤 Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
+                dbc.Button("📄 Exportar CSV", id="btn-export-csv", color="primary", size="sm"),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
-            ], style={'marginBottom': '20px'})
+            ], style={'marginBottom': '24px', 'display': 'flex', 'gap': '12px'})
         ], className="fade-in"),
         
         # Tabs
         dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
-            dbc.Tab(label='✅ Resumen general', tab_id='tab-resumen'),
-            dbc.Tab(label='📦 Gestión y calidad', tab_id='tab-gestion'),
-            dbc.Tab(label='🏥 Especialidades y FPS', tab_id='tab-especialidades'),
-            dbc.Tab(label='✝️ Mortalidad', tab_id='tab-mortalidad'),
-        ], style={'marginBottom': '0', 'borderBottom': 'none', 'backgroundColor': 'rgba(19,34,56,0.8)', 'borderRadius': '12px 12px 0 0', 'padding': '0 10px'}),
+            dbc.Tab(label='📊 Resumen General', tab_id='tab-resumen'),
+            dbc.Tab(label='⚙️ Gestión y Calidad', tab_id='tab-gestion'),
+            dbc.Tab(label='🏥 Especialidades', tab_id='tab-especialidades'),
+            dbc.Tab(label='📋 Mortalidad', tab_id='tab-mortalidad'),
+        ], style={'marginBottom': '0', 'borderBottom': 'none'}),
         
         html.Div(id='tab-content', className="tab-content"),
         
         # Footer
         html.Div([
-            html.Hr(style={'borderColor': '#333333', 'margin': '30px 0 20px 0'}),
+            html.Hr(style={'borderColor': 'rgba(51,65,85,0.5)', 'margin': '40px 0 24px 0'}),
             html.Div([
                 html.Div([
-                    html.P("Hospital Infantil Universitario de San José", style={'color': '#e2e8f0', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px'}),
-                    html.P("Unidad de Cuidados Intensivos - Adultos", style={'color': '#a0aec0', 'margin': '0', 'fontSize': '12px'})
+                    html.P("Hospital Infantil Universitario de San José", style={
+                        'color': '#f1f5f9', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px'
+                    }),
+                    html.P("Unidad de Cuidados Intensivos - Adultos", style={
+                        'color': '#64748b', 'margin': '0', 'fontSize': '12px'
+                    })
                 ]),
                 html.Div([
-                    html.P("© 2025 - Dashboard de Indicadores UCI", style={'color': '#718096', 'margin': '0', 'fontSize': '12px'})
+                    html.P("© 2025 - Dashboard de Indicadores UCI", style={
+                        'color': '#475569', 'margin': '0', 'fontSize': '12px'
+                    })
                 ], style={'textAlign': 'right'})
-            ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '15px'})
+            ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
         ], className="dashboard-footer")
         
-    ], fluid=True, style={'maxWidth': '1400px', 'padding': '30px 20px'})
-], style={'background': 'linear-gradient(135deg, #0c1929 0%, #1a365d 25%, #1e3a5f 50%, #0f2744 75%, #0a1628 100%)', 'minHeight': '100vh', 'fontFamily': "'Inter', sans-serif"})
+    ], fluid=True, style={'maxWidth': '1440px', 'padding': '32px 24px'})
+], style={
+    'background': 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+    'minHeight': '100vh', 
+    'fontFamily': "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+})
 
 @app.callback(Output('tab-content', 'children'), Input('tabs', 'active_tab'))
 def render_tab_content(tab):
@@ -615,7 +809,10 @@ def render_tab_content(tab):
             filtros = html.Div([
                 dbc.Row([
                     dbc.Col([
-                        html.Label("📅 Meses", style={'color': '#e2e8f0', 'fontWeight': '600', 'marginBottom': '8px'}),
+                        html.Label("📅 Seleccionar Meses", style={
+                            'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '10px', 
+                            'fontSize': '13px', 'letterSpacing': '0.5px'
+                        }),
                         dcc.Dropdown(
                             id='filtro-mes-inicio',
                             options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
@@ -626,14 +823,19 @@ def render_tab_content(tab):
                     ], xs=12, md=6),
                     dbc.Col([
                         dbc.Button("🔍 Aplicar Filtros", id='btn-aplicar-filtros', color="success", className="w-100",
-                                  style={'borderRadius': '8px', 'fontWeight': '600', 'height': '38px', 'marginTop': '28px'})
+                                  style={'height': '44px', 'marginTop': '28px'})
                     ], xs=12, md=3),
                     dbc.Col([
                         dbc.Button("📊 Todos los meses", id='btn-todos-meses', color="secondary", className="w-100",
-                                  style={'borderRadius': '8px', 'fontWeight': '500', 'height': '38px', 'marginTop': '28px'})
+                                  style={'height': '44px', 'marginTop': '28px'})
                     ], xs=12, md=3),
                 ], className="mb-2", align="end"),
-            ], style={'background': 'linear-gradient(145deg, #132238 0%, #1a365d 100%)', 'padding': '20px', 'borderRadius': '15px', 'marginBottom': '25px'})
+            ], style={
+                'background': 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.9) 100%)',
+                'padding': '24px', 'borderRadius': '20px', 'marginBottom': '28px',
+                'border': '1px solid rgba(99,102,241,0.2)',
+                'boxShadow': '0 4px 24px rgba(0,0,0,0.2)'
+            })
             
             return html.Div([filtros, html.Div(id='resumen-content')])
         except Exception as e:
@@ -644,10 +846,8 @@ def render_tab_content(tab):
             suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
             suma_col = suma_col[0] if suma_col else '∑'
             
-            # Usar el valor de la hoja ESTADISTICA (columna suma)
-            total_fallecidos = safe_get_row('FALLECIDOS', suma_col)
-            if pd.isna(total_fallecidos) or total_fallecidos == 0:
-                total_fallecidos = len(df_fallecidos) if not df_fallecidos.empty else 0
+            # Usar el conteo real de la hoja MORTALIDAD (más preciso)
+            total_fallecidos = len(df_fallecidos) if not df_fallecidos.empty else 0
             fallecidos_covid = safe_get_row('FALLECIDOS COVID-19', suma_col)
             total_egresos = safe_get_row('NÚMERO DE EGRESOS DEL MES', suma_col)
             
