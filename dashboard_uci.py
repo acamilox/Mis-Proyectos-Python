@@ -458,16 +458,16 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
             trend_icon = '→'
         
         trend_element = html.Div([
-            html.Span(trend_icon, style={'marginRight': '4px', 'fontSize': '14px'}),
-            html.Span(trend_value, style={'fontSize': '12px', 'fontWeight': '600'})
+            html.Span(trend_icon, style={'marginRight': '3px', 'fontSize': '11px'}),
+            html.Span(trend_value, style={'fontSize': '10px', 'fontWeight': '600'})
         ], style={
             'color': trend_color,
             'display': 'flex',
             'alignItems': 'center',
             'justifyContent': 'center',
-            'marginTop': '8px',
-            'padding': '4px 10px',
-            'borderRadius': '20px',
+            'marginTop': '6px',
+            'padding': '2px 8px',
+            'borderRadius': '12px',
             'background': f'{trend_color}15',
             'border': f'1px solid {trend_color}30'
         })
@@ -475,25 +475,25 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
     card_content = [
         html.Div([
             html.Span(icon, style={
-                'fontSize': '28px', 
-                'filter': 'drop-shadow(0 0 6px rgba(255,255,255,0.2))'
+                'fontSize': '20px', 
+                'filter': 'drop-shadow(0 0 4px rgba(255,255,255,0.2))'
             })
         ], style={
-            'width': '52px', 'height': '52px', 'borderRadius': '14px',
+            'width': '40px', 'height': '40px', 'borderRadius': '10px',
             'background': f'linear-gradient(135deg, {accent_color}30 0%, {accent_color}15 100%)',
             'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center',
-            'marginBottom': '14px', 'border': f'1px solid {accent_color}40'
+            'marginBottom': '10px', 'border': f'1px solid {accent_color}40'
         }),
         html.H6(capitalizar_texto(title), style={
-            'color': '#94a3b8', 'fontSize': '11px', 'marginBottom': '8px', 
-            'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px'
+            'color': '#94a3b8', 'fontSize': '10px', 'marginBottom': '4px', 
+            'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.3px'
         }),
         html.H2(value, style={
             'color': '#f1f5f9', 'fontWeight': '700', 
-            'marginBottom': '6px', 'fontSize': '28px', 'lineHeight': '1'
+            'marginBottom': '4px', 'fontSize': '22px', 'lineHeight': '1'
         }),
         html.P(capitalizar_texto(subtitle), style={
-            'color': '#64748b', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
+            'color': '#64748b', 'fontSize': '10px', 'margin': '0', 'fontWeight': '500'
         })
     ]
     
@@ -503,17 +503,18 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
     return dbc.Card(
         dbc.CardBody([
             html.Div(card_content, style={'textAlign': 'center'})
-        ], style={'padding': '20px 16px'}),
+        ], style={'padding': '14px 10px'}),
         className="kpi-card h-100",
         style={
             'border': f'1px solid {accent_color}30',
-            'borderRadius': '16px', 
-            'boxShadow': f'0 4px 20px rgba(0,0,0,0.3)',
+            'borderRadius': '12px', 
+            'boxShadow': f'0 3px 15px rgba(0,0,0,0.25)',
             'background': 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
             'transition': 'all 0.3s ease', 
             'height': '100%',
             'position': 'relative',
-            'overflow': 'hidden'
+            'overflow': 'hidden',
+            'minHeight': '140px'
         }
     )
 
@@ -758,36 +759,9 @@ app.index_string = '''
                 transform: translateY(-2px);
             }
             
-            .btn-presentation {
-                background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
-                border: none !important;
-            }
-            
-            .btn-presentation:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4) !important;
-            }
-            
-            .btn-presentation.active {
-                background: linear-gradient(135deg, #22c55e 0%, #10b981 100%) !important;
-            }
-            
             .dashboard-footer {
                 background: transparent;
                 padding: 0 0 20px 0;
-            }
-            
-            /* Modo presentación */
-            .presentation-mode .filtros-section {
-                display: none !important;
-            }
-            
-            .presentation-mode .export-buttons {
-                display: none !important;
-            }
-            
-            .presentation-mode .tab-content {
-                padding: 16px 8px !important;
             }
             
             /* Insight cards */
@@ -855,7 +829,6 @@ app.index_string = '''
 '''
 
 app.layout = html.Div([
-    dcc.Store(id='presentation-mode-store', data=False),
     dbc.Container([
         # Header
         html.Div([
@@ -877,9 +850,8 @@ app.layout = html.Div([
                 ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '20px'})
             ]),
             html.Div([
-                dbc.Button("🎯 Modo Presentación", id="btn-presentation-mode", className="btn-presentation me-3", size="sm"),
-                dbc.Button("📤 Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2 export-buttons"),
-                dbc.Button("📄 Exportar CSV", id="btn-export-csv", color="primary", size="sm", className="export-buttons"),
+                dbc.Button("📤 Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
+                dbc.Button("📄 Exportar CSV", id="btn-export-csv", color="primary", size="sm"),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
             ], style={'marginBottom': '24px', 'display': 'flex', 'gap': '12px'})
@@ -929,35 +901,39 @@ def render_tab_content(tab):
                 return html.Div([html.H3("⚠️ No hay datos", style={'color': '#ffffff'})])
             
             filtros = html.Div([
-                dbc.Row([
-                    dbc.Col([
-                        html.Label("📅 Seleccionar Meses", style={
-                            'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '8px', 
-                            'fontSize': '13px', 'display': 'block'
-                        }),
-                        dcc.Dropdown(
-                            id='filtro-mes-inicio',
-                            options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
-                            value=meses_disponibles,
-                            multi=True,
-                            placeholder="Selecciona meses..."
-                        )
-                    ], xs=12, md=6),
-                    dbc.Col([
-                        html.Label(" ", style={'marginBottom': '8px', 'fontSize': '13px', 'display': 'block', 'color': 'transparent'}),
-                        dbc.Button("🔍 Aplicar Filtros", id='btn-aplicar-filtros', color="success", className="w-100",
-                                  style={'height': '80px', 'fontSize': '14px'})
-                    ], xs=6, md=3),
-                    dbc.Col([
-                        html.Label(" ", style={'marginBottom': '8px', 'fontSize': '13px', 'display': 'block', 'color': 'transparent'}),
-                        dbc.Button("📊 Todos los meses", id='btn-todos-meses', color="secondary", className="w-100",
-                                  style={'height': '80px', 'fontSize': '14px'})
-                    ], xs=6, md=3),
-                ], className="g-3", align="start"),
+                html.Div([
+                    html.Div([
+                        html.Span("📅", style={'fontSize': '16px', 'marginRight': '8px'}),
+                        html.Span("Filtrar por Meses", style={
+                            'color': '#f1f5f9', 'fontWeight': '600', 'fontSize': '14px'
+                        })
+                    ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '12px'}),
+                    dbc.Row([
+                        dbc.Col([
+                            dcc.Dropdown(
+                                id='filtro-mes-inicio',
+                                options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
+                                value=meses_disponibles,
+                                multi=True,
+                                placeholder="Selecciona meses...",
+                                style={'fontSize': '13px'}
+                            )
+                        ], xs=12, lg=8),
+                        dbc.Col([
+                            html.Div([
+                                dbc.Button("✓ Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
+                                          style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '600'}),
+                                dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
+                                          style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '600', 'marginLeft': '8px'})
+                            ], style={'display': 'flex', 'justifyContent': 'flex-end', 'gap': '4px', 'height': '100%', 'alignItems': 'center'})
+                        ], xs=12, lg=4, style={'marginTop': '8px'} if True else {})
+                    ], className="g-2", align="center"),
+                ])
             ], style={
-                'background': 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.9) 100%)',
-                'padding': '20px', 'borderRadius': '16px', 'marginBottom': '24px',
-                'border': '1px solid rgba(99,102,241,0.2)'
+                'background': 'linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.95) 100%)',
+                'padding': '16px 20px', 'borderRadius': '12px', 'marginBottom': '20px',
+                'border': '1px solid rgba(99,102,241,0.25)',
+                'boxShadow': '0 2px 10px rgba(0,0,0,0.15)'
             }, className="filtros-section")
             
             return html.Div([filtros, html.Div(id='resumen-content')])
@@ -1488,18 +1464,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
-# --- CALLBACK MODO PRESENTACIÓN ---
-@app.callback(
-    [Output('app-container', 'className'),
-     Output('btn-presentation-mode', 'children'),
-     Output('btn-presentation-mode', 'className')],
-    Input('btn-presentation-mode', 'n_clicks'),
-    prevent_initial_call=True
-)
-def toggle_presentation_mode(n_clicks):
-    if n_clicks and n_clicks % 2 == 1:
-        return 'presentation-mode', '✅ Salir Presentación', 'btn-presentation active me-3'
-    return '', '🎯 Modo Presentación', 'btn-presentation me-3'
+
 
 
 # --- FUNCIÓN PARA GENERAR DATOS DE EXPORTACIÓN ---
