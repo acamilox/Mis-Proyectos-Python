@@ -486,19 +486,24 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
         }),
         html.H6(capitalizar_texto(title), style={
             'color': '#94a3b8', 'fontSize': '11px', 'marginBottom': '8px', 
-            'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px'
+            'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px',
+            'minHeight': '26px', 'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center'
         }),
         html.H2(value, style={
             'color': '#f1f5f9', 'fontWeight': '700', 
             'marginBottom': '6px', 'fontSize': '28px', 'lineHeight': '1'
         }),
         html.P(capitalizar_texto(subtitle), style={
-            'color': '#64748b', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
+            'color': '#64748b', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500',
+            'minHeight': '18px'
         })
     ]
     
     if trend_element:
         card_content.append(trend_element)
+    else:
+        # Placeholder para mantener altura consistente cuando no hay tendencia
+        card_content.append(html.Div(style={'height': '32px'}))
     
     return dbc.Card(
         dbc.CardBody([
@@ -512,6 +517,7 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
             'background': 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
             'transition': 'all 0.3s ease', 
             'height': '100%',
+            'minHeight': '220px',
             'position': 'relative',
             'overflow': 'hidden'
         }
