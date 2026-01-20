@@ -458,16 +458,16 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
             trend_icon = '→'
         
         trend_element = html.Div([
-            html.Span(trend_icon, style={'marginRight': '3px', 'fontSize': '11px'}),
-            html.Span(trend_value, style={'fontSize': '10px', 'fontWeight': '600'})
+            html.Span(trend_icon, style={'marginRight': '4px', 'fontSize': '14px'}),
+            html.Span(trend_value, style={'fontSize': '12px', 'fontWeight': '600'})
         ], style={
             'color': trend_color,
             'display': 'flex',
             'alignItems': 'center',
             'justifyContent': 'center',
-            'marginTop': '6px',
-            'padding': '2px 8px',
-            'borderRadius': '12px',
+            'marginTop': '8px',
+            'padding': '4px 10px',
+            'borderRadius': '20px',
             'background': f'{trend_color}15',
             'border': f'1px solid {trend_color}30'
         })
@@ -475,25 +475,25 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
     card_content = [
         html.Div([
             html.Span(icon, style={
-                'fontSize': '20px', 
-                'filter': 'drop-shadow(0 0 4px rgba(255,255,255,0.2))'
+                'fontSize': '28px', 
+                'filter': 'drop-shadow(0 0 6px rgba(255,255,255,0.2))'
             })
         ], style={
-            'width': '40px', 'height': '40px', 'borderRadius': '10px',
+            'width': '52px', 'height': '52px', 'borderRadius': '14px',
             'background': f'linear-gradient(135deg, {accent_color}30 0%, {accent_color}15 100%)',
             'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center',
-            'marginBottom': '10px', 'border': f'1px solid {accent_color}40'
+            'marginBottom': '14px', 'border': f'1px solid {accent_color}40'
         }),
         html.H6(capitalizar_texto(title), style={
-            'color': '#94a3b8', 'fontSize': '10px', 'marginBottom': '4px', 
-            'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.3px'
+            'color': '#94a3b8', 'fontSize': '11px', 'marginBottom': '8px', 
+            'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px'
         }),
         html.H2(value, style={
             'color': '#f1f5f9', 'fontWeight': '700', 
-            'marginBottom': '4px', 'fontSize': '22px', 'lineHeight': '1'
+            'marginBottom': '6px', 'fontSize': '28px', 'lineHeight': '1'
         }),
         html.P(capitalizar_texto(subtitle), style={
-            'color': '#64748b', 'fontSize': '10px', 'margin': '0', 'fontWeight': '500'
+            'color': '#64748b', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
         })
     ]
     
@@ -503,18 +503,17 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
     return dbc.Card(
         dbc.CardBody([
             html.Div(card_content, style={'textAlign': 'center'})
-        ], style={'padding': '14px 10px'}),
+        ], style={'padding': '20px 16px'}),
         className="kpi-card h-100",
         style={
             'border': f'1px solid {accent_color}30',
-            'borderRadius': '12px', 
-            'boxShadow': f'0 3px 15px rgba(0,0,0,0.25)',
+            'borderRadius': '16px', 
+            'boxShadow': f'0 4px 20px rgba(0,0,0,0.3)',
             'background': 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
             'transition': 'all 0.3s ease', 
             'height': '100%',
             'position': 'relative',
-            'overflow': 'hidden',
-            'minHeight': '140px'
+            'overflow': 'hidden'
         }
     )
 
@@ -550,62 +549,6 @@ def calcular_tendencia(datos, inverse=False):
     trend_value = f"{'+' if cambio_pct > 0 else ''}{cambio_pct:.1f}%"
     return trend, trend_value
 
-
-def crear_resumen_ejecutivo(meses_filtrados):
-    """Genera insights automáticos para el resumen ejecutivo."""
-    insights = []
-    
-    # Ocupación
-    datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados, silent=True)
-    if isinstance(datos_ocup, pd.Series) and len(datos_ocup) > 0:
-        prom_ocup = datos_ocup[datos_ocup > 0].mean()
-        if prom_ocup >= 85:
-            insights.append(('success', '🏥', f'Alta ocupación promedio: {prom_ocup:.1f}%'))
-        elif prom_ocup < 70:
-            insights.append(('warning', '⚠️', f'Ocupación por debajo del objetivo: {prom_ocup:.1f}%'))
-    
-    # Mortalidad
-    datos_fall = safe_get_row('FALLECIDOS', meses_filtrados, silent=True)
-    datos_egr = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados, silent=True)
-    if isinstance(datos_fall, pd.Series) and isinstance(datos_egr, pd.Series):
-        total_fall = datos_fall.sum()
-        total_egr = datos_egr.sum()
-        if total_egr > 0:
-            mort = (total_fall / total_egr) * 100
-            if mort < 15:
-                insights.append(('success', '✅', f'Mortalidad controlada: {mort:.1f}%'))
-            elif mort > 20:
-                insights.append(('danger', '🔴', f'Mortalidad elevada: {mort:.1f}% - Requiere análisis'))
-    
-    # Estancia promedio
-    datos_est = safe_get_row('PROMEDIO ESTANCIA', meses_filtrados, silent=True)
-    if isinstance(datos_est, pd.Series) and len(datos_est) > 0:
-        prom_est = datos_est[datos_est > 0].mean()
-        if prom_est <= 7:
-            insights.append(('success', '⏱️', f'Estancia promedio óptima: {prom_est:.1f} días'))
-        elif prom_est > 10:
-            insights.append(('warning', '📊', f'Estancia prolongada: {prom_est:.1f} días'))
-    
-    # Infecciones
-    datos_bact = safe_get_row('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', meses_filtrados, silent=True)
-    if isinstance(datos_bact, pd.Series):
-        prom_bact = datos_bact[datos_bact > 0].mean() if len(datos_bact[datos_bact > 0]) > 0 else 0
-        if prom_bact == 0:
-            insights.append(('success', '🛡️', 'Cero bacteriemias asociadas a catéter central'))
-        elif prom_bact < 2:
-            insights.append(('success', '🛡️', f'Tasa de ITS-AC baja: {prom_bact:.2f}'))
-    
-    # Giro cama
-    datos_giro = safe_get_row('GIRO CAMA', meses_filtrados, silent=True)
-    if isinstance(datos_giro, pd.Series) and len(datos_giro) > 0:
-        prom_giro = datos_giro[datos_giro > 0].mean()
-        if prom_giro >= 4:
-            insights.append(('success', '🔄', f'Buen giro de cama: {prom_giro:.1f}'))
-    
-    if not insights:
-        insights.append(('info', '📊', 'Datos en proceso de análisis'))
-    
-    return insights
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 server = app.server
@@ -764,16 +707,6 @@ app.index_string = '''
                 padding: 0 0 20px 0;
             }
             
-            /* Insight cards */
-            .insight-card {
-                transition: all 0.3s ease;
-                border-radius: 12px;
-            }
-            
-            .insight-card:hover {
-                transform: translateX(4px);
-            }
-            
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.7; }
@@ -908,26 +841,24 @@ def render_tab_content(tab):
                             'color': '#f1f5f9', 'fontWeight': '600', 'fontSize': '14px'
                         })
                     ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '12px'}),
-                    dbc.Row([
-                        dbc.Col([
+                    html.Div([
+                        html.Div([
                             dcc.Dropdown(
                                 id='filtro-mes-inicio',
                                 options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
                                 value=meses_disponibles,
                                 multi=True,
                                 placeholder="Selecciona meses...",
-                                style={'fontSize': '13px'}
+                                style={'fontSize': '13px', 'minWidth': '400px'}
                             )
-                        ], xs=12, lg=8),
-                        dbc.Col([
-                            html.Div([
-                                dbc.Button("✓ Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
-                                          style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '600'}),
-                                dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
-                                          style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '600', 'marginLeft': '8px'})
-                            ], style={'display': 'flex', 'justifyContent': 'flex-end', 'gap': '4px', 'height': '100%', 'alignItems': 'center'})
-                        ], xs=12, lg=4, style={'marginTop': '8px'} if True else {})
-                    ], className="g-2", align="center"),
+                        ]),
+                        html.Div([
+                            dbc.Button("✓ Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
+                                      style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '600'}),
+                            dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
+                                      style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '600', 'marginLeft': '8px'})
+                        ], style={'marginLeft': '12px', 'display': 'flex', 'alignItems': 'center'})
+                    ], style={'display': 'flex', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '8px'}),
                 ])
             ], style={
                 'background': 'linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.95) 100%)',
@@ -1338,45 +1269,6 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄",
                                trend=trend_giro, trend_value=trend_val_giro)
         
-        # Generar resumen ejecutivo
-        insights = crear_resumen_ejecutivo(meses_filtrados)
-        
-        # Crear tarjetas de insights
-        insight_cards = []
-        color_map = {'success': '#22c55e', 'warning': '#f59e0b', 'danger': '#ef4444', 'info': '#6366f1'}
-        for tipo, icono, texto in insights:
-            color = color_map.get(tipo, '#6366f1')
-            insight_cards.append(
-                html.Div([
-                    html.Span(icono, style={'fontSize': '20px', 'marginRight': '12px'}),
-                    html.Span(texto, style={'color': '#f1f5f9', 'fontSize': '14px', 'fontWeight': '500'})
-                ], className="insight-card", style={
-                    'background': f'linear-gradient(135deg, {color}15 0%, {color}08 100%)',
-                    'border': f'1px solid {color}40',
-                    'borderLeft': f'4px solid {color}',
-                    'padding': '14px 18px',
-                    'borderRadius': '10px',
-                    'marginBottom': '10px',
-                    'display': 'flex',
-                    'alignItems': 'center'
-                })
-            )
-        
-        resumen_ejecutivo = html.Div([
-            html.Div([
-                html.H6("📋 Resumen Ejecutivo", style={
-                    'color': '#f1f5f9', 'fontWeight': '700', 'marginBottom': '16px',
-                    'fontSize': '16px', 'display': 'flex', 'alignItems': 'center'
-                }),
-                html.Div(insight_cards)
-            ], style={
-                'background': 'linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.95) 100%)',
-                'padding': '20px', 'borderRadius': '16px',
-                'border': '1px solid rgba(99,102,241,0.25)',
-                'boxShadow': '0 4px 20px rgba(0,0,0,0.2)'
-            })
-        ], className="mb-4")
-        
         # EPS
         total_famisanar = safe_get_row('FAMISANAR', suma_col, silent=True)
         total_compensar = safe_get_row('COMPENSAR', suma_col, silent=True)
@@ -1449,7 +1341,6 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9'))
 
         return meses_filtrados, html.Div([
-            resumen_ejecutivo,
             dbc.Row([dbc.Col(kpi_ingresos, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi1, xs=12, sm=6, md=True, className="mb-3"),
                      dbc.Col(kpi2, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi3, xs=12, sm=6, md=True, className="mb-3"),
                      dbc.Col(kpi4, xs=12, sm=6, md=True, className="mb-3")], className="mb-3 g-3"),
