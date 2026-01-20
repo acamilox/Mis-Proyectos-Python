@@ -788,7 +788,7 @@ app.layout = html.Div([
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
             ], style={'marginBottom': '24px', 'display': 'flex', 'gap': '12px'})
-        ], className="fade-in"),
+        ], className="fade-in", style={'padding': '0 24px'}),
         
         # Tabs
         dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
@@ -796,7 +796,7 @@ app.layout = html.Div([
             dbc.Tab(label='⚙️ Gestión y Calidad', tab_id='tab-gestion'),
             dbc.Tab(label='🏥 Especialidades', tab_id='tab-especialidades'),
             dbc.Tab(label='📋 Mortalidad', tab_id='tab-mortalidad'),
-        ], style={'marginBottom': '0', 'borderBottom': 'none'}),
+        ], style={'marginBottom': '0', 'borderBottom': 'none', 'padding': '0 24px'}),
         
         html.Div(id='tab-content', className="tab-content"),
         
@@ -819,7 +819,7 @@ app.layout = html.Div([
             ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
         ], className="dashboard-footer", style={'marginTop': '40px', 'paddingBottom': '20px'})
         
-    ], fluid=True, style={'maxWidth': '1440px', 'padding': '32px 24px'}, id='main-container')
+    ], fluid=True, style={'maxWidth': '1440px', 'padding': '32px 0'}, id='main-container')
 ], style={
     'background': 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
     'minHeight': '100vh', 
