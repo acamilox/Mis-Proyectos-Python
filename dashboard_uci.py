@@ -431,37 +431,78 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     )
     return fig
 
-def create_kpi_card(title, value, subtitle="", color=None, icon="📊"):
+def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=None, trend_value=None, inverse=False):
+    """
+    Crea una tarjeta KPI con indicador de tendencia opcional.
+    
+    Args:
+        trend: 'up', 'down', 'stable' o None
+        trend_value: texto como "+5.2%" o "-3.1%"
+        inverse: True si 'down' es positivo (ej: mortalidad, infecciones)
+    """
     accent_color = color or COLOR_PALETTE["primary"]
-    # Si el color es muy oscuro, usar uno más brillante
     if accent_color in ['#34495e', '#2c3e50', '#1e293b']:
-        accent_color = '#64748b'  # Slate más claro
+        accent_color = '#64748b'
+    
+    # Determinar color y símbolo de tendencia
+    trend_element = None
+    if trend and trend_value:
+        if trend == 'up':
+            trend_color = '#ef4444' if inverse else '#22c55e'  # Rojo si inverse, verde si no
+            trend_icon = '↑'
+        elif trend == 'down':
+            trend_color = '#22c55e' if inverse else '#ef4444'  # Verde si inverse, rojo si no
+            trend_icon = '↓'
+        else:
+            trend_color = '#94a3b8'
+            trend_icon = '→'
+        
+        trend_element = html.Div([
+            html.Span(trend_icon, style={'marginRight': '4px', 'fontSize': '14px'}),
+            html.Span(trend_value, style={'fontSize': '12px', 'fontWeight': '600'})
+        ], style={
+            'color': trend_color,
+            'display': 'flex',
+            'alignItems': 'center',
+            'justifyContent': 'center',
+            'marginTop': '8px',
+            'padding': '4px 10px',
+            'borderRadius': '20px',
+            'background': f'{trend_color}15',
+            'border': f'1px solid {trend_color}30'
+        })
+    
+    card_content = [
+        html.Div([
+            html.Span(icon, style={
+                'fontSize': '28px', 
+                'filter': 'drop-shadow(0 0 6px rgba(255,255,255,0.2))'
+            })
+        ], style={
+            'width': '52px', 'height': '52px', 'borderRadius': '14px',
+            'background': f'linear-gradient(135deg, {accent_color}30 0%, {accent_color}15 100%)',
+            'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center',
+            'marginBottom': '14px', 'border': f'1px solid {accent_color}40'
+        }),
+        html.H6(capitalizar_texto(title), style={
+            'color': '#94a3b8', 'fontSize': '11px', 'marginBottom': '8px', 
+            'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px'
+        }),
+        html.H2(value, style={
+            'color': '#f1f5f9', 'fontWeight': '700', 
+            'marginBottom': '6px', 'fontSize': '28px', 'lineHeight': '1'
+        }),
+        html.P(capitalizar_texto(subtitle), style={
+            'color': '#64748b', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
+        })
+    ]
+    
+    if trend_element:
+        card_content.append(trend_element)
+    
     return dbc.Card(
         dbc.CardBody([
-            html.Div([
-                html.Div([
-                    html.Span(icon, style={
-                        'fontSize': '28px', 
-                        'filter': 'drop-shadow(0 0 6px rgba(255,255,255,0.2))'
-                    })
-                ], style={
-                    'width': '52px', 'height': '52px', 'borderRadius': '14px',
-                    'background': f'linear-gradient(135deg, {accent_color}30 0%, {accent_color}15 100%)',
-                    'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center',
-                    'marginBottom': '14px', 'border': f'1px solid {accent_color}40'
-                }),
-                html.H6(capitalizar_texto(title), style={
-                    'color': '#94a3b8', 'fontSize': '11px', 'marginBottom': '8px', 
-                    'fontWeight': '600', 'textTransform': 'uppercase', 'letterSpacing': '0.5px'
-                }),
-                html.H2(value, style={
-                    'color': '#f1f5f9', 'fontWeight': '700', 
-                    'marginBottom': '6px', 'fontSize': '28px', 'lineHeight': '1'
-                }),
-                html.P(capitalizar_texto(subtitle), style={
-                    'color': '#64748b', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500'
-                })
-            ], style={'textAlign': 'center'})
+            html.Div(card_content, style={'textAlign': 'center'})
         ], style={'padding': '20px 16px'}),
         className="kpi-card h-100",
         style={
@@ -475,6 +516,95 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊"):
             'overflow': 'hidden'
         }
     )
+
+
+def calcular_tendencia(datos, inverse=False):
+    """Calcula la tendencia comparando los últimos meses con datos."""
+    if not isinstance(datos, pd.Series):
+        return None, None
+    
+    # Filtrar valores válidos
+    valores = datos.dropna()
+    valores = valores[valores > 0]
+    
+    if len(valores) < 2:
+        return None, None
+    
+    # Comparar último valor con el promedio de los anteriores
+    ultimo = valores.iloc[-1]
+    promedio_anterior = valores.iloc[:-1].mean()
+    
+    if promedio_anterior == 0:
+        return 'stable', '0%'
+    
+    cambio_pct = ((ultimo - promedio_anterior) / promedio_anterior) * 100
+    
+    if abs(cambio_pct) < 2:
+        trend = 'stable'
+    elif cambio_pct > 0:
+        trend = 'up'
+    else:
+        trend = 'down'
+    
+    trend_value = f"{'+' if cambio_pct > 0 else ''}{cambio_pct:.1f}%"
+    return trend, trend_value
+
+
+def crear_resumen_ejecutivo(meses_filtrados):
+    """Genera insights automáticos para el resumen ejecutivo."""
+    insights = []
+    
+    # Ocupación
+    datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados, silent=True)
+    if isinstance(datos_ocup, pd.Series) and len(datos_ocup) > 0:
+        prom_ocup = datos_ocup[datos_ocup > 0].mean()
+        if prom_ocup >= 85:
+            insights.append(('success', '🏥', f'Alta ocupación promedio: {prom_ocup:.1f}%'))
+        elif prom_ocup < 70:
+            insights.append(('warning', '⚠️', f'Ocupación por debajo del objetivo: {prom_ocup:.1f}%'))
+    
+    # Mortalidad
+    datos_fall = safe_get_row('FALLECIDOS', meses_filtrados, silent=True)
+    datos_egr = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados, silent=True)
+    if isinstance(datos_fall, pd.Series) and isinstance(datos_egr, pd.Series):
+        total_fall = datos_fall.sum()
+        total_egr = datos_egr.sum()
+        if total_egr > 0:
+            mort = (total_fall / total_egr) * 100
+            if mort < 15:
+                insights.append(('success', '✅', f'Mortalidad controlada: {mort:.1f}%'))
+            elif mort > 20:
+                insights.append(('danger', '🔴', f'Mortalidad elevada: {mort:.1f}% - Requiere análisis'))
+    
+    # Estancia promedio
+    datos_est = safe_get_row('PROMEDIO ESTANCIA', meses_filtrados, silent=True)
+    if isinstance(datos_est, pd.Series) and len(datos_est) > 0:
+        prom_est = datos_est[datos_est > 0].mean()
+        if prom_est <= 7:
+            insights.append(('success', '⏱️', f'Estancia promedio óptima: {prom_est:.1f} días'))
+        elif prom_est > 10:
+            insights.append(('warning', '📊', f'Estancia prolongada: {prom_est:.1f} días'))
+    
+    # Infecciones
+    datos_bact = safe_get_row('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', meses_filtrados, silent=True)
+    if isinstance(datos_bact, pd.Series):
+        prom_bact = datos_bact[datos_bact > 0].mean() if len(datos_bact[datos_bact > 0]) > 0 else 0
+        if prom_bact == 0:
+            insights.append(('success', '🛡️', 'Cero bacteriemias asociadas a catéter central'))
+        elif prom_bact < 2:
+            insights.append(('success', '🛡️', f'Tasa de ITS-AC baja: {prom_bact:.2f}'))
+    
+    # Giro cama
+    datos_giro = safe_get_row('GIRO CAMA', meses_filtrados, silent=True)
+    if isinstance(datos_giro, pd.Series) and len(datos_giro) > 0:
+        prom_giro = datos_giro[datos_giro > 0].mean()
+        if prom_giro >= 4:
+            insights.append(('success', '🔄', f'Buen giro de cama: {prom_giro:.1f}'))
+    
+    if not insights:
+        insights.append(('info', '📊', 'Datos en proceso de análisis'))
+    
+    return insights
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 server = app.server
@@ -628,9 +758,55 @@ app.index_string = '''
                 transform: translateY(-2px);
             }
             
+            .btn-presentation {
+                background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+                border: none !important;
+            }
+            
+            .btn-presentation:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4) !important;
+            }
+            
+            .btn-presentation.active {
+                background: linear-gradient(135deg, #22c55e 0%, #10b981 100%) !important;
+            }
+            
             .dashboard-footer {
                 background: transparent;
                 padding: 0 0 20px 0;
+            }
+            
+            /* Modo presentación */
+            .presentation-mode .filtros-section {
+                display: none !important;
+            }
+            
+            .presentation-mode .export-buttons {
+                display: none !important;
+            }
+            
+            .presentation-mode .tab-content {
+                padding: 16px 8px !important;
+            }
+            
+            /* Insight cards */
+            .insight-card {
+                transition: all 0.3s ease;
+                border-radius: 12px;
+            }
+            
+            .insight-card:hover {
+                transform: translateX(4px);
+            }
+            
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+            
+            .pulse-animation {
+                animation: pulse 2s ease-in-out infinite;
             }
             
             /* Scrollbar */
@@ -679,6 +855,7 @@ app.index_string = '''
 '''
 
 app.layout = html.Div([
+    dcc.Store(id='presentation-mode-store', data=False),
     dbc.Container([
         # Header
         html.Div([
@@ -700,8 +877,9 @@ app.layout = html.Div([
                 ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '20px'})
             ]),
             html.Div([
-                dbc.Button("📤 Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
-                dbc.Button("📄 Exportar CSV", id="btn-export-csv", color="primary", size="sm"),
+                dbc.Button("🎯 Modo Presentación", id="btn-presentation-mode", className="btn-presentation me-3", size="sm"),
+                dbc.Button("📤 Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2 export-buttons"),
+                dbc.Button("📄 Exportar CSV", id="btn-export-csv", color="primary", size="sm", className="export-buttons"),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
             ], style={'marginBottom': '24px', 'display': 'flex', 'gap': '12px'})
@@ -736,12 +914,12 @@ app.layout = html.Div([
             ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
         ], className="dashboard-footer", style={'marginTop': '40px', 'paddingBottom': '20px'})
         
-    ], fluid=True, style={'maxWidth': '1440px', 'padding': '32px 24px'})
+    ], fluid=True, style={'maxWidth': '1440px', 'padding': '32px 24px'}, id='main-container')
 ], style={
     'background': 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
     'minHeight': '100vh', 
     'fontFamily': "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
-})
+}, id='app-container')
 
 @app.callback(Output('tab-content', 'children'), Input('tabs', 'active_tab'))
 def render_tab_content(tab):
@@ -780,7 +958,7 @@ def render_tab_content(tab):
                 'background': 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.9) 100%)',
                 'padding': '20px', 'borderRadius': '16px', 'marginBottom': '24px',
                 'border': '1px solid rgba(99,102,241,0.2)'
-            })
+            }, className="filtros-section")
             
             return html.Div([filtros, html.Div(id='resumen-content')])
         except Exception as e:
@@ -813,9 +991,14 @@ def render_tab_content(tab):
             maximo_dias = dias_estancia_validos.max()
             mediana_dias = dias_estancia_validos.median()
             
-            # KPIs principales
+            # Calcular tendencias de mortalidad
+            datos_mort_trend = safe_get_row('% DE MORTALIDAD GENERAL', meses_disponibles, silent=True)
+            trend_mort, trend_val_mort = calcular_tendencia(datos_mort_trend, inverse=True)
+            
+            # KPIs principales con tendencias
             kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Dic", "#e74c3c", "🕊️")
-            kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad_general:.2f}%", "Ene - Dic", "#c0392b", "⚰️")
+            kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad_general:.2f}%", "Ene - Dic", "#c0392b", "⚰️",
+                                   trend=trend_mort, trend_value=trend_val_mort, inverse=True)
             kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Dic", "#34495e", "🦠")
             kpi4 = create_kpi_card("% Mortalidad Trauma", f"{mortalidad_trauma:.2f}%", "Promedio", "#f39c12", "🚑")
             
@@ -954,9 +1137,20 @@ def render_tab_content(tab):
             if pd.isna(giro_cama): giro_cama = 0
             if pd.isna(total_dias): total_dias = 0
             if pd.isna(capacidad): capacidad = 0
+            # Calcular tendencias para gestión
+            trend_est, trend_val_est = calcular_tendencia(datos_estancia, inverse=True)
+            trend_giro, trend_val_giro = calcular_tendencia(datos_giro)
             
-            kpi1 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50", "⏱️")
-            kpi2 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", "Promedio", "#27ae60", "🔄")
+            # Tendencias de infecciones
+            datos_bact = safe_get_row('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', meses_disponibles, silent=True)
+            datos_nav = safe_get_row('TASA NEUMONÍA ASOCIADA A VENTILADOR', meses_disponibles, silent=True)
+            trend_bact, trend_val_bact = calcular_tendencia(datos_bact, inverse=True)
+            trend_nav, trend_val_nav = calcular_tendencia(datos_nav, inverse=True)
+            
+            kpi1 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50", "⏱️",
+                                   trend=trend_est, trend_value=trend_val_est, inverse=True)
+            kpi2 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", "Promedio", "#27ae60", "🔄",
+                                   trend=trend_giro, trend_value=trend_val_giro)
             kpi3 = create_kpi_card("Total Días Estancia", f"{int(total_dias)}", "Ene - Dic", "#16a085", "📅")
             kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12", "🛏️")
             
@@ -1153,11 +1347,59 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         if pd.isna(giro_cama): giro_cama = 0
         mortalidad = (total_fallecidos / total_egresos * 100)
 
+        # Calcular tendencias
+        trend_ocup, trend_val_ocup = calcular_tendencia(datos_ocupacional)
+        trend_est, trend_val_est = calcular_tendencia(datos_estancia, inverse=True)  # Menor estancia es mejor
+        trend_giro, trend_val_giro = calcular_tendencia(datos_giro)
+        
+        # KPIs con tendencias
         kpi_ingresos = create_kpi_card("Total Ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db", "📥")
-        kpi1 = create_kpi_card("% Ocupación Promedio", f"{promedio_ocupacional:.2f}%", rango_texto, "#2c3e50", "🏥")
+        kpi1 = create_kpi_card("% Ocupación Promedio", f"{promedio_ocupacional:.2f}%", rango_texto, "#2c3e50", "🏥", 
+                               trend=trend_ocup, trend_value=trend_val_ocup)
         kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad:.2f}%", f"Total {rango_texto}", "#e74c3c", "💔")
-        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60", "⏱️")
-        kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄")
+        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60", "⏱️",
+                               trend=trend_est, trend_value=trend_val_est, inverse=True)
+        kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄",
+                               trend=trend_giro, trend_value=trend_val_giro)
+        
+        # Generar resumen ejecutivo
+        insights = crear_resumen_ejecutivo(meses_filtrados)
+        
+        # Crear tarjetas de insights
+        insight_cards = []
+        color_map = {'success': '#22c55e', 'warning': '#f59e0b', 'danger': '#ef4444', 'info': '#6366f1'}
+        for tipo, icono, texto in insights:
+            color = color_map.get(tipo, '#6366f1')
+            insight_cards.append(
+                html.Div([
+                    html.Span(icono, style={'fontSize': '20px', 'marginRight': '12px'}),
+                    html.Span(texto, style={'color': '#f1f5f9', 'fontSize': '14px', 'fontWeight': '500'})
+                ], className="insight-card", style={
+                    'background': f'linear-gradient(135deg, {color}15 0%, {color}08 100%)',
+                    'border': f'1px solid {color}40',
+                    'borderLeft': f'4px solid {color}',
+                    'padding': '14px 18px',
+                    'borderRadius': '10px',
+                    'marginBottom': '10px',
+                    'display': 'flex',
+                    'alignItems': 'center'
+                })
+            )
+        
+        resumen_ejecutivo = html.Div([
+            html.Div([
+                html.H6("📋 Resumen Ejecutivo", style={
+                    'color': '#f1f5f9', 'fontWeight': '700', 'marginBottom': '16px',
+                    'fontSize': '16px', 'display': 'flex', 'alignItems': 'center'
+                }),
+                html.Div(insight_cards)
+            ], style={
+                'background': 'linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.95) 100%)',
+                'padding': '20px', 'borderRadius': '16px',
+                'border': '1px solid rgba(99,102,241,0.25)',
+                'boxShadow': '0 4px 20px rgba(0,0,0,0.2)'
+            })
+        ], className="mb-4")
         
         # EPS
         total_famisanar = safe_get_row('FAMISANAR', suma_col, silent=True)
@@ -1231,6 +1473,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9'))
 
         return meses_filtrados, html.Div([
+            resumen_ejecutivo,
             dbc.Row([dbc.Col(kpi_ingresos, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi1, xs=12, sm=6, md=True, className="mb-3"),
                      dbc.Col(kpi2, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi3, xs=12, sm=6, md=True, className="mb-3"),
                      dbc.Col(kpi4, xs=12, sm=6, md=True, className="mb-3")], className="mb-3 g-3"),
@@ -1243,6 +1486,20 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         ])
     except Exception as e:
         return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
+
+
+# --- CALLBACK MODO PRESENTACIÓN ---
+@app.callback(
+    [Output('app-container', 'className'),
+     Output('btn-presentation-mode', 'children'),
+     Output('btn-presentation-mode', 'className')],
+    Input('btn-presentation-mode', 'n_clicks'),
+    prevent_initial_call=True
+)
+def toggle_presentation_mode(n_clicks):
+    if n_clicks and n_clicks % 2 == 1:
+        return 'presentation-mode', '✅ Salir Presentación', 'btn-presentation active me-3'
+    return '', '🎯 Modo Presentación', 'btn-presentation me-3'
 
 
 # --- FUNCIÓN PARA GENERAR DATOS DE EXPORTACIÓN ---
