@@ -635,8 +635,9 @@ app.index_string = '''
                 background: transparent;
                 border-radius: 16px;
                 padding: 24px;
+                padding-top: 8px;
                 border: none;
-                margin-top: 12px;
+                margin-top: 0;
             }
             
             /* Dropdown styles */
@@ -1172,22 +1173,27 @@ def render_tab_content(tab):
                 )
 
             return html.Div([
-                html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-3"),
-                dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_estancia), xs=12, md=4), dbc.Col(dcc.Graph(figure=fig_giro), xs=12, md=4), dbc.Col(dcc.Graph(figure=fig_promedio_vm), xs=12, md=4)]),
-                html.H5("Indicadores de Calidad e Infecciones", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '40px', 'marginBottom': '20px', 'textAlign': 'center'}),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_bacteriemia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_nav), xs=12, md=6)]),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_istu), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_lesiones), xs=12, md=6)], className="mt-3"),
-                html.H5("Gérmenes Aislados y Eventos Adversos", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '40px', 'marginBottom': '20px', 'textAlign': 'center'}),
+                html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-4"),
+                dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-5 g-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_estancia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_giro), xs=12, md=6)], className="mb-4 g-4"),
+                dbc.Row([
+                    dbc.Col(xs=12, md=3),
+                    dbc.Col(dcc.Graph(figure=fig_promedio_vm), xs=12, md=6),
+                    dbc.Col(xs=12, md=3)
+                ], className="mb-5", justify="center"),
+                html.H5("Indicadores de Calidad e Infecciones", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_bacteriemia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_nav), xs=12, md=6)], className="mb-4 g-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_istu), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_lesiones), xs=12, md=6)], className="mb-5 g-4"),
+                html.H5("Gérmenes Aislados y Eventos Adversos", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
                 dbc.Row([
                     dbc.Col(xs=12, md=2),
                     dbc.Col(dcc.Graph(figure=fig_germenes), xs=12, md=8),
                     dbc.Col(xs=12, md=2)
-                ], className="mb-4", justify="center"),
+                ], className="mb-5", justify="center"),
                 dbc.Row([
                     dbc.Col(dcc.Graph(figure=fig_eventos), xs=12)
-                ]),
-                html.H5("GRAM - SOT", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '40px', 'marginBottom': '20px', 'textAlign': 'center'}),
+                ], className="mb-5"),
+                html.H5("GRAM - SOT", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
                 dbc.Row([
                     dbc.Col(xs=12, md=2),
                     dbc.Col(dcc.Graph(figure=fig_gram_sot), xs=12, md=8),
