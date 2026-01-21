@@ -840,6 +840,12 @@ app.layout = html.Div([
         
         # Footer
         html.Div([
+            html.Hr(style={
+                'borderColor': '#334155',
+                'borderWidth': '1px',
+                'margin': '0 0 20px 0',
+                'opacity': '0.5'
+            }),
             html.Div([
                 html.Div([
                     html.P("Hospital Infantil Universitario de San José", style={
@@ -855,7 +861,7 @@ app.layout = html.Div([
                     })
                 ], style={'textAlign': 'right'})
             ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
-        ], className="dashboard-footer", style={'marginTop': '40px', 'paddingBottom': '20px'})
+        ], className="dashboard-footer", style={'marginTop': '40px', 'paddingBottom': '20px', 'paddingLeft': '24px', 'paddingRight': '24px'})
         
     ], fluid=True, style={'maxWidth': '1440px', 'padding': '32px 0'}, id='main-container')
 ], style={
