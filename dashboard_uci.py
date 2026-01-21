@@ -456,40 +456,45 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
     if trend and trend_value:
         if trend == 'up':
             trend_color = '#ef4444' if inverse else '#22c55e'  # Rojo si inverse, verde si no
-            trend_icon = '↑'
-            trend_texto = 'Subió' if not inverse else 'Subió'
+            trend_icon = '▲'
         elif trend == 'down':
             trend_color = '#22c55e' if inverse else '#ef4444'  # Verde si inverse, rojo si no
-            trend_icon = '↓'
-            trend_texto = 'Bajó'
+            trend_icon = '▼'
         else:
             trend_color = '#94a3b8'
-            trend_icon = '→'
-            trend_texto = 'Estable'
+            trend_icon = '●'
         
         trend_element = html.Div([
+            html.Div('Variación', style={
+                'fontSize': '10px',
+                'color': '#94a3b8',
+                'fontWeight': '500',
+                'marginBottom': '2px',
+                'textTransform': 'uppercase',
+                'letterSpacing': '0.5px'
+            }),
+            html.Div(trend_value, style={
+                'fontSize': '16px', 
+                'fontWeight': '700',
+                'color': trend_color,
+                'marginBottom': '4px'
+            }),
             html.Div([
-                html.Span(trend_icon, style={'marginRight': '4px', 'fontSize': '14px'}),
-                html.Span(trend_value, style={'fontSize': '12px', 'fontWeight': '600'})
+                html.Span(trend_icon, style={'marginRight': '4px', 'fontSize': '10px'}),
+                html.Span('Respecto a meses anteriores', style={'fontSize': '9px'})
             ], style={
+                'color': '#64748b',
                 'display': 'flex',
                 'alignItems': 'center',
                 'justifyContent': 'center',
-            }),
-            html.Span(f'{trend_texto} vs meses anteriores', style={
-                'fontSize': '9px', 
-                'color': '#94a3b8',
-                'marginTop': '2px',
-                'display': 'block'
             })
         ], style={
-            'color': trend_color,
             'textAlign': 'center',
             'marginTop': '8px',
-            'padding': '6px 10px',
-            'borderRadius': '20px',
-            'background': f'{trend_color}15',
-            'border': f'1px solid {trend_color}30'
+            'padding': '8px 12px',
+            'borderRadius': '12px',
+            'background': f'{trend_color}10',
+            'border': f'1px solid {trend_color}25'
         })
     
     card_content = [
