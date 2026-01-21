@@ -457,23 +457,36 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
         if trend == 'up':
             trend_color = '#ef4444' if inverse else '#22c55e'  # Rojo si inverse, verde si no
             trend_icon = '↑'
+            trend_texto = 'Subió' if not inverse else 'Subió'
         elif trend == 'down':
             trend_color = '#22c55e' if inverse else '#ef4444'  # Verde si inverse, rojo si no
             trend_icon = '↓'
+            trend_texto = 'Bajó'
         else:
             trend_color = '#94a3b8'
             trend_icon = '→'
+            trend_texto = 'Estable'
         
         trend_element = html.Div([
-            html.Span(trend_icon, style={'marginRight': '4px', 'fontSize': '14px'}),
-            html.Span(trend_value, style={'fontSize': '12px', 'fontWeight': '600'})
+            html.Div([
+                html.Span(trend_icon, style={'marginRight': '4px', 'fontSize': '14px'}),
+                html.Span(trend_value, style={'fontSize': '12px', 'fontWeight': '600'})
+            ], style={
+                'display': 'flex',
+                'alignItems': 'center',
+                'justifyContent': 'center',
+            }),
+            html.Span(f'{trend_texto} vs meses anteriores', style={
+                'fontSize': '9px', 
+                'color': '#94a3b8',
+                'marginTop': '2px',
+                'display': 'block'
+            })
         ], style={
             'color': trend_color,
-            'display': 'flex',
-            'alignItems': 'center',
-            'justifyContent': 'center',
+            'textAlign': 'center',
             'marginTop': '8px',
-            'padding': '4px 10px',
+            'padding': '6px 10px',
             'borderRadius': '20px',
             'background': f'{trend_color}15',
             'border': f'1px solid {trend_color}30'
