@@ -6,4 +6,4 @@ services:
     startCommand: gunicorn dashboard_uci:server --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
-        value: "3.11"
+        value: "3.14"
