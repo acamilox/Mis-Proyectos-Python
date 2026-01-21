@@ -310,6 +310,13 @@ def capitalizar_texto(texto):
         return texto
     return texto[0].upper() + texto[1:].lower() if len(texto) > 1 else texto.upper()
 
+def formato_porcentaje(valor, con_simbolo=True):
+    """Formatea porcentaje: sin decimales si es entero, con 1 decimal si no."""
+    simbolo = "%" if con_simbolo else ""
+    if valor == int(valor):
+        return f"{int(valor)}{simbolo}"
+    return f"{valor:.1f}{simbolo}"
+
 def safe_get_row(row_name, columns, silent=False):
     try:
         matching_rows = [idx for idx in df.index if row_name.lower() in str(idx).lower()]
@@ -558,6 +565,12 @@ def calcular_tendencia(datos, inverse=False):
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 server = app.server
+
+# Configuración para gráficos estáticos (sin zoom, pan, etc.)
+GRAPH_CONFIG = {
+    'staticPlot': True,
+    'displayModeBar': False
+}
 
 
 # CSS personalizado
@@ -911,10 +924,10 @@ def render_tab_content(tab):
             
             # KPIs principales con tendencias
             kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Dic", "#e74c3c", "🕊️")
-            kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad_general:.2f}%", "Ene - Dic", "#c0392b", "⚰️",
+            kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad_general), "Ene - Dic", "#c0392b", "⚰️",
                                    trend=trend_mort, trend_value=trend_val_mort, inverse=True)
             kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Dic", "#34495e", "🦠")
-            kpi4 = create_kpi_card("% Mortalidad Trauma", f"{mortalidad_trauma:.2f}%", "Promedio", "#f39c12", "🚑")
+            kpi4 = create_kpi_card("% Mortalidad Trauma", formato_porcentaje(mortalidad_trauma), "Promedio", "#f39c12", "🚑")
             
             # KPIs de días de estancia fallecidos
             kpi_prom_dias = create_kpi_card("Promedio Días Estancia", f"{promedio_dias:.1f}", "Fallecidos", "#9b59b6", "📊")
@@ -984,10 +997,10 @@ def render_tab_content(tab):
                 dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=6), dbc.Col(kpi_mediana_dias, xs=12, md=6)], className="mb-4"),
                 dbc.Row([
                     dbc.Col(xs=12, md=2),
-                    dbc.Col(dcc.Graph(figure=fig_mortalidad), xs=12, md=8),
+                    dbc.Col(dcc.Graph(figure=fig_mortalidad, config=GRAPH_CONFIG), xs=12, md=8),
                     dbc.Col(xs=12, md=2)
                 ], className="mb-4", justify="center"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_trauma), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_edad_sexo), xs=12, md=6)], className="mt-3")
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_trauma, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_edad_sexo, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-3")
             ])
         except Exception as e:
             return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
@@ -1016,10 +1029,10 @@ def render_tab_content(tab):
             pct_neuro = (total_neuro / total_especialidades * 100)
             pct_neurologia = (total_neurologia / total_especialidades * 100)
             
-            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{pct_medicina:.1f}% del total", "#3498db", "🩺")
-            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{pct_cirugia:.1f}% del total", "#27ae60", "💉")
-            kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", f"{pct_neuro:.1f}% del total", "#16a085", "🧠")
-            kpi4 = create_kpi_card("Neurología", f"{int(total_neurologia)}", f"{pct_neurologia:.1f}% del total", "#9b59b6", "🧬")
+            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{formato_porcentaje(pct_medicina, False)}% del total", "#3498db", "🩺")
+            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{formato_porcentaje(pct_cirugia, False)}% del total", "#27ae60", "💉")
+            kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", f"{formato_porcentaje(pct_neuro, False)}% del total", "#16a085", "🧠")
+            kpi4 = create_kpi_card("Neurología", f"{int(total_neurologia)}", f"{formato_porcentaje(pct_neurologia, False)}% del total", "#9b59b6", "🧬")
             
             fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina Interna', color='#3498db', silent=True, decimals=0)
             fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía General', color='#27ae60', silent=True, decimals=0)
@@ -1029,8 +1042,8 @@ def render_tab_content(tab):
             return html.Div([
                 html.H5("Principales Especialidades", style={'color': '#ffffff', 'fontWeight': '600', 'marginBottom': '20px'}),
                 dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_medicina), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_cirugia), xs=12, md=6)], className="mb-4"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_neuro), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_neurologia), xs=12, md=6)])
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_medicina, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_cirugia, config=GRAPH_CONFIG), xs=12, md=6)], className="mb-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_neuro, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_neurologia, config=GRAPH_CONFIG), xs=12, md=6)])
             ])
         except Exception as e:
             return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
@@ -1175,28 +1188,28 @@ def render_tab_content(tab):
             return html.Div([
                 html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-4"),
                 dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-5 g-4"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_estancia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_giro), xs=12, md=6)], className="mb-4 g-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_estancia, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_giro, config=GRAPH_CONFIG), xs=12, md=6)], className="mb-4 g-4"),
                 dbc.Row([
                     dbc.Col(xs=12, md=3),
-                    dbc.Col(dcc.Graph(figure=fig_promedio_vm), xs=12, md=6),
+                    dbc.Col(dcc.Graph(figure=fig_promedio_vm, config=GRAPH_CONFIG), xs=12, md=6),
                     dbc.Col(xs=12, md=3)
                 ], className="mb-5", justify="center"),
                 html.H5("Indicadores de Calidad e Infecciones", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_bacteriemia), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_nav), xs=12, md=6)], className="mb-4 g-4"),
-                dbc.Row([dbc.Col(dcc.Graph(figure=fig_istu), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_lesiones), xs=12, md=6)], className="mb-5 g-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_nav, config=GRAPH_CONFIG), xs=12, md=6)], className="mb-4 g-4"),
+                dbc.Row([dbc.Col(dcc.Graph(figure=fig_istu, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_lesiones, config=GRAPH_CONFIG), xs=12, md=6)], className="mb-5 g-4"),
                 html.H5("Gérmenes Aislados y Eventos Adversos", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
                 dbc.Row([
                     dbc.Col(xs=12, md=2),
-                    dbc.Col(dcc.Graph(figure=fig_germenes), xs=12, md=8),
+                    dbc.Col(dcc.Graph(figure=fig_germenes, config=GRAPH_CONFIG), xs=12, md=8),
                     dbc.Col(xs=12, md=2)
                 ], className="mb-5", justify="center"),
                 dbc.Row([
-                    dbc.Col(dcc.Graph(figure=fig_eventos), xs=12)
+                    dbc.Col(dcc.Graph(figure=fig_eventos, config=GRAPH_CONFIG), xs=12)
                 ], className="mb-5"),
                 html.H5("GRAM - SOT", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
                 dbc.Row([
                     dbc.Col(xs=12, md=2),
-                    dbc.Col(dcc.Graph(figure=fig_gram_sot), xs=12, md=8),
+                    dbc.Col(dcc.Graph(figure=fig_gram_sot, config=GRAPH_CONFIG), xs=12, md=8),
                     dbc.Col(xs=12, md=2)
                 ], justify="center")
             ])
@@ -1273,9 +1286,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         
         # KPIs con tendencias
         kpi_ingresos = create_kpi_card("Total Ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db", "📥")
-        kpi1 = create_kpi_card("% Ocupación Promedio", f"{promedio_ocupacional:.2f}%", rango_texto, "#2c3e50", "🏥", 
+        kpi1 = create_kpi_card("% Ocupación Promedio", formato_porcentaje(promedio_ocupacional), rango_texto, "#2c3e50", "🏥", 
                                trend=trend_ocup, trend_value=trend_val_ocup)
-        kpi2 = create_kpi_card("% Mortalidad General", f"{mortalidad:.2f}%", f"Total {rango_texto}", "#e74c3c", "💔")
+        kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad), f"Total {rango_texto}", "#e74c3c", "💔")
         kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60", "⏱️",
                                trend=trend_est, trend_value=trend_val_est, inverse=True)
         kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄",
@@ -1294,9 +1307,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         pct_compensar = (total_compensar / total_ingresos_anual * 100)
         pct_salud_total = (total_salud_total / total_ingresos_anual * 100)
         
-        kpi_eps1 = create_kpi_card("Famisanar", f"{int(total_famisanar)}", f"{pct_famisanar:.1f}% del total", "#10b981", "🏢")
-        kpi_eps2 = create_kpi_card("Compensar", f"{int(total_compensar)}", f"{pct_compensar:.1f}% del total", "#f59e0b", "🏢")
-        kpi_eps3 = create_kpi_card("Salud Total", f"{int(total_salud_total)}", f"{pct_salud_total:.1f}% del total", "#ef4444", "🏢")
+        kpi_eps1 = create_kpi_card("Famisanar", f"{int(total_famisanar)}", f"{formato_porcentaje(pct_famisanar, False)}% del total", "#10b981", "🏢")
+        kpi_eps2 = create_kpi_card("Compensar", f"{int(total_compensar)}", f"{formato_porcentaje(pct_compensar, False)}% del total", "#f59e0b", "🏢")
+        kpi_eps3 = create_kpi_card("Salud Total", f"{int(total_salud_total)}", f"{formato_porcentaje(pct_salud_total, False)}% del total", "#ef4444", "🏢")
 
         # Gráficos
         datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados)
@@ -1359,9 +1372,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             html.H6("Principales EPS", style={'color': '#cbd5e1', 'fontWeight': '600', 'marginBottom': '15px', 'marginTop': '10px'}),
             dbc.Row([dbc.Col(kpi_eps1, xs=12, sm=6, md=4, className="mb-3"), dbc.Col(kpi_eps2, xs=12, sm=6, md=4, className="mb-3"),
                      dbc.Col(kpi_eps3, xs=12, sm=6, md=4, className="mb-3")], className="mb-4 g-3"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocupacional), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_ingresos_egresos), xs=12, md=6)]),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocupacional, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_ingresos_egresos, config=GRAPH_CONFIG), xs=12, md=6)]),
             html.H6("Morbilidad", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '20px', 'textAlign': 'center'}),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morbilidad_total), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_genero), xs=12, md=6)])
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morbilidad_total, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_genero, config=GRAPH_CONFIG), xs=12, md=6)])
         ])
     except Exception as e:
         return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
