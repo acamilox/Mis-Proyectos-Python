@@ -786,6 +786,100 @@ app.index_string = '''
                 color: #cbd5e1 !important;
                 -webkit-text-fill-color: #cbd5e1 !important;
             }
+            
+            /* ========== RESPONSIVE MOBILE ========== */
+            @media (max-width: 768px) {
+                /* Header */
+                h1 {
+                    font-size: 16px !important;
+                }
+                
+                /* KPI Cards */
+                .kpi-card {
+                    min-height: 180px !important;
+                    margin-bottom: 12px;
+                }
+                
+                .kpi-card h2 {
+                    font-size: 22px !important;
+                }
+                
+                .kpi-card h6 {
+                    font-size: 10px !important;
+                }
+                
+                /* Tabs */
+                .nav-tabs .nav-link {
+                    padding: 8px 12px !important;
+                    font-size: 12px !important;
+                }
+                
+                .nav-tabs {
+                    flex-wrap: nowrap;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+                
+                /* Tab content */
+                .tab-content {
+                    padding: 12px 8px !important;
+                }
+                
+                /* Graphs */
+                .js-plotly-plot {
+                    margin-bottom: 16px;
+                }
+                
+                /* Footer */
+                .dashboard-footer {
+                    padding-left: 12px !important;
+                    padding-right: 12px !important;
+                }
+                
+                .dashboard-footer p {
+                    font-size: 11px !important;
+                }
+                
+                /* Filtros */
+                .filtros-section {
+                    padding: 12px !important;
+                }
+                
+                /* Buttons */
+                .btn {
+                    padding: 6px 12px !important;
+                    font-size: 12px !important;
+                }
+                
+                /* Container padding */
+                .container-fluid {
+                    padding-left: 8px !important;
+                    padding-right: 8px !important;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                h1 {
+                    font-size: 14px !important;
+                }
+                
+                .kpi-card h2 {
+                    font-size: 20px !important;
+                }
+                
+                .nav-tabs .nav-link {
+                    padding: 6px 10px !important;
+                    font-size: 11px !important;
+                }
+                
+                .logo-img {
+                    height: 40px !important;
+                }
+                
+                .header-subtitle {
+                    display: none;
+                }
+            }
         </style>
     </head>
     <body>
@@ -807,8 +901,9 @@ app.layout = html.Div([
                 html.Div([
                     html.Img(src='/assets/Logo.png', style={
                         'height': '70px', 
-                        'filter': 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
-                    }),
+                        'filter': 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
+                        'maxHeight': '50px'
+                    }, className="logo-img"),
                     html.Div([
                         html.H1("DASHBOARD UCI ADULTOS 2025", style={
                             'color': '#f8fafc', 'fontWeight': '700', 'marginBottom': '4px',
@@ -816,16 +911,16 @@ app.layout = html.Div([
                         }),
                         html.P("Sistema de Monitoreo y Análisis de Indicadores", style={
                             'color': '#64748b', 'fontSize': '13px', 'marginBottom': '0', 'fontWeight': '500'
-                        })
+                        }, className="header-subtitle")
                     ], style={'marginLeft': '20px'})
-                ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '20px'})
+                ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '20px', 'flexWrap': 'wrap', 'gap': '10px'})
             ]),
             html.Div([
                 dbc.Button("📤 Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
                 dbc.Button("📄 Exportar CSV", id="btn-export-csv", color="primary", size="sm"),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
-            ], style={'marginBottom': '24px', 'display': 'flex', 'gap': '12px'})
+            ], style={'marginBottom': '24px', 'display': 'flex', 'gap': '12px', 'flexWrap': 'wrap'})
         ], className="fade-in", style={'padding': '0 24px'}),
         
         # Tabs
