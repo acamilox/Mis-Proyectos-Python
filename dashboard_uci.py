@@ -215,7 +215,9 @@ try:
         e_lower = e.lower()
         if 'autoextubación' in e_lower or 'autoextubacion' in e_lower:
             return 'Autoextubación'
-        if 'lpp' in e_lower or 'lesion' in e_lower and 'presion' in e_lower:
+        if 'lpp' in e_lower and 'dispositivo' in e_lower:
+            return 'LPP por dispositivo médico'
+        if 'lpp' in e_lower or ('lesion' in e_lower and 'presion' in e_lower):
             return 'LPP (Lesiones por Presión)'
         if 'desplazamiento' in e_lower:
             return 'Desplazamiento de dispositivos'
@@ -435,6 +437,42 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
                    bgcolor='rgba(15,23,42,0.9)', font={'color': '#f1f5f9', 'size': 11}, bordercolor='#334155', borderwidth=1),
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9', bordercolor='#6366f1'),
         bargap=0.2
+    )
+    return fig
+
+def create_donut_chart(labels, values, title, colors=None):
+    """Crea un gráfico de dona (donut chart)"""
+    if colors is None:
+        colors = ['#6366f1', '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#64748b']
+    
+    fig = go.Figure(data=[go.Pie(
+        labels=labels,
+        values=values,
+        hole=0.5,
+        marker=dict(colors=colors[:len(labels)], line=dict(color='#0f172a', width=2)),
+        textinfo='percent',
+        textfont=dict(size=12, color='#f1f5f9'),
+        hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>'
+    )])
+    
+    fig.update_layout(
+        title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
+        plot_bgcolor='rgba(15,23,42,0.6)',
+        paper_bgcolor='rgba(30,41,59,0.8)',
+        legend=dict(
+            orientation="h", 
+            yanchor="top", 
+            y=-0.1, 
+            xanchor="center", 
+            x=0.5,
+            bgcolor='rgba(15,23,42,0.9)', 
+            font={'color': '#f1f5f9', 'size': 10}, 
+            bordercolor='#334155', 
+            borderwidth=1
+        ),
+        margin=dict(l=30, r=30, t=50, b=80),
+        height=400,
+        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
 
@@ -1024,17 +1062,22 @@ def render_tab_content(tab):
             suma_col = [c for c in df.columns if str(c).strip() in ['∑', 'SUMA']]
             suma_col = suma_col[0] if suma_col else '∑'
             
-            # Usar el conteo real de la hoja MORTALIDAD (más preciso)
-            total_fallecidos = len(df_fallecidos) if not df_fallecidos.empty else 0
+            # Usar el valor de la hoja ESTADISTICA (dato oficial)
+            total_fallecidos = safe_get_row('FALLECIDOS', suma_col)
+            if pd.isna(total_fallecidos): total_fallecidos = len(df_fallecidos) if not df_fallecidos.empty else 0
             fallecidos_covid = safe_get_row('FALLECIDOS COVID-19', suma_col)
             total_egresos = safe_get_row('NÚMERO DE EGRESOS DEL MES', suma_col)
             
             if pd.isna(fallecidos_covid): fallecidos_covid = 0
             if pd.isna(total_egresos) or total_egresos == 0: total_egresos = 1
             
-            mortalidad_general = (total_fallecidos / total_egresos * 100)
-            datos_mortalidad_trauma = safe_get_row('% mortalidad en trauma', meses_disponibles, silent=True)
-            mortalidad_trauma = datos_mortalidad_trauma.sum() / 10 if isinstance(datos_mortalidad_trauma, pd.Series) else 0
+            # Usar el promedio de mortalidad del Excel
+            mortalidad_general = safe_get_row('% DE MORTALIDAD GENERAL', 'PROMEDIO', silent=True)
+            if pd.isna(mortalidad_general): mortalidad_general = (total_fallecidos / total_egresos * 100)
+            
+            # Usar el promedio de mortalidad trauma del Excel
+            mortalidad_trauma = safe_get_row('% mortalidad en trauma', 'PROMEDIO', silent=True)
+            if pd.isna(mortalidad_trauma): mortalidad_trauma = 0
             
             # Calcular estadísticas de días de estancia de fallecidos
             dias_estancia_validos = df_fallecidos['Dias_Estancia'].dropna() if not df_fallecidos.empty else pd.Series([0])
@@ -1046,14 +1089,9 @@ def render_tab_content(tab):
             maximo_dias = dias_estancia_validos.max()
             mediana_dias = dias_estancia_validos.median()
             
-            # Calcular tendencias de mortalidad
-            datos_mort_trend = safe_get_row('% DE MORTALIDAD GENERAL', meses_disponibles, silent=True)
-            trend_mort, trend_val_mort = calcular_tendencia(datos_mort_trend, inverse=True)
-            
-            # KPIs principales con tendencias
+            # KPIs principales
             kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Dic", "#e74c3c", "🕊️")
-            kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad_general), "Ene - Dic", "#c0392b", "⚰️",
-                                   trend=trend_mort, trend_value=trend_val_mort, inverse=True)
+            kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad_general), "Ene - Dic", "#c0392b", "⚰️")
             kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Dic", "#34495e", "🦠")
             kpi4 = create_kpi_card("% Mortalidad Trauma", formato_porcentaje(mortalidad_trauma), "Promedio", "#f39c12", "🚑")
             
@@ -1191,25 +1229,6 @@ def render_tab_content(tab):
             if pd.isna(giro_cama): giro_cama = 0
             if pd.isna(total_dias): total_dias = 0
             if pd.isna(capacidad): capacidad = 0
-            # Calcular tendencias para gestión
-            trend_est, trend_val_est = calcular_tendencia(datos_estancia, inverse=True)
-            trend_giro, trend_val_giro = calcular_tendencia(datos_giro)
-            
-            # Tendencias de infecciones
-            datos_bact = safe_get_row('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', meses_disponibles, silent=True)
-            datos_nav = safe_get_row('TASA NEUMONÍA ASOCIADA A VENTILADOR', meses_disponibles, silent=True)
-            trend_bact, trend_val_bact = calcular_tendencia(datos_bact, inverse=True)
-            trend_nav, trend_val_nav = calcular_tendencia(datos_nav, inverse=True)
-            
-            kpi1 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50", "⏱️",
-                                   trend=trend_est, trend_value=trend_val_est, inverse=True)
-            kpi2 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", "Promedio", "#27ae60", "🔄",
-                                   trend=trend_giro, trend_value=trend_val_giro)
-            kpi3 = create_kpi_card("Total Días Estancia", f"{int(total_dias)}", "Ene - Dic", "#16a085", "📅")
-            kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12", "🛏️")
-            
-            fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=2)
-            fig_giro = create_line_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
             
             # Gráfico Promedio de Días de VM (días ventilador / pacientes ventilados)
             datos_dias_vm = safe_get_row('DIAS VENTILADOR', meses_disponibles, silent=True)
@@ -1224,6 +1243,19 @@ def render_tab_content(tab):
                     promedio_vm.append(round(dias / pac, 2))
                 else:
                     promedio_vm.append(0)
+            
+            # Calcular promedio general de días VM
+            promedio_vm_validos = [v for v in promedio_vm if v > 0]
+            promedio_vm_general = sum(promedio_vm_validos) / len(promedio_vm_validos) if promedio_vm_validos else 0
+            
+            kpi1 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50", "⏱️")
+            kpi2 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", "Promedio", "#27ae60", "🔄")
+            kpi3 = create_kpi_card("Total Días Estancia", f"{int(total_dias)}", "Ene - Dic", "#16a085", "📅")
+            kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12", "🛏️")
+            kpi5 = create_kpi_card("Promedio Días VM", f"{promedio_vm_general:.2f}", "Ventilación Mecánica", "#9b59b6", "🫁")
+            
+            fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=2)
+            fig_giro = create_bar_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
             
             fig_promedio_vm = go.Figure()
             fig_promedio_vm.add_trace(go.Scatter(
@@ -1247,18 +1279,16 @@ def render_tab_content(tab):
             fig_istu = create_line_chart('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa de ISTU AC', color='#f39c12', silent=True, decimals=2)
             fig_lesiones = create_line_chart('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión', color='#9b59b6', silent=True, decimals=2)
 
-            # Gráfico de Gérmenes Aislados (centrado)
+            # Gráfico de Gérmenes Aislados (donut)
             fig_germenes = go.Figure()
             if not df_germenes.empty:
                 colors_germenes = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#f97316', '#64748b', '#14b8a6', '#dc2626', '#22c55e', '#a855f7', '#3b82f6', '#ea580c', '#71717a']
-                fig_germenes = go.Figure(data=[go.Bar(x=df_germenes['Germen'], y=df_germenes['Cantidad'],
-                    marker_color=colors_germenes[:len(df_germenes)], hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>')])
-                fig_germenes.update_layout(title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
-                    plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)', 
-                    xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'tickangle': -45, 'title': ''},
-                    yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'dtick': 1, 'title': ''}, 
-                    margin=dict(l=50, r=50, t=50, b=120),
-                    height=400, hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9'))
+                fig_germenes = create_donut_chart(
+                    labels=df_germenes['Germen'].tolist(),
+                    values=df_germenes['Cantidad'].tolist(),
+                    title='Gérmenes Aislados (IAAS)',
+                    colors=colors_germenes
+                )
             
             # Gráfico de Eventos Adversos - Barras horizontales
             fig_eventos = go.Figure()
@@ -1284,8 +1314,8 @@ def render_tab_content(tab):
                 title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)',
                 xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'dtick': 2, 'range': [0, max_val + 3], 'title': ''},
-                yaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'color': '#94a3b8', 'tickfont': {'size': 11}, 'title': ''},
-                margin=dict(l=200, r=50, t=50, b=30),
+                yaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'color': '#94a3b8', 'tickfont': {'size': 11}, 'title': '', 'automargin': True},
+                margin=dict(l=250, r=50, t=50, b=30),
                 height=450,
                 hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9', font_size=12),
                 bargap=0.25
@@ -1314,7 +1344,7 @@ def render_tab_content(tab):
 
             return html.Div([
                 html.H5("Indicadores de Gestión", style={'color': '#ffffff', 'fontWeight': '600'}, className="mb-4"),
-                dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-5 g-4"),
+                dbc.Row([dbc.Col(kpi1, xs=12, md=True), dbc.Col(kpi2, xs=12, md=True), dbc.Col(kpi3, xs=12, md=True), dbc.Col(kpi4, xs=12, md=True), dbc.Col(kpi5, xs=12, md=True)], className="mb-5 g-4"),
                 dbc.Row([dbc.Col(dcc.Graph(figure=fig_estancia, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_giro, config=GRAPH_CONFIG), xs=12, md=6)], className="mb-4 g-4"),
                 dbc.Row([
                     dbc.Col(xs=12, md=3),
@@ -1332,13 +1362,7 @@ def render_tab_content(tab):
                 ], className="mb-5", justify="center"),
                 dbc.Row([
                     dbc.Col(dcc.Graph(figure=fig_eventos, config=GRAPH_CONFIG), xs=12)
-                ], className="mb-5"),
-                html.H5("GRAM - SOT", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
-                dbc.Row([
-                    dbc.Col(xs=12, md=2),
-                    dbc.Col(dcc.Graph(figure=fig_gram_sot, config=GRAPH_CONFIG), xs=12, md=8),
-                    dbc.Col(xs=12, md=2)
-                ], justify="center")
+                ])
             ])
         except Exception as e:
             return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
@@ -1404,22 +1428,17 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         if pd.isna(total_egresos) or total_egresos == 0: total_egresos = 1
         if pd.isna(promedio_estancia): promedio_estancia = 0
         if pd.isna(giro_cama): giro_cama = 0
-        mortalidad = (total_fallecidos / total_egresos * 100)
-
-        # Calcular tendencias
-        trend_ocup, trend_val_ocup = calcular_tendencia(datos_ocupacional)
-        trend_est, trend_val_est = calcular_tendencia(datos_estancia, inverse=True)  # Menor estancia es mejor
-        trend_giro, trend_val_giro = calcular_tendencia(datos_giro)
         
-        # KPIs con tendencias
+        # Usar el promedio de mortalidad del Excel
+        mortalidad = safe_get_row('% DE MORTALIDAD GENERAL', 'PROMEDIO', silent=True)
+        if pd.isna(mortalidad): mortalidad = (total_fallecidos / total_egresos * 100)
+        
+        # KPIs
         kpi_ingresos = create_kpi_card("Total Ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db", "📥")
-        kpi1 = create_kpi_card("% Ocupación Promedio", formato_porcentaje(promedio_ocupacional), rango_texto, "#2c3e50", "🏥", 
-                               trend=trend_ocup, trend_value=trend_val_ocup)
+        kpi1 = create_kpi_card("% Ocupación Promedio", formato_porcentaje(promedio_ocupacional), rango_texto, "#2c3e50", "🏥")
         kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad), f"Total {rango_texto}", "#e74c3c", "💔")
-        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60", "⏱️",
-                               trend=trend_est, trend_value=trend_val_est, inverse=True)
-        kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄",
-                               trend=trend_giro, trend_value=trend_val_giro)
+        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60", "⏱️")
+        kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄")
         
         # EPS
         total_famisanar = safe_get_row('FAMISANAR', suma_col, silent=True)
@@ -1433,10 +1452,15 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         pct_famisanar = (total_famisanar / total_ingresos_anual * 100)
         pct_compensar = (total_compensar / total_ingresos_anual * 100)
         pct_salud_total = (total_salud_total / total_ingresos_anual * 100)
+        otras_eps = total_ingresos_anual - total_famisanar - total_compensar - total_salud_total
         
-        kpi_eps1 = create_kpi_card("Famisanar", f"{int(total_famisanar)}", f"{formato_porcentaje(pct_famisanar, False)}% del total", "#10b981", "🏢")
-        kpi_eps2 = create_kpi_card("Compensar", f"{int(total_compensar)}", f"{formato_porcentaje(pct_compensar, False)}% del total", "#f59e0b", "🏢")
-        kpi_eps3 = create_kpi_card("Salud Total", f"{int(total_salud_total)}", f"{formato_porcentaje(pct_salud_total, False)}% del total", "#ef4444", "🏢")
+        # Donut de distribución EPS
+        fig_eps_donut = create_donut_chart(
+            labels=['Famisanar', 'Compensar', 'Salud Total', 'Otras'],
+            values=[total_famisanar, total_compensar, total_salud_total, otras_eps],
+            title='Distribución por EPS',
+            colors=['#10b981', '#f59e0b', '#ef4444', '#64748b']
+        )
 
         # Gráficos
         datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados)
@@ -1470,14 +1494,14 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         fig_morbilidad_genero = go.Figure()
         if not df_morbilidad.empty:
             colors_morb = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#f97316', '#64748b', '#14b8a6', '#dc2626']
-            fig_morbilidad_total = go.Figure(data=[go.Bar(x=df_morbilidad.index, y=df_morbilidad['Total'], marker_color=colors_morb)])
-            fig_morbilidad_total.update_layout(title={'text': 'Morbilidad por Diagnóstico', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
-                plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)', 
-                xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'tickangle': -45, 'title': ''},
-                yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''}, 
-                margin=dict(l=50, r=30, t=50, b=100),
-                height=400,
-                hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9'))
+            
+            # Donut chart para morbilidad por diagnóstico
+            fig_morbilidad_total = create_donut_chart(
+                labels=df_morbilidad.index.tolist(),
+                values=df_morbilidad['Total'].tolist(),
+                title='Morbilidad por Diagnóstico',
+                colors=colors_morb
+            )
             
             fig_morbilidad_genero = go.Figure(data=[
                 go.Bar(name='Hombres', x=df_morbilidad.index, y=df_morbilidad['Hombre'], marker_color='#3b82f6'),
@@ -1496,12 +1520,14 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             dbc.Row([dbc.Col(kpi_ingresos, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi1, xs=12, sm=6, md=True, className="mb-3"),
                      dbc.Col(kpi2, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi3, xs=12, sm=6, md=True, className="mb-3"),
                      dbc.Col(kpi4, xs=12, sm=6, md=True, className="mb-3")], className="mb-3 g-3"),
-            html.H6("Principales EPS", style={'color': '#cbd5e1', 'fontWeight': '600', 'marginBottom': '15px', 'marginTop': '10px'}),
-            dbc.Row([dbc.Col(kpi_eps1, xs=12, sm=6, md=4, className="mb-3"), dbc.Col(kpi_eps2, xs=12, sm=6, md=4, className="mb-3"),
-                     dbc.Col(kpi_eps3, xs=12, sm=6, md=4, className="mb-3")], className="mb-4 g-3"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocupacional, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_ingresos_egresos, config=GRAPH_CONFIG), xs=12, md=6)]),
-            html.H6("Morbilidad", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '20px', 'textAlign': 'center'}),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morbilidad_total, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_genero, config=GRAPH_CONFIG), xs=12, md=6)])
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps_donut, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_total, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-3"),
+            html.H6("Morbilidad por Sexo", style={'color': '#ffffff', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '20px', 'textAlign': 'center'}),
+            dbc.Row([
+                dbc.Col(xs=12, md=2),
+                dbc.Col(dcc.Graph(figure=fig_morbilidad_genero, config=GRAPH_CONFIG), xs=12, md=8),
+                dbc.Col(xs=12, md=2)
+            ])
         ])
     except Exception as e:
         return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
