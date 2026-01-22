@@ -1448,22 +1448,23 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         total_famisanar = safe_get_row('FAMISANAR', suma_col, silent=True)
         total_compensar = safe_get_row('COMPENSAR', suma_col, silent=True)
         total_salud_total = safe_get_row('SALUD TOTAL', suma_col, silent=True)
+        total_nueva_eps = safe_get_row('NUEVA  EPS', suma_col, silent=True)
+        total_capital_salud = safe_get_row('CAPITAL SALUD', suma_col, silent=True)
         if pd.isna(total_famisanar): total_famisanar = 0
         if pd.isna(total_compensar): total_compensar = 0
         if pd.isna(total_salud_total): total_salud_total = 0
+        if pd.isna(total_nueva_eps): total_nueva_eps = 0
+        if pd.isna(total_capital_salud): total_capital_salud = 0
         total_ingresos_anual = safe_get_row('NUMERO DE INGRESOS DEL MES', suma_col, silent=True)
         if pd.isna(total_ingresos_anual) or total_ingresos_anual == 0: total_ingresos_anual = 1
-        pct_famisanar = (total_famisanar / total_ingresos_anual * 100)
-        pct_compensar = (total_compensar / total_ingresos_anual * 100)
-        pct_salud_total = (total_salud_total / total_ingresos_anual * 100)
-        otras_eps = total_ingresos_anual - total_famisanar - total_compensar - total_salud_total
+        otras_eps = total_ingresos_anual - total_famisanar - total_compensar - total_salud_total - total_nueva_eps - total_capital_salud
         
-        # Donut de distribución EPS
+        # Donut de distribución EPS (principales)
         fig_eps_donut = create_donut_chart(
-            labels=['Famisanar', 'Compensar', 'Salud Total', 'Otras'],
-            values=[total_famisanar, total_compensar, total_salud_total, otras_eps],
+            labels=['Famisanar', 'Compensar', 'Salud Total', 'Nueva EPS', 'Capital Salud', 'Otras'],
+            values=[total_famisanar, total_compensar, total_salud_total, total_nueva_eps, total_capital_salud, otras_eps],
             title='Distribución por EPS',
-            colors=['#10b981', '#f59e0b', '#ef4444', '#64748b']
+            colors=['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#64748b']
         )
 
         # Gráficos
@@ -1573,9 +1574,9 @@ def generar_datos_exportacion():
     
     # 2. EPS
     eps_data = []
-    eps_list = ['FAMISANAR', 'COMPENSAR', 'SALUD TOTAL', 'SANITAS', 'NUEVA EPS', 'SURA']
+    eps_list = ['FAMISANAR', 'COMPENSAR', 'SALUD TOTAL', 'NUEVA  EPS', 'CAPITAL SALUD', 'SANITAS', 'SURA', 'ALIANSALUD']
     for eps in eps_list:
-        fila = {'EPS': eps}
+        fila = {'EPS': eps.strip()}
         data = safe_get_row(eps, meses_disponibles, silent=True)
         for i, mes in enumerate(meses_disponibles):
             fila[meses_completos.get(mes, mes)] = data.iloc[i] if isinstance(data, pd.Series) else 0
@@ -1586,7 +1587,7 @@ def generar_datos_exportacion():
     
     # 3. Especialidades
     esp_data = []
-    especialidades = ['MEDICINA INTERNA', 'CIRUGIA GENERAL', 'NEUROCIRUGIA', 'NEUROLOGIA']
+    especialidades = ['MEDICINA INTERNA', 'CIRUGIA GENERAL', 'NEUROCIRUGIA', 'NEUROLOGIA', 'ORTOPEDIA', 'UROLOGIA', 'GINECOLOGIA']
     for esp in especialidades:
         fila = {'Especialidad': esp.title()}
         data = safe_get_row(esp, meses_disponibles, silent=True)
@@ -1621,6 +1622,10 @@ def generar_datos_exportacion():
         ('% DE MORTALIDAD GENERAL', '% Mortalidad General'),
         ('Pacientes con diagnóstico de Trauma', 'Pacientes Trauma'),
         ('Pacientes fallecidos por Trauma', 'Fallecidos Trauma'),
+        ('% mortalidad en trauma', '% Mortalidad Trauma'),
+        ('Pacientes Obstétricas', 'Pacientes Obstétricas'),
+        ('Pacientes fallecidas Ginecobstetricia', 'Fallecidas Gineco-Obstetricia'),
+        ('%. Mortalidad Obstétrica', '% Mortalidad Obstétrica'),
     ]
     for row_name, label in indicadores_mort:
         fila = {'Indicador': label}
@@ -1650,7 +1655,24 @@ def generar_datos_exportacion():
         gram_export['Total'] = df_gram_sot.values.sum()
         datos['GRAM-SOT'] = pd.DataFrame([gram_export])
     
-    # 10. Fallecidos detalle
+    # 10. Ventilación Mecánica
+    vm_data = []
+    indicadores_vm = [
+        ('PACIENTES VENTILADOS', 'Pacientes Ventilados'),
+        ('DIAS VENTILADOR', 'Días Ventilador'),
+        ('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV'),
+    ]
+    for row_name, label in indicadores_vm:
+        fila = {'Indicador': label}
+        data = safe_get_row(row_name, meses_disponibles, silent=True)
+        for i, mes in enumerate(meses_disponibles):
+            fila[meses_completos.get(mes, mes)] = data.iloc[i] if isinstance(data, pd.Series) else 0
+        total = safe_get_row(row_name, suma_col, silent=True)
+        fila['Total'] = total if not pd.isna(total) else 0
+        vm_data.append(fila)
+    datos['Ventilacion Mecanica'] = pd.DataFrame(vm_data)
+    
+    # 11. Fallecidos detalle
     if not df_fallecidos.empty:
         df_fall_export = df_fallecidos[['Nombre', 'Edad', 'Sexo', 'Dias_Estancia', 'Mes']].copy()
         df_fall_export.columns = ['Nombre', 'Edad', 'Sexo', 'Días Estancia', 'Mes']
