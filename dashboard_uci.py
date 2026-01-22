@@ -840,6 +840,15 @@ app.index_string = '''
                     font-size: 11px !important;
                 }
                 
+                .dashboard-footer > div > div {
+                    flex-direction: column !important;
+                    text-align: center !important;
+                }
+                
+                .dashboard-footer > div > div > div {
+                    text-align: center !important;
+                }
+                
                 /* Filtros */
                 .filtros-section {
                     padding: 12px !important;
@@ -1100,13 +1109,12 @@ def render_tab_content(tab):
                     plot_bgcolor='rgba(15,23,42,0.6)',
                     paper_bgcolor='rgba(30,41,59,0.8)',
                     xaxis={'title': '', 'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8',
-                           'range': [-(max_val + 2), max_val + 2], 'tickvals': list(range(-int(max_val)-1, int(max_val)+2)),
-                           'ticktext': [str(abs(x)) for x in range(-int(max_val)-1, int(max_val)+2)]},
+                           'range': [-(max_val + 2), max_val + 2], 'showticklabels': False, 'zeroline': False},
                     yaxis={'title': '', 'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8'},
-                    legend=dict(orientation="h", y=-0.25, x=0.5, xanchor="center", bgcolor='rgba(15,23,42,0.9)', 
+                    legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", bgcolor='rgba(15,23,42,0.9)', 
                                font={'color': '#f1f5f9', 'size': 11}, bordercolor='#334155', borderwidth=1),
                     hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9'),
-                    margin=dict(l=60, r=50, t=50, b=80),
+                    margin=dict(l=60, r=30, t=50, b=60),
                     height=400
                 )
             
