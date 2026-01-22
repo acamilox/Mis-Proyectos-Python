@@ -1413,8 +1413,11 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         promedio_ocupacional = datos_ocupacional[datos_ocupacional > 0].mean() if len(datos_ocupacional[datos_ocupacional > 0]) > 0 else 0
         datos_ingresos_kpi = safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         total_ingresos = datos_ingresos_kpi.sum() if isinstance(datos_ingresos_kpi, pd.Series) else datos_ingresos_kpi
-        # Usar datos de fallecidos de la hoja MORTALIDAD (más precisa que ESTADISTICA)
-        if not df_fallecidos.empty:
+        # Usar datos de fallecidos: si son todos los meses, usar ESTADISTICA (valor oficial)
+        if len(meses_filtrados) == len(meses_disponibles):
+            total_fallecidos = safe_get_row('FALLECIDOS', suma_col)
+            if pd.isna(total_fallecidos): total_fallecidos = 0
+        elif not df_fallecidos.empty:
             total_fallecidos = len(df_fallecidos[df_fallecidos['Mes'].isin(meses_filtrados)])
         else:
             datos_fallecidos = safe_get_row('FALLECIDOS', meses_filtrados)
@@ -1449,7 +1452,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         total_compensar = safe_get_row('COMPENSAR', suma_col, silent=True)
         total_salud_total = safe_get_row('SALUD TOTAL', suma_col, silent=True)
         total_nueva_eps = safe_get_row('NUEVA  EPS', suma_col, silent=True)
-        total_capital_salud = safe_get_row('CAPITAL SALUD', suma_col, silent=True)
+        total_capital_salud = safe_get_row('CAPITAL SALUD ', suma_col, silent=True)
         if pd.isna(total_famisanar): total_famisanar = 0
         if pd.isna(total_compensar): total_compensar = 0
         if pd.isna(total_salud_total): total_salud_total = 0
@@ -1574,7 +1577,7 @@ def generar_datos_exportacion():
     
     # 2. EPS
     eps_data = []
-    eps_list = ['FAMISANAR', 'COMPENSAR', 'SALUD TOTAL', 'NUEVA  EPS', 'CAPITAL SALUD', 'SANITAS', 'SURA', 'ALIANSALUD']
+    eps_list = ['FAMISANAR', 'COMPENSAR', 'SALUD TOTAL', 'NUEVA  EPS', 'CAPITAL SALUD ', 'SANITAS', 'SURA', 'ALIANSALUD']
     for eps in eps_list:
         fila = {'EPS': eps.strip()}
         data = safe_get_row(eps, meses_disponibles, silent=True)
