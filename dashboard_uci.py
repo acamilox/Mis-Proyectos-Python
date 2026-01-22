@@ -346,14 +346,20 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
     bar_color = color or COLOR_PALETTE['primary']
     if decimals == 0:
         hover_format = '<b>%{x}</b><br>Valor: %{y:.0f}<extra></extra>'
+        text_template = '%{y:.0f}'
     else:
         hover_format = f'<b>%{{x}}</b><br>Valor: %{{y:.{decimals}f}}<extra></extra>'
+        text_template = f'%{{y:.{decimals}f}}'
     
     fig.update_traces(
         marker_color=bar_color,
         marker_line_color='rgba(255,255,255,0.1)',
         marker_line_width=1,
-        hovertemplate=hover_format
+        hovertemplate=hover_format,
+        text=data,
+        texttemplate=text_template,
+        textposition='inside',
+        textfont=dict(color='white', size=10)
     )
     fig.update_layout(
         showlegend=False,
@@ -413,15 +419,21 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
         
         if decimals == 0:
             hover_template = f'<b>%{{x}}</b><br>{label}: %{{y:.0f}}<extra></extra>'
+            text_template = '%{y:.0f}'
         else:
             hover_template = f'<b>%{{x}}</b><br>{label}: %{{y:.{decimals}f}}<extra></extra>'
+            text_template = f'%{{y:.{decimals}f}}'
         
         fig.add_trace(go.Bar(
             name=label, x=meses_disponibles, y=data,
             marker_color=colors[i % len(colors)],
             marker_line_color='rgba(255,255,255,0.1)',
             marker_line_width=1,
-            hovertemplate=hover_template
+            hovertemplate=hover_template,
+            text=data,
+            texttemplate=text_template,
+            textposition='inside',
+            textfont=dict(color='white', size=9)
         ))
     
     fig.update_layout(
@@ -450,28 +462,20 @@ def create_donut_chart(labels, values, title, colors=None):
         values=values,
         hole=0.5,
         marker=dict(colors=colors[:len(labels)], line=dict(color='#0f172a', width=2)),
-        textinfo='percent',
-        textfont=dict(size=12, color='#f1f5f9'),
-        hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>'
+        textinfo='percent+label',
+        textposition='outside',
+        textfont=dict(size=10, color='#f1f5f9'),
+        hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
+        pull=[0.02] * len(values)
     )])
     
     fig.update_layout(
         title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
         plot_bgcolor='rgba(15,23,42,0.6)',
         paper_bgcolor='rgba(30,41,59,0.8)',
-        legend=dict(
-            orientation="h", 
-            yanchor="top", 
-            y=-0.1, 
-            xanchor="center", 
-            x=0.5,
-            bgcolor='rgba(15,23,42,0.9)', 
-            font={'color': '#f1f5f9', 'size': 10}, 
-            bordercolor='#334155', 
-            borderwidth=1
-        ),
-        margin=dict(l=30, r=30, t=50, b=80),
-        height=400,
+        showlegend=False,
+        margin=dict(l=80, r=80, t=50, b=50),
+        height=420,
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
@@ -1477,8 +1481,10 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         datos_ingresos = safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         datos_egresos_chart = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
         fig_ingresos_egresos = go.Figure()
-        fig_ingresos_egresos.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ingresos, marker_color='#6366f1'))
-        fig_ingresos_egresos.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_egresos_chart, marker_color='#10b981'))
+        fig_ingresos_egresos.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ingresos, marker_color='#6366f1',
+            text=datos_ingresos, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
+        fig_ingresos_egresos.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_egresos_chart, marker_color='#10b981',
+            text=datos_egresos_chart, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
         fig_ingresos_egresos.update_layout(title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             barmode='group', plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)', 
             xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''},
@@ -1504,8 +1510,10 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             )
             
             fig_morbilidad_genero = go.Figure(data=[
-                go.Bar(name='Hombres', x=df_morbilidad.index, y=df_morbilidad['Hombre'], marker_color='#3b82f6'),
-                go.Bar(name='Mujeres', x=df_morbilidad.index, y=df_morbilidad['Mujer'], marker_color='#ec4899')])
+                go.Bar(name='Hombres', x=df_morbilidad.index, y=df_morbilidad['Hombre'], marker_color='#3b82f6',
+                    text=df_morbilidad['Hombre'], texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)),
+                go.Bar(name='Mujeres', x=df_morbilidad.index, y=df_morbilidad['Mujer'], marker_color='#ec4899',
+                    text=df_morbilidad['Mujer'], texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9))])
             fig_morbilidad_genero.update_layout(title={'text': 'Morbilidad por Sexo', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 barmode='group', plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)', 
                 xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'tickangle': -45, 'title': ''},
