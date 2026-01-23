@@ -376,26 +376,26 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
 
 def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
     data = safe_get_row(row_name, meses_disponibles, silent=silent)
-    fig = px.line(x=meses_disponibles, y=data, title=title, markers=True)
-    
     line_color = color or COLOR_PALETTE['secondary']
-    if decimals == 0:
-        hover_format = '<b>%{x}</b><br>Valor: %{y:.0f}<extra></extra>'
-        text_template = '%{y:.0f}'
-    else:
-        hover_format = f'<b>%{{x}}</b><br>Valor: %{{y:.{decimals}f}}<extra></extra>'
-        text_template = f'%{{y:.{decimals}f}}'
     
-    fig.update_traces(
-        line_color=line_color,
-        line_width=2,
-        marker=dict(size=8, color=line_color, line=dict(width=2, color='#0f172a')),
-        hovertemplate=hover_format,
-        text=data,
-        texttemplate=text_template,
+    # Formatear texto según decimales
+    if decimals == 0:
+        text_values = [f'{int(v)}' if pd.notna(v) else '' for v in data]
+    else:
+        text_values = [f'{v:.{decimals}f}' if pd.notna(v) else '' for v in data]
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=meses_disponibles, 
+        y=data,
+        mode='lines+markers+text',
+        line=dict(color=line_color, width=2),
+        marker=dict(size=10, color=line_color, line=dict(width=2, color='#0f172a')),
+        text=text_values,
         textposition='top center',
-        textfont=dict(color='#f1f5f9', size=10)
-    )
+        textfont=dict(color='#f1f5f9', size=11),
+        hovertemplate=f'<b>%{{x}}</b><br>Valor: %{{y:.{decimals}f}}<extra></extra>'
+    ))
     
     yaxis_config = {'gridcolor': 'rgba(148,163,184,0.15)', 'showline': False, 'color': '#94a3b8', 'tickfont': {'size': 11}}
     if isinstance(data, pd.Series):
@@ -404,10 +404,10 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
             yaxis_config['dtick'] = 1
     
     fig.update_layout(
+        title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
         showlegend=False,
         plot_bgcolor='rgba(15,23,42,0.6)',
         paper_bgcolor='rgba(30,41,59,0.8)',
-        title={'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
         xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'showline': False, 'color': '#94a3b8', 'tickfont': {'size': 11}, 'title': ''},
         yaxis=yaxis_config,
         margin=dict(l=50, r=30, t=50, b=40),
@@ -460,9 +460,30 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
 
 def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     """Crea un gráfico de dona ordenado de mayor a menor, en sentido horario desde las 12"""
-    # Paleta de colores únicos y distintivos (sin repetir)
+    # Paleta de 20 colores únicos y distintivos (sin repetir)
     if colors is None:
-        colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6', '#a855f7', '#eab308', '#22d3d8', '#fb7185', '#4ade80']
+        colors = [
+            '#6366f1',  # Indigo
+            '#10b981',  # Esmeralda
+            '#f59e0b',  # Ámbar
+            '#ef4444',  # Rojo
+            '#8b5cf6',  # Violeta
+            '#06b6d4',  # Cyan
+            '#ec4899',  # Rosa
+            '#84cc16',  # Lima
+            '#f97316',  # Naranja
+            '#14b8a6',  # Teal
+            '#a855f7',  # Púrpura
+            '#eab308',  # Amarillo
+            '#3b82f6',  # Azul
+            '#22c55e',  # Verde
+            '#e11d48',  # Rosa fuerte
+            '#0ea5e9',  # Celeste
+            '#d946ef',  # Fucsia
+            '#facc15',  # Dorado
+            '#64748b',  # Gris
+            '#fb923c',  # Melocotón
+        ]
     
     if auto_sort:
         # Ordenar de mayor a menor
@@ -1317,10 +1338,14 @@ def render_tab_content(tab):
             fig_giro = create_bar_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
             
             fig_promedio_vm = go.Figure()
+            text_vm = [f'{v:.2f}' if pd.notna(v) else '' for v in promedio_vm]
             fig_promedio_vm.add_trace(go.Scatter(
-                x=meses_disponibles, y=promedio_vm, mode='lines+markers',
+                x=meses_disponibles, y=promedio_vm, mode='lines+markers+text',
                 line=dict(color='#9b59b6', width=2),
-                marker=dict(size=8, line=dict(width=2, color='#0f172a')),
+                marker=dict(size=10, color='#9b59b6', line=dict(width=2, color='#0f172a')),
+                text=text_vm,
+                textposition='top center',
+                textfont=dict(color='#f1f5f9', size=11),
                 hovertemplate='<b>%{x}</b><br>Promedio días VM: %{y:.2f}<extra></extra>'
             ))
             fig_promedio_vm.update_layout(
@@ -1528,23 +1553,29 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
 
         # Gráficos
         datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados)
-        fig_ocupacional = px.line(x=meses_filtrados, y=datos_ocup, title='% Ocupacional Mensual', markers=True)
-        fig_ocupacional.update_traces(
-            line_color='#10b981', 
-            line_width=2, 
-            marker=dict(size=8, line=dict(width=2, color='#0f172a')),
-            text=datos_ocup,
-            texttemplate='%{y:.1f}',
+        fig_ocupacional = go.Figure()
+        fig_ocupacional.add_trace(go.Scatter(
+            x=meses_filtrados, 
+            y=datos_ocup,
+            mode='lines+markers+text',
+            line=dict(color='#10b981', width=2),
+            marker=dict(size=10, color='#10b981', line=dict(width=2, color='#0f172a')),
+            text=[f'{v:.1f}' if pd.notna(v) else '' for v in datos_ocup],
             textposition='top center',
-            textfont=dict(color='#f1f5f9', size=10)
-        )
-        fig_ocupacional.update_layout(showlegend=False, plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)',
-            title={'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5}, 
+            textfont=dict(color='#f1f5f9', size=11),
+            hovertemplate='<b>%{x}</b><br>Ocupación: %{y:.1f}%<extra></extra>'
+        ))
+        fig_ocupacional.update_layout(
+            title={'text': '% Ocupacional Mensual', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            showlegend=False, 
+            plot_bgcolor='rgba(15,23,42,0.6)', 
+            paper_bgcolor='rgba(30,41,59,0.8)',
             xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''},
             yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''}, 
             margin=dict(l=50, r=30, t=50, b=40),
             height=380,
-            hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9'))
+            hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9')
+        )
         
         datos_ingresos = safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         datos_egresos_chart = safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
