@@ -1496,12 +1496,12 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         otras_eps = total_ingresos_anual - total_famisanar - total_compensar - total_salud_total - total_nueva_eps - total_capital_salud
         
         # Donut de distribución EPS (principales) - Orden: mayor a menor en sentido horario
-        # Famisanar → Nueva EPS → Otras → Salud Total → Compensar → Capital Salud
+        # Famisanar → Compensar → Salud Total → Otras → Nueva EPS → Capital Salud
         fig_eps_donut = create_donut_chart(
-            labels=['Famisanar', 'Nueva EPS', 'Otras', 'Salud Total', 'Compensar', 'Capital Salud'],
-            values=[total_famisanar, total_nueva_eps, otras_eps, total_salud_total, total_compensar, total_capital_salud],
+            labels=['Famisanar', 'Compensar', 'Salud Total', 'Otras', 'Nueva EPS', 'Capital Salud'],
+            values=[total_famisanar, total_compensar, total_salud_total, otras_eps, total_nueva_eps, total_capital_salud],
             title='Distribución por EPS',
-            colors=['#10b981', '#3b82f6', '#64748b', '#ef4444', '#f59e0b', '#8b5cf6'],
+            colors=['#10b981', '#f59e0b', '#ef4444', '#64748b', '#3b82f6', '#8b5cf6'],
             auto_sort=False
         )
 
