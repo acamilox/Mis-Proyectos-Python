@@ -453,7 +453,7 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     return fig
 
 def create_donut_chart(labels, values, title, colors=None):
-    """Crea un gráfico de dona (donut chart) ordenado de mayor a menor en sentido horario"""
+    """Crea un gráfico de dona (donut chart) ordenado de mayor a menor en sentido horario desde las 12"""
     if colors is None:
         colors = ['#6366f1', '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#64748b']
     
@@ -468,21 +468,34 @@ def create_donut_chart(labels, values, title, colors=None):
         values=values_sorted,
         hole=0.5,
         marker=dict(colors=colors_sorted, line=dict(color='#0f172a', width=2)),
-        textinfo='percent+label',
-        textposition='outside',
-        textfont=dict(size=10, color='#f1f5f9'),
+        textinfo='percent',
+        textposition='inside',
+        textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        pull=[0.02] * len(values_sorted),
         direction='clockwise',
-        sort=False
+        sort=False,
+        rotation=90
     )])
     
     fig.update_layout(
         title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
         plot_bgcolor='rgba(15,23,42,0.6)',
         paper_bgcolor='rgba(30,41,59,0.8)',
-        showlegend=False,
-        margin=dict(l=80, r=80, t=50, b=50),
+        showlegend=True,
+        legend=dict(
+            orientation='v',
+            yanchor='middle',
+            y=0.5,
+            xanchor='left',
+            x=1.02,
+            bgcolor='rgba(15,23,42,0.8)',
+            bordercolor='#334155',
+            borderwidth=1,
+            font=dict(color='#f1f5f9', size=11),
+            itemsizing='constant',
+            tracegroupgap=8
+        ),
+        margin=dict(l=20, r=150, t=50, b=30),
         height=420,
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
