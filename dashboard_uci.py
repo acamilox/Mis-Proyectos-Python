@@ -469,18 +469,26 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         labels_final = list(labels)
         colors_final = list(colors[:len(labels)])
     
-    # Calcular angulo: queremos que el primer segmento empiece en las 12
-    # y vaya hacia la derecha (sentido horario visual)
-    # En Plotly con counterclockwise, el segmento va hacia la derecha
-    # rotation = angulo desde las 3 en sentido antihorario
-    # Para empezar en las 12: rotation = 90
-    # Pero counterclockwise empieza el segmento hacia la derecha desde ese punto
-    # Necesitamos ajustar para que el CENTRO del primer segmento este en las 12
+    # En Plotly:
+    # - clockwise va hacia la IZQUIERDA visualmente
+    # - counterclockwise va hacia la DERECHA visualmente
+    # Queremos: mayor arriba, luego hacia la DERECHA (sentido horario visual)
+    # Entonces usamos clockwise pero con los datos en orden INVERSO
+    # Así el mayor queda arriba y los demás van hacia la derecha
+    
+    # Invertir el orden de los datos
+    values_final = values_final[::-1]
+    labels_final = labels_final[::-1]
+    colors_final = colors_final[::-1]
+    
+    # Calcular rotacion para que el ULTIMO elemento (que ahora es el mayor) quede arriba
     total = sum(values_final)
-    primer_pct = (values_final[0] / total) if total > 0 else 0
-    primer_angulo = primer_pct * 360
-    # Ajustar rotation para centrar el primer segmento en las 12
-    rotation_ajustado = 90 + (primer_angulo / 2)
+    # El ultimo elemento es el mayor, calcular su angulo
+    mayor_pct = values_final[-1] / total if total > 0 else 0
+    mayor_angulo = mayor_pct * 360
+    # Con clockwise, el ultimo segmento termina en rotation
+    # Queremos que el centro del mayor este en 90 (las 12)
+    rotation_ajustado = 90 + (mayor_angulo / 2)
     
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
@@ -491,7 +499,7 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='counterclockwise',
+        direction='clockwise',
         sort=False,
         rotation=rotation_ajustado
     )])
