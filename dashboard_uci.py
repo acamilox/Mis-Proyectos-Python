@@ -464,26 +464,22 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         labels_final = [d[1] for d in datos]
         colors_final = [d[2] for d in datos]
     else:
-        # Respetar el orden dado
+        # Respetar el orden dado (NO invertir)
         values_final = list(values)
         labels_final = list(labels)
         colors_final = list(colors[:len(labels)])
     
-    # Configuración que funciona: clockwise con datos invertidos pone el mayor arriba
-    # Pero va hacia la izquierda. Para que vaya hacia la derecha, 
-    # NO invertimos los datos y usamos counterclockwise
-    # Pero necesitamos calcular la rotación correcta
-    
-    # Invertir el orden de los datos (el mayor queda al final)
-    values_final = values_final[::-1]
-    labels_final = labels_final[::-1]
-    colors_final = colors_final[::-1]
-    
-    # Calcular rotacion para centrar el mayor (ultimo elemento) en las 12
+    # Calcular rotación para poner el primer elemento en las 12
     total = sum(values_final)
-    mayor_pct = values_final[-1] / total if total > 0 else 0
-    mayor_angulo = mayor_pct * 360
-    rotation_ajustado = 0 + (mayor_angulo / 2)
+    
+    if total > 0:
+        # El primer elemento (índice 0) se pone en las 12
+        primer_pct = values_final[0] / total
+        primer_angulo = primer_pct * 360
+        # Rotamos la mitad del ángulo del primer segmento para centrarlo en las 12
+        rotation_ajustado = -primer_angulo / 2
+    else:
+        rotation_ajustado = 0
     
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
@@ -1505,11 +1501,10 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         if pd.isna(total_ingresos_anual) or total_ingresos_anual == 0: total_ingresos_anual = 1
         otras_eps = total_ingresos_anual - total_famisanar - total_compensar - total_salud_total - total_nueva_eps - total_capital_salud
         
-        # Donut de distribución EPS (principales) - Orden: mayor a menor en sentido horario
-        # Nueva EPS → Compensar → Salud Total → Otras → Capital Salud → Famisanar
+        # Donut de distribución EPS (principales) - ORDEN EXACTO: Famisanar → Compensar → Salud Total → Otras → Nueva EPS → Capital Salud
         fig_eps_donut = create_donut_chart(
-            labels=['Nueva EPS', 'Compensar', 'Salud Total', 'Otras', 'Capital Salud', 'Famisanar'],
-            values=[total_nueva_eps, total_compensar, total_salud_total, otras_eps, total_capital_salud, total_famisanar],
+            labels=['Famisanar', 'Compensar', 'Salud Total', 'Otras', 'Nueva EPS', 'Capital Salud'],
+            values=[total_famisanar, total_compensar, total_salud_total, otras_eps, total_nueva_eps, total_capital_salud],
             title='Distribución por EPS',
             colors=['#10b981', '#3b82f6', '#64748b', '#ef4444', '#f59e0b', '#8b5cf6'],
             auto_sort=False
