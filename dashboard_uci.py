@@ -469,17 +469,21 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         labels_final = list(labels)
         colors_final = list(colors[:len(labels)])
     
-    # Queremos: mayor arriba en las 12, luego hacia la DERECHA (sentido horario visual)
-    # counterclockwise en Plotly va hacia la DERECHA
-    # No invertimos los datos, los dejamos en orden mayor a menor
+    # Configuración que funciona: clockwise con datos invertidos pone el mayor arriba
+    # Pero va hacia la izquierda. Para que vaya hacia la derecha, 
+    # NO invertimos los datos y usamos counterclockwise
+    # Pero necesitamos calcular la rotación correcta
     
-    # Calcular rotacion para centrar el primer elemento (mayor) en las 12
+    # Invertir el orden de los datos (el mayor queda al final)
+    values_final = values_final[::-1]
+    labels_final = labels_final[::-1]
+    colors_final = colors_final[::-1]
+    
+    # Calcular rotacion para centrar el mayor (ultimo elemento) en las 12
     total = sum(values_final)
-    mayor_pct = values_final[0] / total if total > 0 else 0
+    mayor_pct = values_final[-1] / total if total > 0 else 0
     mayor_angulo = mayor_pct * 360
-    # Con counterclockwise y rotation=X, el primer segmento empieza en X grados
-    # Para centrar en las 12 (90 grados), restamos la mitad del angulo del mayor
-    rotation_ajustado = 90 - (mayor_angulo / 2)
+    rotation_ajustado = 0 + (mayor_angulo / 2)
     
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
@@ -490,7 +494,7 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='counterclockwise',
+        direction='clockwise',
         sort=False,
         rotation=rotation_ajustado
     )])
@@ -1502,12 +1506,12 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         otras_eps = total_ingresos_anual - total_famisanar - total_compensar - total_salud_total - total_nueva_eps - total_capital_salud
         
         # Donut de distribución EPS (principales) - Orden: mayor a menor en sentido horario
-        # Famisanar → Compensar → Salud Total → Otras → Nueva EPS → Capital Salud
+        # Nueva EPS → Compensar → Salud Total → Otras → Capital Salud → Famisanar
         fig_eps_donut = create_donut_chart(
-            labels=['Famisanar', 'Compensar', 'Salud Total', 'Otras', 'Nueva EPS', 'Capital Salud'],
-            values=[total_famisanar, total_compensar, total_salud_total, otras_eps, total_nueva_eps, total_capital_salud],
+            labels=['Nueva EPS', 'Compensar', 'Salud Total', 'Otras', 'Capital Salud', 'Famisanar'],
+            values=[total_nueva_eps, total_compensar, total_salud_total, otras_eps, total_capital_salud, total_famisanar],
             title='Distribución por EPS',
-            colors=['#10b981', '#f59e0b', '#ef4444', '#64748b', '#3b82f6', '#8b5cf6'],
+            colors=['#10b981', '#3b82f6', '#64748b', '#ef4444', '#f59e0b', '#8b5cf6'],
             auto_sort=False
         )
 
