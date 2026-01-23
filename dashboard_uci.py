@@ -1325,12 +1325,12 @@ def render_tab_content(tab):
             # Gráfico de Gérmenes Aislados (donut)
             fig_germenes = go.Figure()
             if not df_germenes.empty:
-                colors_germenes = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#f97316', '#64748b', '#14b8a6', '#dc2626', '#22c55e', '#a855f7', '#3b82f6', '#ea580c', '#71717a']
+                # auto_sort=True ordena de mayor a menor automáticamente
                 fig_germenes = create_donut_chart(
                     labels=df_germenes['Germen'].tolist(),
                     values=df_germenes['Cantidad'].tolist(),
                     title='Gérmenes Aislados (IAAS)',
-                    colors=colors_germenes
+                    auto_sort=True
                 )
             
             # Gráfico de Eventos Adversos - Barras horizontales
@@ -1543,14 +1543,12 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         fig_morbilidad_total = go.Figure()
         fig_morbilidad_genero = go.Figure()
         if not df_morbilidad.empty:
-            colors_morb = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#f97316', '#64748b', '#14b8a6', '#dc2626']
-            
-            # Donut chart para morbilidad por diagnóstico
+            # Donut chart para morbilidad por diagnóstico - auto_sort=True ordena de mayor a menor
             fig_morbilidad_total = create_donut_chart(
                 labels=df_morbilidad.index.tolist(),
                 values=df_morbilidad['Total'].tolist(),
                 title='Morbilidad por Diagnóstico',
-                colors=colors_morb
+                auto_sort=True
             )
             
             fig_morbilidad_genero = go.Figure(data=[
