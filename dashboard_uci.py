@@ -453,55 +453,32 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     return fig
 
 def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
-    """Crea un gráfico de dona (donut chart) en sentido horario desde las 12
-    
-    Args:
-        auto_sort: Si True, ordena de mayor a menor. Si False, respeta el orden dado.
-    """
+    """Crea un gráfico de dona ordenado de mayor a menor, en sentido horario desde las 12"""
     if colors is None:
         colors = ['#6366f1', '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#64748b']
     
     if auto_sort:
         # Ordenar de mayor a menor
         datos = sorted(zip(values, labels, colors[:len(labels)]), reverse=True)
-        values_sorted = [d[0] for d in datos]
-        labels_sorted = [d[1] for d in datos]
-        colors_sorted = [d[2] for d in datos]
+        values_final = [d[0] for d in datos]
+        labels_final = [d[1] for d in datos]
+        colors_final = [d[2] for d in datos]
     else:
         # Respetar el orden dado
-        values_sorted = values
-        labels_sorted = labels
-        colors_sorted = colors[:len(labels)]
+        values_final = list(values)
+        labels_final = list(labels)
+        colors_final = list(colors[:len(labels)])
     
-    # Para que visualmente vaya en sentido horario desde las 12:
-    # - Invertimos el orden de los datos (excepto el primero que va arriba)
-    # - El primer elemento queda arriba, los demás van hacia la izquierda (counterclockwise)
-    #   pero al invertir el orden, visualmente parece que van hacia la derecha
-    if len(values_sorted) > 1:
-        primer_valor = values_sorted[0]
-        primer_label = labels_sorted[0]
-        primer_color = colors_sorted[0]
-        # Invertir el resto
-        resto_values = values_sorted[1:][::-1]
-        resto_labels = labels_sorted[1:][::-1]
-        resto_colors = colors_sorted[1:][::-1]
-        # Reconstruir: primero el mayor, luego el resto invertido
-        values_sorted = [primer_valor] + resto_values
-        labels_sorted = [primer_label] + resto_labels
-        colors_sorted = [primer_color] + resto_colors
-    
-    # rotation=90 empieza desde las 12 en punto
-    # direction='counterclockwise' va hacia la izquierda, pero con datos invertidos parece horario
     fig = go.Figure(data=[go.Pie(
-        labels=labels_sorted,
-        values=values_sorted,
+        labels=labels_final,
+        values=values_final,
         hole=0.5,
-        marker=dict(colors=colors_sorted, line=dict(color='#0f172a', width=2)),
+        marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
         textinfo='percent',
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='counterclockwise',
+        direction='clockwise',
         sort=False,
         rotation=90
     )])
