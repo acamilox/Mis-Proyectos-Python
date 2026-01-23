@@ -463,6 +463,8 @@ def create_donut_chart(labels, values, title, colors=None):
     labels_sorted = [d[1] for d in datos]
     colors_sorted = [d[2] for d in datos]
     
+    # En Plotly: rotation=90 empieza desde las 12 en punto
+    # direction='counterclockwise' hace que vaya hacia la DERECHA (sentido horario visual)
     fig = go.Figure(data=[go.Pie(
         labels=labels_sorted,
         values=values_sorted,
@@ -472,7 +474,7 @@ def create_donut_chart(labels, values, title, colors=None):
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='clockwise',
+        direction='counterclockwise',
         sort=False,
         rotation=90
     )])
