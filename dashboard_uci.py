@@ -469,24 +469,17 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         labels_final = list(labels)
         colors_final = list(colors[:len(labels)])
     
-    # En Plotly:
-    # - clockwise va hacia la IZQUIERDA visualmente
-    # - counterclockwise va hacia la DERECHA visualmente
-    # Queremos: mayor arriba, luego hacia la DERECHA (sentido horario visual)
-    # Entonces usamos clockwise pero con los datos en orden INVERSO
-    # Así el mayor queda arriba y los demás van hacia la derecha
+    # Queremos: mayor arriba en las 12, luego hacia la DERECHA (sentido horario visual)
+    # counterclockwise en Plotly va hacia la DERECHA
+    # No invertimos los datos, los dejamos en orden mayor a menor
     
-    # Invertir el orden de los datos
-    values_final = values_final[::-1]
-    labels_final = labels_final[::-1]
-    colors_final = colors_final[::-1]
-    
-    # Calcular rotacion para que el ULTIMO elemento (que ahora es el mayor) quede arriba en las 12
+    # Calcular rotacion para centrar el primer elemento (mayor) en las 12
     total = sum(values_final)
-    mayor_pct = values_final[-1] / total if total > 0 else 0
+    mayor_pct = values_final[0] / total if total > 0 else 0
     mayor_angulo = mayor_pct * 360
-    # Probando con 360 (0) grados
-    rotation_ajustado = 0 + (mayor_angulo / 2)
+    # Con counterclockwise y rotation=X, el primer segmento empieza en X grados
+    # Para centrar en las 12 (90 grados), restamos la mitad del angulo del mayor
+    rotation_ajustado = 90 - (mayor_angulo / 2)
     
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
@@ -497,7 +490,7 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='clockwise',
+        direction='counterclockwise',
         sort=False,
         rotation=rotation_ajustado
     )])
