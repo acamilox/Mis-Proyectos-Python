@@ -374,7 +374,7 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
     )
     return fig
 
-def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
+def create_line_chart(row_name, title, color=None, silent=False, decimals=1):
     data = safe_get_row(row_name, meses_disponibles, silent=silent)
     line_color = color or COLOR_PALETTE['secondary']
     
@@ -1179,7 +1179,7 @@ def render_tab_content(tab):
             kpi_prom_dias = create_kpi_card("Promedio Días Estancia", f"{promedio_dias:.1f}", "Fallecidos", "#9b59b6", "📊")
             kpi_mediana_dias = create_kpi_card("Mediana Días de Estancia", f"{mediana_dias:.1f}", "Fallecidos", "#3498db", "📈")
             
-            fig_mortalidad = create_line_chart('% DE MORTALIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=2)
+            fig_mortalidad = create_line_chart('% DE MORTALIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=1)
             fig_trauma = create_grouped_bar_chart(
                 ['Pacientes con diagnóstico de Trauma', 'Pacientes fallecidos por Trauma'],
                 ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos', decimals=0)
@@ -1334,11 +1334,11 @@ def render_tab_content(tab):
             kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12", "🛏️")
             kpi5 = create_kpi_card("Promedio Días VM", f"{promedio_vm_general:.2f}", "Ventilación Mecánica", "#9b59b6", "🫁")
             
-            fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=2)
+            fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=1)
             fig_giro = create_bar_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
             
             fig_promedio_vm = go.Figure()
-            text_vm = [f'{v:.2f}' if pd.notna(v) else '' for v in promedio_vm]
+            text_vm = [f'{v:.1f}' if pd.notna(v) else '' for v in promedio_vm]
             fig_promedio_vm.add_trace(go.Scatter(
                 x=meses_disponibles, y=promedio_vm, mode='lines+markers+text',
                 line=dict(color='#9b59b6', width=2),
@@ -1346,7 +1346,7 @@ def render_tab_content(tab):
                 text=text_vm,
                 textposition='top center',
                 textfont=dict(color='#f1f5f9', size=11),
-                hovertemplate='<b>%{x}</b><br>Promedio días VM: %{y:.2f}<extra></extra>'
+                hovertemplate='<b>%{x}</b><br>Promedio días VM: %{y:.1f}<extra></extra>'
             ))
             fig_promedio_vm.update_layout(
                 title={'text': 'Promedio de Días de VM', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
@@ -1358,10 +1358,10 @@ def render_tab_content(tab):
                 hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
             )
             
-            fig_bacteriemia = create_line_chart('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', 'Tasa de ITS AC', color='#e74c3c', silent=True, decimals=2)
-            fig_nav = create_line_chart('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV', color='#e74c3c', silent=True, decimals=2)
-            fig_istu = create_line_chart('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa de ISTU AC', color='#f39c12', silent=True, decimals=2)
-            fig_lesiones = create_line_chart('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión', color='#9b59b6', silent=True, decimals=2)
+            fig_bacteriemia = create_line_chart('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', 'Tasa de ITS AC', color='#e74c3c', silent=True, decimals=1)
+            fig_nav = create_line_chart('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV', color='#e74c3c', silent=True, decimals=1)
+            fig_istu = create_line_chart('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa de ISTU AC', color='#f39c12', silent=True, decimals=1)
+            fig_lesiones = create_line_chart('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión', color='#9b59b6', silent=True, decimals=1)
 
             # Gráfico de Gérmenes Aislados (donut)
             fig_germenes = go.Figure()
