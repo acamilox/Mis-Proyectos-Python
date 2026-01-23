@@ -469,6 +469,19 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         labels_final = list(labels)
         colors_final = list(colors[:len(labels)])
     
+    # Calcular angulo: queremos que el primer segmento empiece en las 12
+    # y vaya hacia la derecha (sentido horario visual)
+    # En Plotly con counterclockwise, el segmento va hacia la derecha
+    # rotation = angulo desde las 3 en sentido antihorario
+    # Para empezar en las 12: rotation = 90
+    # Pero counterclockwise empieza el segmento hacia la derecha desde ese punto
+    # Necesitamos ajustar para que el CENTRO del primer segmento este en las 12
+    total = sum(values_final)
+    primer_pct = (values_final[0] / total) if total > 0 else 0
+    primer_angulo = primer_pct * 360
+    # Ajustar rotation para centrar el primer segmento en las 12
+    rotation_ajustado = 90 + (primer_angulo / 2)
+    
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
         values=values_final,
@@ -478,9 +491,9 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='clockwise',
+        direction='counterclockwise',
         sort=False,
-        rotation=90
+        rotation=rotation_ajustado
     )])
     
     fig.update_layout(
