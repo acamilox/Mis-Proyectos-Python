@@ -381,14 +381,20 @@ def create_line_chart(row_name, title, color=None, silent=False, decimals=2):
     line_color = color or COLOR_PALETTE['secondary']
     if decimals == 0:
         hover_format = '<b>%{x}</b><br>Valor: %{y:.0f}<extra></extra>'
+        text_template = '%{y:.0f}'
     else:
         hover_format = f'<b>%{{x}}</b><br>Valor: %{{y:.{decimals}f}}<extra></extra>'
+        text_template = f'%{{y:.{decimals}f}}'
     
     fig.update_traces(
         line_color=line_color,
         line_width=2,
         marker=dict(size=8, color=line_color, line=dict(width=2, color='#0f172a')),
-        hovertemplate=hover_format
+        hovertemplate=hover_format,
+        text=data,
+        texttemplate=text_template,
+        textposition='top center',
+        textfont=dict(color='#f1f5f9', size=10)
     )
     
     yaxis_config = {'gridcolor': 'rgba(148,163,184,0.15)', 'showline': False, 'color': '#94a3b8', 'tickfont': {'size': 11}}
@@ -454,8 +460,9 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
 
 def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     """Crea un gráfico de dona ordenado de mayor a menor, en sentido horario desde las 12"""
+    # Paleta de colores únicos y distintivos (sin repetir)
     if colors is None:
-        colors = ['#6366f1', '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#64748b']
+        colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6', '#a855f7', '#eab308', '#22d3d8', '#fb7185', '#4ade80']
     
     if auto_sort:
         # Ordenar de mayor a menor
@@ -494,6 +501,15 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         sort=False,
         rotation=rotation_ajustado
     )])
+    
+    # Agregar anotación con el total en el centro
+    fig.add_annotation(
+        text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
+        x=0.5, y=0.5,
+        font=dict(size=16, color='#f1f5f9'),
+        showarrow=False,
+        xref='paper', yref='paper'
+    )
     
     fig.update_layout(
         title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
@@ -1513,7 +1529,15 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         # Gráficos
         datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados)
         fig_ocupacional = px.line(x=meses_filtrados, y=datos_ocup, title='% Ocupacional Mensual', markers=True)
-        fig_ocupacional.update_traces(line_color='#10b981', line_width=2, marker=dict(size=8, line=dict(width=2, color='#0f172a')))
+        fig_ocupacional.update_traces(
+            line_color='#10b981', 
+            line_width=2, 
+            marker=dict(size=8, line=dict(width=2, color='#0f172a')),
+            text=datos_ocup,
+            texttemplate='%{y:.1f}',
+            textposition='top center',
+            textfont=dict(color='#f1f5f9', size=10)
+        )
         fig_ocupacional.update_layout(showlegend=False, plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)',
             title={'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5}, 
             xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''},
