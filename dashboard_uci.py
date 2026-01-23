@@ -473,8 +473,25 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         labels_sorted = labels
         colors_sorted = colors[:len(labels)]
     
+    # Para que visualmente vaya en sentido horario desde las 12:
+    # - Invertimos el orden de los datos (excepto el primero que va arriba)
+    # - El primer elemento queda arriba, los demás van hacia la izquierda (counterclockwise)
+    #   pero al invertir el orden, visualmente parece que van hacia la derecha
+    if len(values_sorted) > 1:
+        primer_valor = values_sorted[0]
+        primer_label = labels_sorted[0]
+        primer_color = colors_sorted[0]
+        # Invertir el resto
+        resto_values = values_sorted[1:][::-1]
+        resto_labels = labels_sorted[1:][::-1]
+        resto_colors = colors_sorted[1:][::-1]
+        # Reconstruir: primero el mayor, luego el resto invertido
+        values_sorted = [primer_valor] + resto_values
+        labels_sorted = [primer_label] + resto_labels
+        colors_sorted = [primer_color] + resto_colors
+    
     # rotation=90 empieza desde las 12 en punto
-    # direction='clockwise' va hacia la derecha (sentido horario visual)
+    # direction='counterclockwise' va hacia la izquierda, pero con datos invertidos parece horario
     fig = go.Figure(data=[go.Pie(
         labels=labels_sorted,
         values=values_sorted,
@@ -484,7 +501,7 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='clockwise',
+        direction='counterclockwise',
         sort=False,
         rotation=90
     )])
