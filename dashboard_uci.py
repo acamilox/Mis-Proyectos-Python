@@ -453,20 +453,28 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     return fig
 
 def create_donut_chart(labels, values, title, colors=None):
-    """Crea un gráfico de dona (donut chart)"""
+    """Crea un gráfico de dona (donut chart) ordenado de mayor a menor en sentido horario"""
     if colors is None:
         colors = ['#6366f1', '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#64748b']
     
+    # Ordenar de mayor a menor
+    datos = sorted(zip(values, labels, colors[:len(labels)]), reverse=True)
+    values_sorted = [d[0] for d in datos]
+    labels_sorted = [d[1] for d in datos]
+    colors_sorted = [d[2] for d in datos]
+    
     fig = go.Figure(data=[go.Pie(
-        labels=labels,
-        values=values,
+        labels=labels_sorted,
+        values=values_sorted,
         hole=0.5,
-        marker=dict(colors=colors[:len(labels)], line=dict(color='#0f172a', width=2)),
+        marker=dict(colors=colors_sorted, line=dict(color='#0f172a', width=2)),
         textinfo='percent+label',
         textposition='outside',
         textfont=dict(size=10, color='#f1f5f9'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        pull=[0.02] * len(values)
+        pull=[0.02] * len(values_sorted),
+        direction='clockwise',
+        sort=False
     )])
     
     fig.update_layout(
