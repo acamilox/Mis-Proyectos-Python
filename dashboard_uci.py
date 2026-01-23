@@ -485,8 +485,8 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     total = sum(values_final)
     mayor_pct = values_final[-1] / total if total > 0 else 0
     mayor_angulo = mayor_pct * 360
-    # Necesitamos rotar 90 grados mas para mover de las 3 a las 12
-    rotation_ajustado = 180 + (mayor_angulo / 2)
+    # El mayor debe estar centrado en las 12 (270 grados en sistema Plotly)
+    rotation_ajustado = 270 + (mayor_angulo / 2)
     
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
