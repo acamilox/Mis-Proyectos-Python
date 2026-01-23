@@ -452,16 +452,26 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     )
     return fig
 
-def create_donut_chart(labels, values, title, colors=None):
-    """Crea un gráfico de dona (donut chart) ordenado de mayor a menor en sentido horario desde las 12"""
+def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
+    """Crea un gráfico de dona (donut chart) en sentido horario desde las 12
+    
+    Args:
+        auto_sort: Si True, ordena de mayor a menor. Si False, respeta el orden dado.
+    """
     if colors is None:
         colors = ['#6366f1', '#10b981', '#06b6d4', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#64748b']
     
-    # Ordenar de mayor a menor
-    datos = sorted(zip(values, labels, colors[:len(labels)]), reverse=True)
-    values_sorted = [d[0] for d in datos]
-    labels_sorted = [d[1] for d in datos]
-    colors_sorted = [d[2] for d in datos]
+    if auto_sort:
+        # Ordenar de mayor a menor
+        datos = sorted(zip(values, labels, colors[:len(labels)]), reverse=True)
+        values_sorted = [d[0] for d in datos]
+        labels_sorted = [d[1] for d in datos]
+        colors_sorted = [d[2] for d in datos]
+    else:
+        # Respetar el orden dado
+        values_sorted = values
+        labels_sorted = labels
+        colors_sorted = colors[:len(labels)]
     
     # En Plotly: rotation=90 empieza desde las 12 en punto
     # direction='counterclockwise' hace que vaya hacia la DERECHA (sentido horario visual)
@@ -1485,12 +1495,14 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         if pd.isna(total_ingresos_anual) or total_ingresos_anual == 0: total_ingresos_anual = 1
         otras_eps = total_ingresos_anual - total_famisanar - total_compensar - total_salud_total - total_nueva_eps - total_capital_salud
         
-        # Donut de distribución EPS (principales)
+        # Donut de distribución EPS (principales) - Orden: mayor a menor en sentido horario
+        # Famisanar → Nueva EPS → Otras → Salud Total → Compensar → Capital Salud
         fig_eps_donut = create_donut_chart(
-            labels=['Famisanar', 'Compensar', 'Salud Total', 'Nueva EPS', 'Capital Salud', 'Otras'],
-            values=[total_famisanar, total_compensar, total_salud_total, total_nueva_eps, total_capital_salud, otras_eps],
+            labels=['Famisanar', 'Nueva EPS', 'Otras', 'Salud Total', 'Compensar', 'Capital Salud'],
+            values=[total_famisanar, total_nueva_eps, otras_eps, total_salud_total, total_compensar, total_capital_salud],
             title='Distribución por EPS',
-            colors=['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#64748b']
+            colors=['#10b981', '#3b82f6', '#64748b', '#ef4444', '#f59e0b', '#8b5cf6'],
+            auto_sort=False
         )
 
         # Gráficos
