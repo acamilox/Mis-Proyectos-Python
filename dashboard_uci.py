@@ -463,11 +463,11 @@ def create_donut_chart(labels, values, title, colors=None):
     labels_sorted = [d[1] for d in datos]
     colors_sorted = [d[2] for d in datos]
     
-    # Calcular el total para determinar el ángulo inicial
+    # Calcular el ángulo para que el primer segmento (mayor) esté centrado en las 12
     total = sum(values_sorted)
-    # El primer segmento debe empezar en las 12 (90 grados en coordenadas Plotly)
-    # pero centrado, así que restamos la mitad del primer segmento
     primer_porcentaje = (values_sorted[0] / total) * 360 if total > 0 else 0
+    # En Plotly: rotation es desde las 3 en punto, counterclockwise va hacia arriba
+    # Para centrar el mayor en las 12: empezamos en 90 + mitad del primer segmento
     angulo_inicio = 90 + (primer_porcentaje / 2)
     
     fig = go.Figure(data=[go.Pie(
@@ -479,7 +479,7 @@ def create_donut_chart(labels, values, title, colors=None):
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='clockwise',
+        direction='counterclockwise',
         sort=False,
         rotation=angulo_inicio
     )])
