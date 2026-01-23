@@ -481,14 +481,12 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     labels_final = labels_final[::-1]
     colors_final = colors_final[::-1]
     
-    # Calcular rotacion para que el ULTIMO elemento (que ahora es el mayor) quede arriba
+    # Calcular rotacion para que el ULTIMO elemento (que ahora es el mayor) quede arriba en las 12
     total = sum(values_final)
-    # El ultimo elemento es el mayor, calcular su angulo
     mayor_pct = values_final[-1] / total if total > 0 else 0
     mayor_angulo = mayor_pct * 360
-    # Con clockwise, el ultimo segmento termina en rotation
-    # Queremos que el centro del mayor este en 90 (las 12)
-    rotation_ajustado = 90 + (mayor_angulo / 2)
+    # Necesitamos rotar 90 grados mas para mover de las 3 a las 12
+    rotation_ajustado = 180 + (mayor_angulo / 2)
     
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
