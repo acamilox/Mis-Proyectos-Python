@@ -422,13 +422,14 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
     
     fig.update_traces(
         marker_color=bar_color,
-        marker_line_color='rgba(255,255,255,0.1)',
+        marker_line_color='rgba(255,255,255,0.2)',
         marker_line_width=1,
         hovertemplate=hover_format,
         text=data,
         texttemplate=text_template,
         textposition='inside',
-        textfont=dict(color='white', size=10)
+        insidetextanchor='middle',
+        textfont=dict(color='white', size=12, family='Inter', weight=700)
     )
     fig.update_layout(
         showlegend=False,
@@ -439,7 +440,8 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
         yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'showline': False, 'color': '#94a3b8', 'tickformat': 'd', 'tickfont': {'size': 11}, 'title': ''},
         margin=dict(l=50, r=30, t=50, b=40),
         height=380,
-        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9', bordercolor=bar_color)
+        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9', bordercolor=bar_color),
+        bargap=0.3
     )
     return fig
 
@@ -502,13 +504,14 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
         fig.add_trace(go.Bar(
             name=label, x=meses_disponibles, y=data,
             marker_color=colors[i % len(colors)],
-            marker_line_color='rgba(255,255,255,0.1)',
+            marker_line_color='rgba(255,255,255,0.2)',
             marker_line_width=1,
             hovertemplate=hover_template,
             text=data,
             texttemplate=text_template,
             textposition='inside',
-            textfont=dict(color='white', size=9)
+            insidetextanchor='middle',
+            textfont=dict(color='white', size=11, family='Inter')
         ))
     
     fig.update_layout(
@@ -523,7 +526,7 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
         legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5, 
                    bgcolor='rgba(15,23,42,0.9)', font={'color': '#f1f5f9', 'size': 11}, bordercolor='#334155', borderwidth=1),
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9', bordercolor='#6366f1'),
-        bargap=0.2
+        bargap=0.25
     )
     return fig
 
@@ -1391,12 +1394,13 @@ def render_tab_content(tab):
             fig_promedio_vm.add_trace(go.Bar(
                 x=meses_disponibles, y=promedio_vm,
                 marker_color='#9b59b6',
-                marker_line_color='rgba(255,255,255,0.1)',
+                marker_line_color='rgba(255,255,255,0.2)',
                 marker_line_width=1,
                 text=text_vm,
                 texttemplate='%{text}',
-                textposition='outside',
-                textfont=dict(color='#f1f5f9', size=10),
+                textposition='inside',
+                insidetextanchor='middle',
+                textfont=dict(color='white', size=12, family='Inter'),
                 hovertemplate='<b>%{x}</b><br>Promedio días VM: %{y:.1f}<extra></extra>'
             ))
             fig_promedio_vm.update_layout(
@@ -1406,6 +1410,7 @@ def render_tab_content(tab):
                 yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'showline': False, 'color': '#94a3b8', 'title': ''},
                 margin=dict(l=50, r=30, t=50, b=40),
                 height=380,
+                bargap=0.3,
                 hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
             )
             
