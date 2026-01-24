@@ -528,30 +528,14 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     return fig
 
 def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
-    """Crea un gráfico de dona ordenado de mayor a menor, en sentido horario desde las 12"""
-    # Paleta de 20 colores únicos y distintivos (sin repetir)
+    """Crea un gráfico de barras horizontales ordenado de mayor a menor"""
+    # Paleta de colores
     if colors is None:
         colors = [
-            '#6366f1',  # Indigo
-            '#10b981',  # Esmeralda
-            '#f59e0b',  # Ámbar
-            '#ef4444',  # Rojo
-            '#8b5cf6',  # Violeta
-            '#06b6d4',  # Cyan
-            '#ec4899',  # Rosa
-            '#84cc16',  # Lima
-            '#f97316',  # Naranja
-            '#14b8a6',  # Teal
-            '#a855f7',  # Púrpura
-            '#eab308',  # Amarillo
-            '#3b82f6',  # Azul
-            '#22c55e',  # Verde
-            '#e11d48',  # Rosa fuerte
-            '#0ea5e9',  # Celeste
-            '#d946ef',  # Fucsia
-            '#facc15',  # Dorado
-            '#64748b',  # Gris
-            '#fb923c',  # Melocotón
+            '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+            '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6',
+            '#a855f7', '#eab308', '#3b82f6', '#22c55e', '#e11d48',
+            '#0ea5e9', '#d946ef', '#facc15', '#64748b', '#fb923c',
         ]
     
     if auto_sort:
@@ -561,66 +545,58 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         labels_final = [d[1] for d in datos]
         colors_final = [d[2] for d in datos]
     else:
-        # Respetar el orden dado (NO invertir)
         values_final = list(values)
         labels_final = list(labels)
         colors_final = list(colors[:len(labels)])
     
-    # Calcular rotación para poner el primer elemento en las 12
+    # Calcular porcentajes
     total = sum(values_final)
+    porcentajes = [(v / total * 100) if total > 0 else 0 for v in values_final]
     
-    if total > 0:
-        # El primer elemento (índice 0) se pone en las 12
-        primer_pct = values_final[0] / total
-        primer_angulo = primer_pct * 360
-        # Rotamos la mitad del ángulo del primer segmento para centrarlo en las 12
-        rotation_ajustado = -primer_angulo / 2
-    else:
-        rotation_ajustado = 0
+    # Invertir para que el mayor quede arriba
+    values_final = values_final[::-1]
+    labels_final = labels_final[::-1]
+    colors_final = colors_final[::-1]
+    porcentajes = porcentajes[::-1]
     
-    fig = go.Figure(data=[go.Pie(
-        labels=labels_final,
-        values=values_final,
-        hole=0.5,
-        marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
-        textinfo='percent',
-        textposition='inside',
+    # Texto con valor y porcentaje
+    text_labels = [f'{int(v)} ({p:.1f}%)' for v, p in zip(values_final, porcentajes)]
+    
+    fig = go.Figure(data=[go.Bar(
+        x=values_final,
+        y=labels_final,
+        orientation='h',
+        marker=dict(
+            color=colors_final,
+            line=dict(color='#0f172a', width=1)
+        ),
+        text=text_labels,
+        textposition='auto',
         textfont=dict(size=11, color='white'),
-        hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-        direction='clockwise',
-        sort=False,
-        rotation=rotation_ajustado
+        hovertemplate='<b>%{y}</b><br>Cantidad: %{x}<br>Porcentaje: %{text}<extra></extra>'
     )])
     
-    # Agregar anotación con el total en el centro de la dona
-    fig.add_annotation(
-        text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
-        x=0.5, y=0.5,
-        font=dict(size=16, color='#f1f5f9'),
-        showarrow=False,
-        xref='paper', yref='paper'
-    )
-    
     fig.update_layout(
-        title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
+        title={'text': f'{title} (Total: {int(total):,})'.replace(',', '.'), 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
         plot_bgcolor='rgba(15,23,42,0.6)',
         paper_bgcolor='rgba(30,41,59,0.8)',
-        showlegend=True,
-        legend=dict(
-            orientation='v',
-            yanchor='middle',
-            y=0.5,
-            xanchor='left',
-            x=1.02,
-            bgcolor='rgba(15,23,42,0.8)',
-            bordercolor='#334155',
-            borderwidth=1,
-            font=dict(color='#f1f5f9', size=11),
-            itemsizing='constant',
-            tracegroupgap=8
+        showlegend=False,
+        xaxis=dict(
+            gridcolor='rgba(148,163,184,0.15)',
+            showline=False,
+            color='#94a3b8',
+            tickfont=dict(size=10),
+            title=''
         ),
-        margin=dict(l=20, r=150, t=50, b=30),
-        height=420,
+        yaxis=dict(
+            gridcolor='rgba(148,163,184,0.15)',
+            showline=False,
+            color='#f1f5f9',
+            tickfont=dict(size=10),
+            title=''
+        ),
+        margin=dict(l=120, r=20, t=50, b=30),
+        height=max(350, len(labels_final) * 32 + 80),
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
