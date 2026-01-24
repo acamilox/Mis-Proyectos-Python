@@ -1433,16 +1433,27 @@ def render_tab_content(tab):
             # Gráfico de Eventos Adversos - Barras horizontales
             fig_eventos = go.Figure()
             if not df_eventos_adversos.empty:
-                colors_eventos = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#f97316', '#dc2626', '#22c55e', '#a855f7']
+                # Paleta amplia de 25 colores únicos
+                colors_eventos = [
+                    '#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', 
+                    '#06b6d4', '#f97316', '#ec4899', '#22c55e', '#a855f7',
+                    '#14b8a6', '#eab308', '#3b82f6', '#84cc16', '#e11d48',
+                    '#0ea5e9', '#d946ef', '#facc15', '#fb7185', '#4ade80',
+                    '#38bdf8', '#c084fc', '#fbbf24', '#2dd4bf', '#f472b6'
+                ]
                 
                 # Invertir orden para que el mayor quede arriba
                 df_eventos_plot = df_eventos_adversos.iloc[::-1].reset_index(drop=True)
+                n_eventos = len(df_eventos_plot)
+                
+                # Asignar colores únicos a cada barra
+                bar_colors = [colors_eventos[i % len(colors_eventos)] for i in range(n_eventos)][::-1]
                 
                 fig_eventos = go.Figure(data=[go.Bar(
                     y=df_eventos_plot['Evento'],
                     x=df_eventos_plot['Cantidad'],
                     orientation='h',
-                    marker_color=colors_eventos[:len(df_eventos_plot)][::-1],
+                    marker_color=bar_colors,
                     text=df_eventos_plot['Cantidad'],
                     textposition='outside',
                     textfont=dict(color='#f1f5f9', size=12),
