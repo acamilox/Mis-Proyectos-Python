@@ -578,14 +578,27 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     else:
         rotation_ajustado = 0
     
+    # Calcular porcentajes para decidir qué mostrar
+    total_calc = sum(values_final) if sum(values_final) > 0 else 1
+    porcentajes = [(v / total_calc) * 100 for v in values_final]
+    
+    # Solo mostrar porcentaje dentro si es >= 3%
+    text_info = []
+    for pct in porcentajes:
+        if pct >= 3:
+            text_info.append(f'{pct:.1f}%')
+        else:
+            text_info.append('')
+    
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
         values=values_final,
         hole=0.5,
         marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
-        textinfo='percent',
+        text=text_info,
+        textinfo='text',
         textposition='inside',
-        textfont=dict(size=10, color='white'),
+        textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
         direction='clockwise',
         sort=False,
