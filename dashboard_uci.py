@@ -1465,11 +1465,11 @@ def render_tab_content(tab):
                 title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)',
                 xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'dtick': 2, 'range': [0, max_val + 3], 'title': ''},
-                yaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'color': '#94a3b8', 'tickfont': {'size': 11}, 'title': '', 'automargin': True},
-                margin=dict(l=250, r=50, t=50, b=30),
-                height=450,
+                yaxis={'gridcolor': 'rgba(148,163,184,0.1)', 'color': '#f1f5f9', 'tickfont': {'size': 10}, 'title': '', 'ticksuffix': '  '},
+                margin=dict(l=280, r=50, t=50, b=30),
+                height=500,
                 hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9', font_size=12),
-                bargap=0.25
+                bargap=0.2
             )
 
             # Gráfico GRAM-SOT (Donaciones/Trasplantes)
