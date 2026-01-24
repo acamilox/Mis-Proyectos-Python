@@ -1527,28 +1527,57 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60", "⏱️")
         kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄")
         
-        # EPS
+        # EPS - Todas las EPS individuales
         total_famisanar = safe_get_row('FAMISANAR', suma_col, silent=True)
         total_compensar = safe_get_row('COMPENSAR', suma_col, silent=True)
         total_salud_total = safe_get_row('SALUD TOTAL', suma_col, silent=True)
         total_nueva_eps = safe_get_row('NUEVA  EPS', suma_col, silent=True)
         total_capital_salud = safe_get_row('CAPITAL SALUD ', suma_col, silent=True)
+        total_sanitas = safe_get_row('SANITAS', suma_col, silent=True)
+        total_emcosalud = safe_get_row('EMCOSALUD', suma_col, silent=True)
+        total_sura = safe_get_row('SURA', suma_col, silent=True)
+        total_aliansalud = safe_get_row('ALIANSALUD', suma_col, silent=True)
+        total_emssanar = safe_get_row('EMSSANAR', suma_col, silent=True)
+        
+        # Limpiar valores nulos
         if pd.isna(total_famisanar): total_famisanar = 0
         if pd.isna(total_compensar): total_compensar = 0
         if pd.isna(total_salud_total): total_salud_total = 0
         if pd.isna(total_nueva_eps): total_nueva_eps = 0
         if pd.isna(total_capital_salud): total_capital_salud = 0
-        total_ingresos_anual = safe_get_row('NUMERO DE INGRESOS DEL MES', suma_col, silent=True)
-        if pd.isna(total_ingresos_anual) or total_ingresos_anual == 0: total_ingresos_anual = 1
-        otras_eps = total_ingresos_anual - total_famisanar - total_compensar - total_salud_total - total_nueva_eps - total_capital_salud
+        if pd.isna(total_sanitas): total_sanitas = 0
+        if pd.isna(total_emcosalud): total_emcosalud = 0
+        if pd.isna(total_sura): total_sura = 0
+        if pd.isna(total_aliansalud): total_aliansalud = 0
+        if pd.isna(total_emssanar): total_emssanar = 0
         
-        # Donut de distribución EPS (principales) - ORDEN EXACTO: Famisanar → Compensar → Salud Total → Otras → Nueva EPS → Capital Salud
+        # Crear lista de EPS con sus valores (solo las que tienen datos > 0)
+        eps_data = [
+            ('Famisanar', total_famisanar),
+            ('Compensar', total_compensar),
+            ('Salud Total', total_salud_total),
+            ('Nueva EPS', total_nueva_eps),
+            ('Capital Salud', total_capital_salud),
+            ('Sanitas', total_sanitas),
+            ('Emcosalud', total_emcosalud),
+            ('Sura', total_sura),
+            ('Aliansalud', total_aliansalud),
+            ('Emssanar', total_emssanar),
+        ]
+        
+        # Filtrar EPS con valores > 0 y ordenar de mayor a menor
+        eps_data = [(nombre, valor) for nombre, valor in eps_data if valor > 0]
+        eps_data.sort(key=lambda x: x[1], reverse=True)
+        
+        eps_labels = [e[0] for e in eps_data]
+        eps_values = [e[1] for e in eps_data]
+        
+        # Donut de distribución EPS - Ordenado de mayor a menor
         fig_eps_donut = create_donut_chart(
-            labels=['Famisanar', 'Compensar', 'Salud Total', 'Otras', 'Nueva EPS', 'Capital Salud'],
-            values=[total_famisanar, total_compensar, total_salud_total, otras_eps, total_nueva_eps, total_capital_salud],
+            labels=eps_labels,
+            values=eps_values,
             title='Distribución por EPS',
-            colors=['#10b981', '#3b82f6', '#64748b', '#ef4444', '#f59e0b', '#8b5cf6'],
-            auto_sort=False
+            auto_sort=False  # Ya está ordenado
         )
 
         # Gráficos
