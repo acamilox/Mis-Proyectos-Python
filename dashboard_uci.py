@@ -578,39 +578,25 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     else:
         rotation_ajustado = 0
     
-    # Calcular porcentajes para decidir qué mostrar
-    total_calc = sum(values_final) if sum(values_final) > 0 else 1
-    porcentajes = [(v / total_calc) * 100 for v in values_final]
-    
-    # Solo mostrar porcentaje dentro si es >= 3%
-    text_info = []
-    for pct in porcentajes:
-        if pct >= 3:
-            text_info.append(f'{pct:.1f}%')
-        else:
-            text_info.append('')
-    
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
         values=values_final,
         hole=0.5,
         marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
-        text=text_info,
-        textinfo='text',
+        textinfo='percent',
         textposition='inside',
         textfont=dict(size=11, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
         direction='clockwise',
         sort=False,
-        rotation=rotation_ajustado,
-        domain=dict(x=[0.05, 0.95], y=[0.30, 1])
+        rotation=rotation_ajustado
     )])
     
     # Agregar anotación con el total en el centro de la dona
     fig.add_annotation(
         text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
-        x=0.5, y=0.65,
-        font=dict(size=15, color='#f1f5f9'),
+        x=0.5, y=0.5,
+        font=dict(size=16, color='#f1f5f9'),
         showarrow=False,
         xref='paper', yref='paper'
     )
@@ -621,19 +607,20 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         paper_bgcolor='rgba(30,41,59,0.8)',
         showlegend=True,
         legend=dict(
-            orientation='h',
-            yanchor='top',
-            y=0.22,
-            xanchor='center',
-            x=0.5,
-            bgcolor='rgba(15,23,42,0.0)',
-            font=dict(color='#f1f5f9', size=10),
+            orientation='v',
+            yanchor='middle',
+            y=0.5,
+            xanchor='left',
+            x=1.02,
+            bgcolor='rgba(15,23,42,0.8)',
+            bordercolor='#334155',
+            borderwidth=1,
+            font=dict(color='#f1f5f9', size=11),
             itemsizing='constant',
-            entrywidth=120,
-            entrywidthmode='pixels'
+            tracegroupgap=8
         ),
-        margin=dict(l=10, r=10, t=45, b=10),
-        height=550,
+        margin=dict(l=20, r=150, t=50, b=30),
+        height=420,
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
