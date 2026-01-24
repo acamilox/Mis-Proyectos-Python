@@ -583,20 +583,20 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         values=values_final,
         hole=0.5,
         marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
-        textinfo='percent',
-        textposition='inside',
-        textfont=dict(size=10, color='white'),
+        textinfo='label+percent',
+        textposition='outside',
+        textfont=dict(size=11, color='#f1f5f9'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
         direction='clockwise',
         sort=False,
         rotation=rotation_ajustado,
-        domain=dict(x=[0.05, 0.95], y=[0.30, 1])
+        pull=[0.02] * len(values_final)
     )])
     
     # Agregar anotación con el total en el centro de la dona
     fig.add_annotation(
         text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
-        x=0.5, y=0.65,
+        x=0.5, y=0.5,
         font=dict(size=15, color='#f1f5f9'),
         showarrow=False,
         xref='paper', yref='paper'
@@ -606,21 +606,9 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
         plot_bgcolor='rgba(15,23,42,0.6)',
         paper_bgcolor='rgba(30,41,59,0.8)',
-        showlegend=True,
-        legend=dict(
-            orientation='h',
-            yanchor='top',
-            y=0.22,
-            xanchor='center',
-            x=0.5,
-            bgcolor='rgba(15,23,42,0.0)',
-            font=dict(color='#f1f5f9', size=10),
-            itemsizing='constant',
-            entrywidth=120,
-            entrywidthmode='pixels'
-        ),
-        margin=dict(l=10, r=10, t=45, b=10),
-        height=550,
+        showlegend=False,
+        margin=dict(l=80, r=80, t=50, b=30),
+        height=500,
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
