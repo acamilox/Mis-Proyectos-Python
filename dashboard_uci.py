@@ -528,7 +528,7 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     return fig
 
 def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
-    """Crea un gráfico de barras horizontales ordenado de mayor a menor"""
+    """Crea un gráfico Treemap ordenado de mayor a menor"""
     # Paleta de colores
     if colors is None:
         colors = [
@@ -553,50 +553,28 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     total = sum(values_final)
     porcentajes = [(v / total * 100) if total > 0 else 0 for v in values_final]
     
-    # Invertir para que el mayor quede arriba
-    values_final = values_final[::-1]
-    labels_final = labels_final[::-1]
-    colors_final = colors_final[::-1]
-    porcentajes = porcentajes[::-1]
+    # Texto para mostrar
+    text_labels = [f'{label}<br>{int(v)} ({p:.1f}%)' for label, v, p in zip(labels_final, values_final, porcentajes)]
     
-    # Texto con valor y porcentaje
-    text_labels = [f'{int(v)} ({p:.1f}%)' for v, p in zip(values_final, porcentajes)]
-    
-    fig = go.Figure(data=[go.Bar(
-        x=values_final,
-        y=labels_final,
-        orientation='h',
-        marker=dict(
-            color=colors_final,
-            line=dict(color='#0f172a', width=1)
-        ),
+    fig = go.Figure(data=[go.Treemap(
+        labels=labels_final,
+        values=values_final,
+        parents=[''] * len(labels_final),
         text=text_labels,
-        textposition='auto',
-        textfont=dict(size=11, color='white'),
-        hovertemplate='<b>%{y}</b><br>Cantidad: %{x}<br>Porcentaje: %{text}<extra></extra>'
+        textinfo='text',
+        textfont=dict(size=12, color='white'),
+        marker=dict(
+            colors=colors_final,
+            line=dict(color='#0f172a', width=2)
+        ),
+        hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percentRoot:.1%}<extra></extra>'
     )])
     
     fig.update_layout(
         title={'text': f'{title} (Total: {int(total):,})'.replace(',', '.'), 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
-        plot_bgcolor='rgba(15,23,42,0.6)',
         paper_bgcolor='rgba(30,41,59,0.8)',
-        showlegend=False,
-        xaxis=dict(
-            gridcolor='rgba(148,163,184,0.15)',
-            showline=False,
-            color='#94a3b8',
-            tickfont=dict(size=10),
-            title=''
-        ),
-        yaxis=dict(
-            gridcolor='rgba(148,163,184,0.15)',
-            showline=False,
-            color='#f1f5f9',
-            tickfont=dict(size=10),
-            title=''
-        ),
-        margin=dict(l=120, r=20, t=50, b=30),
-        height=max(350, len(labels_final) * 32 + 80),
+        margin=dict(l=10, r=10, t=50, b=10),
+        height=420,
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
