@@ -590,13 +590,13 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         direction='clockwise',
         sort=False,
         rotation=rotation_ajustado,
-        domain=dict(x=[0.15, 0.85], y=[0.25, 1])  # Dona más arriba para dejar espacio a leyenda
+        domain=dict(x=[0.05, 0.95], y=[0.30, 1])
     )])
     
     # Agregar anotación con el total en el centro de la dona
     fig.add_annotation(
         text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
-        x=0.5, y=0.62,
+        x=0.5, y=0.65,
         font=dict(size=15, color='#f1f5f9'),
         showarrow=False,
         xref='paper', yref='paper'
@@ -610,15 +610,17 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         legend=dict(
             orientation='h',
             yanchor='top',
-            y=0.18,
+            y=0.22,
             xanchor='center',
             x=0.5,
             bgcolor='rgba(15,23,42,0.0)',
-            font=dict(color='#f1f5f9', size=11),
-            itemsizing='constant'
+            font=dict(color='#f1f5f9', size=10),
+            itemsizing='constant',
+            entrywidth=120,
+            entrywidthmode='pixels'
         ),
         margin=dict(l=10, r=10, t=45, b=10),
-        height=520,
+        height=550,
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
