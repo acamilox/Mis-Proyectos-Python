@@ -581,22 +581,23 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
         values=values_final,
-        hole=0.5,
+        hole=0.55,
         marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
         textinfo='percent',
         textposition='inside',
-        textfont=dict(size=11, color='white'),
+        textfont=dict(size=9, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
         direction='clockwise',
         sort=False,
-        rotation=rotation_ajustado
+        rotation=rotation_ajustado,
+        domain=dict(x=[0, 0.55], y=[0, 1])  # Dona más pequeña a la izquierda
     )])
     
-    # Agregar anotación con el total en el centro
+    # Agregar anotación con el total en el centro de la dona
     fig.add_annotation(
         text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
-        x=0.5, y=0.5,
-        font=dict(size=16, color='#f1f5f9'),
+        x=0.275, y=0.5,
+        font=dict(size=14, color='#f1f5f9'),
         showarrow=False,
         xref='paper', yref='paper'
     )
@@ -611,16 +612,17 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
             yanchor='middle',
             y=0.5,
             xanchor='left',
-            x=1.02,
+            x=0.58,
             bgcolor='rgba(15,23,42,0.8)',
             bordercolor='#334155',
             borderwidth=1,
-            font=dict(color='#f1f5f9', size=11),
+            font=dict(color='#f1f5f9', size=10),
             itemsizing='constant',
-            tracegroupgap=8
+            tracegroupgap=2,
+            itemwidth=30
         ),
-        margin=dict(l=20, r=150, t=50, b=30),
-        height=420,
+        margin=dict(l=10, r=10, t=50, b=20),
+        height=480,
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
