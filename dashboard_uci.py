@@ -529,29 +529,29 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
 
 def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     """Crea un gráfico de dona ordenado de mayor a menor, en sentido horario desde las 12"""
-    # Paleta de 20 colores únicos y distintivos (sin repetir)
+    # Paleta de colores pastel/vibrantes diferenciados (evitando rojos y verdes similares)
     if colors is None:
         colors = [
-            '#6366f1',  # Indigo
-            '#10b981',  # Esmeralda
-            '#f59e0b',  # Ámbar
-            '#ef4444',  # Rojo
-            '#8b5cf6',  # Violeta
-            '#06b6d4',  # Cyan
-            '#ec4899',  # Rosa
-            '#84cc16',  # Lima
-            '#f97316',  # Naranja
-            '#14b8a6',  # Teal
-            '#a855f7',  # Púrpura
-            '#eab308',  # Amarillo
-            '#3b82f6',  # Azul
-            '#22c55e',  # Verde
-            '#e11d48',  # Rosa fuerte
-            '#0ea5e9',  # Celeste
-            '#d946ef',  # Fucsia
-            '#facc15',  # Dorado
-            '#64748b',  # Gris
-            '#fb923c',  # Melocotón
+            '#818cf8',  # Indigo claro
+            '#34d399',  # Esmeralda
+            '#fbbf24',  # Ámbar
+            '#f87171',  # Rojo coral
+            '#a78bfa',  # Violeta
+            '#22d3ee',  # Cyan
+            '#f472b6',  # Rosa
+            '#a3e635',  # Lima
+            '#fb923c',  # Naranja
+            '#2dd4bf',  # Teal
+            '#c084fc',  # Púrpura claro
+            '#facc15',  # Amarillo
+            '#60a5fa',  # Azul claro
+            '#4ade80',  # Verde menta
+            '#fb7185',  # Rosa fuerte
+            '#38bdf8',  # Celeste
+            '#e879f9',  # Fucsia
+            '#fcd34d',  # Dorado
+            '#94a3b8',  # Gris
+            '#fdba74',  # Melocotón
         ]
     
     if auto_sort:
@@ -581,45 +581,49 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
         values=values_final,
-        hole=0.5,
-        marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
+        hole=0.45,
+        marker=dict(
+            colors=colors_final, 
+            line=dict(color='#1e293b', width=2)
+        ),
         textinfo='percent',
         textposition='inside',
-        textfont=dict(size=10, color='white'),
+        textfont=dict(size=11, color='white', family='Inter'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
         direction='clockwise',
         sort=False,
         rotation=rotation_ajustado,
-        domain=dict(x=[0.15, 0.85], y=[0.25, 1])  # Dona más arriba para dejar espacio a leyenda
+        domain=dict(x=[0.1, 0.9], y=[0.22, 0.98])
     )])
     
     # Agregar anotación con el total en el centro de la dona
     fig.add_annotation(
-        text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
-        x=0.5, y=0.62,
-        font=dict(size=15, color='#f1f5f9'),
+        text=f"<b>Total</b><br><span style='font-size:18px'>{int(total):,}</span>".replace(',', '.'),
+        x=0.5, y=0.60,
+        font=dict(size=13, color='#f1f5f9', family='Inter'),
         showarrow=False,
         xref='paper', yref='paper'
     )
     
     fig.update_layout(
-        title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
+        title={'text': title, 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter', 'weight': 'bold'}, 'x': 0.5, 'xanchor': 'center', 'y': 0.98},
         plot_bgcolor='rgba(15,23,42,0.6)',
         paper_bgcolor='rgba(30,41,59,0.8)',
         showlegend=True,
         legend=dict(
             orientation='h',
             yanchor='top',
-            y=0.18,
+            y=0.15,
             xanchor='center',
             x=0.5,
-            bgcolor='rgba(15,23,42,0.0)',
-            font=dict(color='#f1f5f9', size=11),
-            itemsizing='constant'
+            bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#e2e8f0', size=10, family='Inter'),
+            itemsizing='constant',
+            itemwidth=40
         ),
-        margin=dict(l=10, r=10, t=45, b=10),
-        height=520,
-        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
+        margin=dict(l=15, r=15, t=40, b=5),
+        height=480,
+        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9', bordercolor='#475569')
     )
     return fig
 
