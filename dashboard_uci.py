@@ -581,23 +581,22 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
         values=values_final,
-        hole=0.55,
+        hole=0.5,
         marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
         textinfo='percent',
         textposition='inside',
-        textfont=dict(size=9, color='white'),
+        textfont=dict(size=10, color='white'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
         direction='clockwise',
         sort=False,
-        rotation=rotation_ajustado,
-        domain=dict(x=[0, 0.55], y=[0, 1])  # Dona más pequeña a la izquierda
+        rotation=rotation_ajustado
     )])
     
     # Agregar anotación con el total en el centro de la dona
     fig.add_annotation(
         text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
-        x=0.275, y=0.5,
-        font=dict(size=14, color='#f1f5f9'),
+        x=0.5, y=0.55,
+        font=dict(size=16, color='#f1f5f9'),
         showarrow=False,
         xref='paper', yref='paper'
     )
@@ -608,21 +607,19 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         paper_bgcolor='rgba(30,41,59,0.8)',
         showlegend=True,
         legend=dict(
-            orientation='v',
-            yanchor='middle',
-            y=0.5,
-            xanchor='left',
-            x=0.58,
+            orientation='h',
+            yanchor='top',
+            y=-0.05,
+            xanchor='center',
+            x=0.5,
             bgcolor='rgba(15,23,42,0.8)',
             bordercolor='#334155',
             borderwidth=1,
             font=dict(color='#f1f5f9', size=10),
-            itemsizing='constant',
-            tracegroupgap=2,
-            itemwidth=30
+            itemsizing='constant'
         ),
-        margin=dict(l=10, r=10, t=50, b=20),
-        height=480,
+        margin=dict(l=20, r=20, t=50, b=100),
+        height=500,
         hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
     )
     return fig
