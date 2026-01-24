@@ -528,7 +528,7 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
     return fig
 
 def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
-    """Crea un gráfico Treemap ordenado de mayor a menor"""
+    """Crea un gráfico de torta (pie chart) ordenado de mayor a menor"""
     # Paleta de colores
     if colors is None:
         colors = [
@@ -549,11 +549,76 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         labels_final = list(labels)
         colors_final = list(colors[:len(labels)])
     
-    # Calcular porcentajes
+    total = sum(values_final)
+    
+    # Calcular rotación para centrar el mayor en las 12
+    if total > 0:
+        primer_pct = values_final[0] / total
+        primer_angulo = primer_pct * 360
+        rotation_ajustado = 90 - (primer_angulo / 2)
+    else:
+        rotation_ajustado = 90
+    
+    fig = go.Figure(data=[go.Pie(
+        labels=labels_final,
+        values=values_final,
+        hole=0,  # Sin hueco = torta
+        marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
+        textinfo='percent',
+        textposition='inside',
+        textfont=dict(size=11, color='white'),
+        hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
+        direction='clockwise',
+        sort=False,
+        rotation=rotation_ajustado
+    )])
+    
+    fig.update_layout(
+        title={'text': f'{title} (Total: {int(total):,})'.replace(',', '.'), 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
+        plot_bgcolor='rgba(15,23,42,0.6)',
+        paper_bgcolor='rgba(30,41,59,0.8)',
+        showlegend=True,
+        legend=dict(
+            orientation='v',
+            yanchor='middle',
+            y=0.5,
+            xanchor='left',
+            x=1.02,
+            bgcolor='rgba(15,23,42,0.8)',
+            bordercolor='#334155',
+            borderwidth=1,
+            font=dict(color='#f1f5f9', size=10),
+            itemsizing='constant'
+        ),
+        margin=dict(l=20, r=150, t=50, b=30),
+        height=420,
+        hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
+    )
+    return fig
+
+def create_treemap_chart(labels, values, title, colors=None, auto_sort=True):
+    """Crea un gráfico Treemap ordenado de mayor a menor"""
+    # Paleta de colores
+    if colors is None:
+        colors = [
+            '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+            '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6',
+            '#a855f7', '#eab308', '#3b82f6', '#22c55e', '#e11d48',
+            '#0ea5e9', '#d946ef', '#facc15', '#64748b', '#fb923c',
+        ]
+    
+    if auto_sort:
+        datos = sorted(zip(values, labels, colors[:len(labels)]), reverse=True)
+        values_final = [d[0] for d in datos]
+        labels_final = [d[1] for d in datos]
+        colors_final = [d[2] for d in datos]
+    else:
+        values_final = list(values)
+        labels_final = list(labels)
+        colors_final = list(colors[:len(labels)])
+    
     total = sum(values_final)
     porcentajes = [(v / total * 100) if total > 0 else 0 for v in values_final]
-    
-    # Texto para mostrar
     text_labels = [f'{label}<br>{int(v)} ({p:.1f}%)' for label, v, p in zip(labels_final, values_final, porcentajes)]
     
     fig = go.Figure(data=[go.Treemap(
@@ -563,10 +628,7 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         text=text_labels,
         textinfo='text',
         textfont=dict(size=12, color='white'),
-        marker=dict(
-            colors=colors_final,
-            line=dict(color='#0f172a', width=2)
-        ),
+        marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percentRoot:.1%}<extra></extra>'
     )])
     
@@ -1389,8 +1451,8 @@ def render_tab_content(tab):
             # Gráfico de Gérmenes Aislados (donut)
             fig_germenes = go.Figure()
             if not df_germenes.empty:
-                # auto_sort=True ordena de mayor a menor automáticamente
-                fig_germenes = create_donut_chart(
+                # Treemap para gérmenes (muchas categorías)
+                fig_germenes = create_treemap_chart(
                     labels=df_germenes['Germen'].tolist(),
                     values=df_germenes['Cantidad'].tolist(),
                     title='Gérmenes Aislados (IAAS)',
