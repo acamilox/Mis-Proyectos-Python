@@ -53,9 +53,9 @@ df_morbilidad = pd.DataFrame()
 try:
     df_morb_raw = pd.read_excel(EXCEL_PATH, sheet_name='MORBILIDAD', header=None)
     
-    # Procesar datos de morbilidad - extraer totales por diagnóstico
+    # Procesar datos de morbilidad - extraer totales por diagnóstico (todas las categorías)
     diagnosticos = ['ACV', 'CARDIOVASCULAR', 'RESPIRATORIO', 'SEPSIS', 'POP', 'DM', 
-                    'GINECO-OBSTE', 'TRAUMA', 'TOXICOLOGIA', 'OTROS']
+                    'GINECO-OBSTE', 'GINECO-ONCOLOGIA', 'GINECO', 'TRAUMA', 'TOXICOLOGIA', 'OTROS']
     
     morbilidad_data = {diag: {'Hombre': 0, 'Mujer': 0, 'Total': 0} for diag in diagnosticos}
     
@@ -76,6 +76,8 @@ try:
                 if pd.notna(total): morbilidad_data[diag_key]['Total'] += int(total)
     
     df_morbilidad = pd.DataFrame(morbilidad_data).T
+    # Filtrar solo los que tienen datos > 0 y ordenar de mayor a menor
+    df_morbilidad = df_morbilidad[df_morbilidad['Total'] > 0]
     df_morbilidad = df_morbilidad.sort_values('Total', ascending=False)
     print(f"✅ Datos de morbilidad cargados: {len(df_morbilidad)} diagnósticos")
 except Exception as e:
@@ -211,31 +213,98 @@ try:
     meses_sep = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
                  'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE']
     
-    def categorizar_evento(e):
-        e_lower = e.lower()
+    def normalizar_evento(e):
+        """Normaliza el nombre del evento para agrupar variantes similares"""
+        e_lower = e.lower().strip()
+        
+        # Autoextubación
         if 'autoextubación' in e_lower or 'autoextubacion' in e_lower:
             return 'Autoextubación'
-        if 'lpp' in e_lower and 'dispositivo' in e_lower:
-            return 'LPP por dispositivo médico'
-        if 'lpp' in e_lower or ('lesion' in e_lower and 'presion' in e_lower):
-            return 'LPP (Lesiones por Presión)'
-        if 'desplazamiento' in e_lower:
-            return 'Desplazamiento de dispositivos'
+        
+        # Autoretiro de dispositivos (especificar cuál)
         if 'autoretiro' in e_lower:
-            return 'Autoretiro de dispositivos'
+            if 'cvc' in e_lower:
+                return 'Autoretiro CVC'
+            if 'picc' in e_lower:
+                return 'Autoretiro PICC'
+            if 'ventriculostomia' in e_lower:
+                return 'Autoretiro Ventriculostomía'
+            return 'Autoretiro de dispositivo'
+        
+        # Desplazamiento de dispositivos (especificar cuál)
+        if 'desplazamiento' in e_lower:
+            if 'gastrostomia' in e_lower or 'sonda' in e_lower:
+                return 'Desplazamiento sonda/gastrostomía'
+            if 'cvc' in e_lower or 'venoso central' in e_lower:
+                return 'Desplazamiento CVC'
+            if 'hemodialisis' in e_lower or 'hemodiálisis' in e_lower:
+                return 'Desplazamiento catéter hemodiálisis'
+            if 'arterial' in e_lower:
+                return 'Desplazamiento línea arterial'
+            if 'torax' in e_lower or 'tórax' in e_lower:
+                return 'Desplazamiento tubo tórax'
+            if 'nefrostomia' in e_lower:
+                return 'Desplazamiento nefrostomía'
+            if 'biliar' in e_lower:
+                return 'Desplazamiento derivación biliar'
+            if 'parecentesis' in e_lower or 'paracentesis' in e_lower:
+                return 'Desplazamiento catéter paracentesis'
+            return 'Desplazamiento de dispositivo'
+        
+        # LPP (Lesiones por presión)
+        if 'lpp' in e_lower or ('lesion' in e_lower and 'presion' in e_lower):
+            if 'dispositivo' in e_lower or 'medico' in e_lower or 'collar' in e_lower:
+                return 'LPP por dispositivo médico'
+            if 'sacra' in e_lower or 'sacro' in e_lower:
+                return 'LPP región sacra'
+            if 'talon' in e_lower or 'talón' in e_lower:
+                return 'LPP talón'
+            if 'occipital' in e_lower:
+                return 'LPP occipital'
+            if 'gluteo' in e_lower or 'glúteo' in e_lower:
+                return 'LPP glúteo'
+            return 'LPP'
+        
+        # LECASH
         if 'lecash' in e_lower:
             return 'LECASH'
+        
+        # MARSI
         if 'marsi' in e_lower:
             return 'Lesión MARSI'
-        if 'error' in e_lower or 'medicamento' in e_lower:
-            return 'Errores de medicación'
+        
+        # Errores de medicación
+        if 'error' in e_lower or 'medicamento' in e_lower or 'medicación' in e_lower:
+            if 'contraste' in e_lower:
+                return 'Error medicamento (contraste)'
+            if 'retiro' in e_lower:
+                return 'Error en retiro CVC'
+            if 'retraso' in e_lower:
+                return 'Retraso administración medicamento'
+            return 'Error de medicación'
+        
+        # Problema con medicamento
+        if 'problema' in e_lower and 'medicamento' in e_lower:
+            return 'Problema con medicamento'
+        
+        # Retraso medicamento
+        if 'retraso' in e_lower:
+            return 'Retraso administración medicamento'
+        
+        # Caídas
         if 'caida' in e_lower or 'caída' in e_lower:
-            return 'Caídas'
+            return 'Caída'
+        
+        # Flebitis
         if 'flebitis' in e_lower:
             return 'Flebitis'
+        
+        # Neumotórax
         if 'neumotórax' in e_lower or 'neumotorax' in e_lower:
             return 'Neumotórax'
-        return 'Otros'
+        
+        # Si no coincide con nada, devolver el evento original capitalizado
+        return e.strip().capitalize()
     
     todos_eventos = []
     for i in range(1, 200):
@@ -243,7 +312,7 @@ try:
         if cell.value:
             evento = str(cell.value).strip()
             if evento.upper() not in meses_sep and evento and evento.upper() != 'NAN':
-                todos_eventos.append(categorizar_evento(evento))
+                todos_eventos.append(normalizar_evento(evento))
     
     # Agrupar eventos y contar
     df_eventos_adversos = pd.Series(todos_eventos).value_counts().reset_index()
