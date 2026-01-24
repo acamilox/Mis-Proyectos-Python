@@ -1383,18 +1383,20 @@ def render_tab_content(tab):
             kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12", "🛏️")
             kpi5 = create_kpi_card("Promedio Días VM", f"{promedio_vm_general:.2f}", "Ventilación Mecánica", "#9b59b6", "🫁")
             
-            fig_estancia = create_line_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=1)
+            fig_estancia = create_bar_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=1)
             fig_giro = create_bar_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
             
             fig_promedio_vm = go.Figure()
             text_vm = [f'{v:.1f}' if pd.notna(v) else '' for v in promedio_vm]
-            fig_promedio_vm.add_trace(go.Scatter(
-                x=meses_disponibles, y=promedio_vm, mode='lines+markers+text',
-                line=dict(color='#9b59b6', width=2),
-                marker=dict(size=10, color='#9b59b6', line=dict(width=2, color='#0f172a')),
+            fig_promedio_vm.add_trace(go.Bar(
+                x=meses_disponibles, y=promedio_vm,
+                marker_color='#9b59b6',
+                marker_line_color='rgba(255,255,255,0.1)',
+                marker_line_width=1,
                 text=text_vm,
-                textposition='top center',
-                textfont=dict(color='#f1f5f9', size=11),
+                texttemplate='%{text}',
+                textposition='outside',
+                textfont=dict(color='#f1f5f9', size=10),
                 hovertemplate='<b>%{x}</b><br>Promedio días VM: %{y:.1f}<extra></extra>'
             ))
             fig_promedio_vm.update_layout(
@@ -1408,9 +1410,9 @@ def render_tab_content(tab):
             )
             
             fig_bacteriemia = create_line_chart('TASA DE BACTERIEMIA ASOC. A  C. CENTRAL', 'Tasa de ITS AC', color='#e74c3c', silent=True, decimals=1)
-            fig_nav = create_line_chart('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV', color='#e74c3c', silent=True, decimals=1)
+            fig_nav = create_bar_chart('TASA NEUMONÍA ASOCIADA A VENTILADOR', 'Tasa NAV', color='#e74c3c', silent=True, decimals=1)
             fig_istu = create_line_chart('TASA INFECCIÓN ASOCIADA A C. URINARIO', 'Tasa de ISTU AC', color='#f39c12', silent=True, decimals=1)
-            fig_lesiones = create_line_chart('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión', color='#9b59b6', silent=True, decimals=1)
+            fig_lesiones = create_bar_chart('TASA LESIONES POR PRESION', 'Tasa Lesiones por Presión', color='#9b59b6', silent=True, decimals=1)
 
             # Gráfico de Gérmenes Aislados (donut)
             fig_germenes = go.Figure()
