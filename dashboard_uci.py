@@ -1711,9 +1711,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 barmode='group', plot_bgcolor='rgba(15,23,42,0.6)', paper_bgcolor='rgba(30,41,59,0.8)', 
                 xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'tickangle': -45, 'title': ''},
                 yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''}, 
-                margin=dict(l=50, r=30, t=50, b=100),
-                height=400,
-                legend=dict(orientation="h", y=-0.30, x=0.5, xanchor="center",
+                margin=dict(l=50, r=30, t=50, b=130),
+                height=420,
+                legend=dict(orientation="h", y=-0.45, x=0.5, xanchor="center",
                 bgcolor='rgba(15,23,42,0.9)', font={'color': '#f1f5f9', 'size': 11}, bordercolor='#334155', borderwidth=1), 
                 hoverlabel=dict(bgcolor='#1e293b', font_color='#f1f5f9'))
 
