@@ -551,13 +551,13 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     
     total = sum(values_final)
     
-    # Calcular rotación para centrar el mayor en las 12
+    # Calcular rotación para centrar el mayor en las 12 (arriba)
     if total > 0:
         primer_pct = values_final[0] / total
         primer_angulo = primer_pct * 360
-        rotation_ajustado = 90 - (primer_angulo / 2)
+        rotation_ajustado = -primer_angulo / 2
     else:
-        rotation_ajustado = 90
+        rotation_ajustado = 0
     
     fig = go.Figure(data=[go.Pie(
         labels=labels_final,
