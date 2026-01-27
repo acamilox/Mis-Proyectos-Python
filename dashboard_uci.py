@@ -429,7 +429,7 @@ def create_bar_chart(row_name, title, color=None, silent=False, decimals=0):
         texttemplate=text_template,
         textposition='inside',
         insidetextanchor='middle',
-        textfont=dict(color='white', size=12, family='Inter', weight=700)
+        textfont=dict(color='black', size=12, family='Inter', weight=700)
     )
     fig.update_layout(
         showlegend=False,
@@ -511,7 +511,7 @@ def create_grouped_bar_chart(row_names, labels, title, decimals=0):
             texttemplate=text_template,
             textposition='inside',
             insidetextanchor='middle',
-            textfont=dict(color='white', size=11, family='Inter')
+            textfont=dict(color='black', size=11, family='Inter')
         ))
     
     fig.update_layout(
@@ -1400,7 +1400,7 @@ def render_tab_content(tab):
                 texttemplate='%{text}',
                 textposition='inside',
                 insidetextanchor='middle',
-                textfont=dict(color='white', size=12, family='Inter'),
+                textfont=dict(color='black', size=12, family='Inter'),
                 hovertemplate='<b>%{x}</b><br>Promedio días VM: %{y:.1f}<extra></extra>'
             ))
             fig_promedio_vm.update_layout(
