@@ -1707,7 +1707,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                     texttemplate='%{x:.0f}',
                     textposition='inside',
                     insidetextanchor='middle',
-                    textfont=dict(color='white', size=12, family='Inter')
+                    textfont=dict(color='black', size=12, family='Inter', weight='bold')
                 )
             ])
             fig_morbilidad_total.update_layout(
@@ -1715,9 +1715,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 plot_bgcolor='rgba(15,23,42,0.6)',
                 paper_bgcolor='rgba(30,41,59,0.8)',
                 xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''},
-                yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': '', 'ticksuffix': '  '},
-                margin=dict(l=150, r=30, t=50, b=30),
-                height=450,
+                yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': '', 'ticksuffix': '  ', 'automargin': True},
+                margin=dict(l=180, r=30, t=50, b=30),
+                height=500,
                 showlegend=False,
                 hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
             )
