@@ -569,7 +569,7 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
         marker=dict(colors=colors_final, line=dict(color='#0f172a', width=2)),
         textinfo='percent',
         textposition='inside',
-        textfont=dict(size=11, color='white'),
+        textfont=dict(size=12, color='black', family='Inter', weight='bold'),
         hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
         direction='clockwise',
         sort=False,
