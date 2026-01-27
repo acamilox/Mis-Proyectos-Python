@@ -1717,7 +1717,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''},
                 yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': '', 'ticksuffix': '  ', 'automargin': True},
                 margin=dict(l=180, r=30, t=50, b=30),
-                height=500,
+                height=420,
                 showlegend=False,
                 hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
             )
