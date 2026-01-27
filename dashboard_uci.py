@@ -1694,12 +1694,32 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         fig_morbilidad_total = go.Figure()
         fig_morbilidad_genero = go.Figure()
         if not df_morbilidad.empty:
-            # Donut chart para morbilidad por diagnóstico - auto_sort=True ordena de mayor a menor
-            fig_morbilidad_total = create_donut_chart(
-                labels=df_morbilidad.index.tolist(),
-                values=df_morbilidad['Total'].tolist(),
-                title='Morbilidad por Diagnóstico',
-                auto_sort=True
+            # Gráfico de barras horizontales para morbilidad por diagnóstico - ordenado de mayor a menor
+            df_morb_sorted = df_morbilidad.sort_values('Total', ascending=True)  # ascending=True para que el mayor quede arriba
+            colores_morbilidad = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#3b82f6', '#84cc16', '#06b6d4', '#a855f7', '#eab308']
+            fig_morbilidad_total = go.Figure(data=[
+                go.Bar(
+                    y=df_morb_sorted.index,
+                    x=df_morb_sorted['Total'],
+                    orientation='h',
+                    marker_color=colores_morbilidad[:len(df_morb_sorted)],
+                    text=df_morb_sorted['Total'],
+                    texttemplate='%{x:.0f}',
+                    textposition='inside',
+                    insidetextanchor='middle',
+                    textfont=dict(color='white', size=12, family='Inter')
+                )
+            ])
+            fig_morbilidad_total.update_layout(
+                title={'text': 'Morbilidad por Diagnóstico', 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5, 'xanchor': 'center'},
+                plot_bgcolor='rgba(15,23,42,0.6)',
+                paper_bgcolor='rgba(30,41,59,0.8)',
+                xaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': ''},
+                yaxis={'gridcolor': 'rgba(148,163,184,0.15)', 'color': '#94a3b8', 'title': '', 'ticksuffix': '  '},
+                margin=dict(l=150, r=30, t=50, b=30),
+                height=450,
+                showlegend=False,
+                hoverlabel=dict(bgcolor='#1e293b', font_size=13, font_color='#f1f5f9')
             )
             
             fig_morbilidad_genero = go.Figure(data=[
