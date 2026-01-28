@@ -974,15 +974,31 @@ app.index_string = '''
             /* ========== RESPONSIVE MOBILE ========== */
             @media (max-width: 768px) {
                 .header-main {
-                    padding: 12px 16px;
+                    padding: 12px;
+                }
+                
+                .header-main > div {
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    gap: 12px !important;
+                }
+                
+                .header-main > div > div:first-child {
+                    justify-content: center;
+                }
+                
+                .header-main > div > div:last-child {
+                    justify-content: center;
                 }
                 
                 h1 {
                     font-size: 16px !important;
                 }
                 
+                /* KPI Cards móvil */
                 .kpi-card {
-                    margin-bottom: 8px;
+                    margin-bottom: 6px !important;
+                    padding: 12px 10px !important;
                 }
                 
                 .kpi-card h2 {
@@ -990,25 +1006,40 @@ app.index_string = '''
                 }
                 
                 .kpi-card h6 {
-                    font-size: 10px !important;
+                    font-size: 9px !important;
+                    margin-bottom: 4px !important;
+                    min-height: auto !important;
                 }
                 
+                .kpi-card p {
+                    font-size: 10px !important;
+                    min-height: auto !important;
+                }
+                
+                /* Tabs móvil */
                 .nav-tabs {
-                    padding: 0 12px;
+                    padding: 0 8px;
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                
+                .nav-tabs::-webkit-scrollbar {
+                    display: none;
                 }
                 
                 .nav-tabs .nav-link {
-                    padding: 12px 16px !important;
-                    font-size: 13px !important;
+                    padding: 12px 14px !important;
+                    font-size: 12px !important;
+                    flex-shrink: 0;
                 }
                 
                 .tab-content {
-                    padding: 12px !important;
+                    padding: 12px 8px !important;
                 }
                 
                 .graph-card {
-                    padding: 12px;
-                    margin-bottom: 12px;
+                    padding: 8px;
+                    margin-bottom: 8px;
                 }
                 
                 .dashboard-footer {
@@ -1016,31 +1047,43 @@ app.index_string = '''
                 }
                 
                 .dashboard-footer p {
-                    font-size: 11px !important;
+                    font-size: 10px !important;
                 }
                 
+                /* Filtros compactos */
                 .filtros-section {
                     padding: 12px !important;
+                    margin-bottom: 12px !important;
                 }
                 
-                .filtros-section > div > div:last-child {
+                .filtros-section > div > span {
+                    font-size: 12px !important;
+                    margin-bottom: 8px !important;
+                }
+                
+                .filtros-section > div > div {
                     flex-direction: column !important;
                     width: 100%;
+                    gap: 8px !important;
                 }
                 
-                .filtros-section > div > div:last-child > div:first-child {
+                .filtros-section > div > div > div:first-child {
                     width: 100%;
                 }
                 
-                .filtros-section > div > div:last-child > div:first-child .Select {
+                .filtros-section > div > div > div:first-child .Select {
                     min-width: 100% !important;
                 }
                 
-                .filtros-section > div > div:last-child > div:last-child {
+                .filtros-section > div > div > div:last-child {
                     margin-left: 0 !important;
-                    margin-top: 12px;
                     width: 100%;
-                    justify-content: flex-start;
+                    display: flex;
+                    gap: 8px;
+                }
+                
+                .filtros-section > div > div > div:last-child .btn {
+                    flex: 1;
                 }
                 
                 .container-fluid {
@@ -1049,13 +1092,46 @@ app.index_string = '''
                 }
                 
                 .row {
-                    margin-left: 0 !important;
-                    margin-right: 0 !important;
+                    margin-left: -4px !important;
+                    margin-right: -4px !important;
                 }
                 
                 .col, [class*="col-"] {
-                    padding-left: 6px !important;
-                    padding-right: 6px !important;
+                    padding-left: 4px !important;
+                    padding-right: 4px !important;
+                }
+                
+                /* Reducir espacio entre filas */
+                .mb-3 {
+                    margin-bottom: 8px !important;
+                }
+                
+                .mb-4 {
+                    margin-bottom: 12px !important;
+                }
+                
+                .g-3 {
+                    --bs-gutter-x: 8px !important;
+                    --bs-gutter-y: 8px !important;
+                }
+                
+                /* Títulos de sección móvil */
+                h5 {
+                    font-size: 14px !important;
+                    text-align: center;
+                    margin-bottom: 12px !important;
+                }
+                
+                h6 {
+                    font-size: 12px !important;
+                    margin-top: 16px !important;
+                    margin-bottom: 12px !important;
+                }
+                
+                /* Footer móvil centrado */
+                .dashboard-footer > div {
+                    flex-direction: column !important;
+                    text-align: center !important;
                 }
             }
             
@@ -1064,22 +1140,39 @@ app.index_string = '''
                     font-size: 14px !important;
                 }
                 
+                .kpi-card {
+                    padding: 10px 8px !important;
+                }
+                
                 .kpi-card h2 {
                     font-size: 18px !important;
                 }
                 
+                .kpi-card h6 {
+                    font-size: 8px !important;
+                }
+                
                 .nav-tabs .nav-link {
-                    padding: 10px 12px !important;
-                    font-size: 12px !important;
+                    padding: 8px 10px !important;
+                    font-size: 11px !important;
                 }
                 
                 .logo-img {
-                    height: 40px !important;
-                    max-height: 40px !important;
+                    height: 32px !important;
+                    max-height: 32px !important;
                 }
                 
                 .header-subtitle {
-                    display: none;
+                    display: none !important;
+                }
+                
+                .btn {
+                    font-size: 11px !important;
+                    padding: 6px 10px !important;
+                }
+                
+                .filtros-section > div > div > div:last-child .btn {
+                    max-width: 100px;
                 }
             }
         </style>
@@ -1748,17 +1841,17 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 hoverlabel=dict(bgcolor='#1e293b', font_color='#ffffff'))
 
         return meses_filtrados, html.Div([
-            dbc.Row([dbc.Col(kpi_ingresos, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi1, xs=12, sm=6, md=True, className="mb-3"),
-                     dbc.Col(kpi2, xs=12, sm=6, md=True, className="mb-3"), dbc.Col(kpi3, xs=12, sm=6, md=True, className="mb-3"),
-                     dbc.Col(kpi4, xs=12, sm=6, md=True, className="mb-3")], className="mb-3 g-3"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocupacional, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_ingresos_egresos, config=GRAPH_CONFIG), xs=12, md=6)]),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps_donut, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_total, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-3"),
-            html.H6("Morbilidad por Sexo", style={'color': '#1e293b', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '20px', 'textAlign': 'center'}),
+            dbc.Row([dbc.Col(kpi_ingresos, xs=6, sm=6, md=True, className="mb-2"), dbc.Col(kpi1, xs=6, sm=6, md=True, className="mb-2"),
+                     dbc.Col(kpi2, xs=6, sm=6, md=True, className="mb-2"), dbc.Col(kpi3, xs=6, sm=6, md=True, className="mb-2"),
+                     dbc.Col(kpi4, xs=6, sm=6, md=True, className="mb-2")], className="mb-3 g-2"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocupacional, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_ingresos_egresos, config=GRAPH_CONFIG), xs=12, md=6)], className="g-2"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps_donut, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_total, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-2 g-2"),
+            html.H6("Morbilidad por Sexo", style={'color': '#1e293b', 'fontWeight': '600', 'marginTop': '20px', 'marginBottom': '12px', 'textAlign': 'center', 'fontSize': '14px'}),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
                 dbc.Col(dcc.Graph(figure=fig_morbilidad_genero, config=GRAPH_CONFIG), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
-            ])
+            ], className="g-2")
         ])
     except Exception as e:
         return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#dc2626'})])
