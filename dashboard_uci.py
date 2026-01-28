@@ -1408,22 +1408,20 @@ def render_tab_content(tab):
                 fig_edad_sexo.add_trace(go.Bar(
                     name='Hombres', y=edad_sexo.index.astype(str), x=[-v for v in hombres_vals],
                     orientation='h', marker_color='#3498db',
-                    text=[f'{int(v)} ({p:.1f}%)' for v, p in zip(hombres_vals, hombres_pct)],
-                    textposition='inside', textfont=dict(color='white', size=13, family='Inter', weight='bold'),
+                    text=[f'{int(v)}' for v in hombres_vals],
+                    textposition='inside', textfont=dict(color='white', size=14, family='Inter', weight='bold'),
                     hovertemplate='<b>%{y}</b><br>Hombres: %{customdata[0]} (%{customdata[1]:.1f}%)<extra></extra>',
                     customdata=list(zip(hombres_vals, hombres_pct)),
-                    insidetextanchor='middle',
-                    constraintext='none'
+                    insidetextanchor='middle'
                 ))
                 fig_edad_sexo.add_trace(go.Bar(
                     name='Mujeres', y=edad_sexo.index.astype(str), x=mujeres_vals,
                     orientation='h', marker_color='#e91e63',
-                    text=[f'{int(v)} ({p:.1f}%)' for v, p in zip(mujeres_vals, mujeres_pct)],
-                    textposition='inside', textfont=dict(color='white', size=13, family='Inter', weight='bold'),
+                    text=[f'{int(v)}' for v in mujeres_vals],
+                    textposition='inside', textfont=dict(color='white', size=14, family='Inter', weight='bold'),
                     hovertemplate='<b>%{y}</b><br>Mujeres: %{customdata[0]} (%{customdata[1]:.1f}%)<extra></extra>',
                     customdata=list(zip(mujeres_vals, mujeres_pct)),
-                    insidetextanchor='middle',
-                    constraintext='none'
+                    insidetextanchor='middle'
                 ))
                 
                 max_val = max(max(hombres_vals), max(mujeres_vals)) if len(hombres_vals) > 0 else 5
@@ -1433,14 +1431,14 @@ def render_tab_content(tab):
                     plot_bgcolor='#1e293b',
                     paper_bgcolor='#1e293b',
                     xaxis={'title': '', 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#94a3b8',
-                           'range': [-(max_val + 8), max_val + 8], 'showticklabels': False, 'zeroline': False},
+                           'range': [-(max_val + 3), max_val + 3], 'showticklabels': False, 'zeroline': False},
                     yaxis={'title': '', 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#f1f5f9', 'tickfont': {'size': 12}},
                     legend=dict(orientation="h", y=-0.12, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', 
                                font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.2)', borderwidth=1),
-                    hoverlabel=dict(bgcolor='#0f172a', font_color='#ffffff'),
+                    hoverlabel=dict(bgcolor='#0f172a', font_color='#ffffff', font_size=14),
                     margin=dict(l=70, r=30, t=50, b=60),
-                    height=450,
-                    bargap=0.08
+                    height=400,
+                    bargap=0.15
                 )
             
             return html.Div([
