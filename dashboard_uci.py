@@ -38,13 +38,13 @@ try:
             except:
                 pass
     
-    print(f"✅ Datos cargados: {len(df)} filas, {len(df.columns)} columnas")
-    print(f"\n📋 Columnas disponibles: {list(df.columns)}")
-    print(f"\n📋 Primeras 10 filas:")
+    print(f"Datos cargados: {len(df)} filas, {len(df.columns)} columnas")
+    print(f"\nColumnas disponibles: {list(df.columns)}")
+    print(f"\nPrimeras 10 filas:")
     for i, idx in enumerate(df.index[:10]):
         print(f"  {i}: '{idx}'")
 except Exception as e:
-    print(f"❌ Error cargando datos: {e}")
+    print(f"Error cargando datos: {e}")
     import traceback
     traceback.print_exc()
 
@@ -79,9 +79,9 @@ try:
     # Filtrar solo los que tienen datos > 0 y ordenar de mayor a menor
     df_morbilidad = df_morbilidad[df_morbilidad['Total'] > 0]
     df_morbilidad = df_morbilidad.sort_values('Total', ascending=False)
-    print(f"✅ Datos de morbilidad cargados: {len(df_morbilidad)} diagnósticos")
+    print(f"Datos de morbilidad cargados: {len(df_morbilidad)} diagnósticos")
 except Exception as e:
-    print(f"⚠️ Error cargando morbilidad: {e}")
+    print(f"Error cargando morbilidad: {e}")
 
 # --- CARGA DE DATOS DE GÉRMENES AISLADOS (IAAS) ---
 df_germenes = pd.DataFrame()
@@ -115,9 +115,9 @@ try:
     germenes_norm = germenes_raw.apply(normalizar_germen)
     df_germenes = germenes_norm.value_counts().reset_index()
     df_germenes.columns = ['Germen', 'Cantidad']
-    print(f"✅ Datos de gérmenes cargados: {len(df_germenes)} tipos")
+    print(f"Datos de gérmenes cargados: {len(df_germenes)} tipos")
 except Exception as e:
-    print(f"⚠️ Error cargando gérmenes: {e}")
+    print(f"Error cargando gérmenes: {e}")
 
 # --- CARGA DE DATOS DE FALLECIDOS (MORTALIDAD) - Edad, Sexo y Días de Estancia ---
 df_fallecidos = pd.DataFrame()
@@ -200,9 +200,9 @@ try:
         })
     
     df_fallecidos = pd.DataFrame(fallecidos_data)
-    print(f"✅ Datos de fallecidos cargados: {len(df_fallecidos)} pacientes")
+    print(f"Datos de fallecidos cargados: {len(df_fallecidos)} pacientes")
 except Exception as e:
-    print(f"⚠️ Error cargando fallecidos: {e}")
+    print(f"Error cargando fallecidos: {e}")
 
 # --- CARGA DE TODOS LOS EVENTOS ADVERSOS (columna E) ---
 df_eventos_adversos = pd.DataFrame()
@@ -317,9 +317,9 @@ try:
     # Agrupar eventos y contar
     df_eventos_adversos = pd.Series(todos_eventos).value_counts().reset_index()
     df_eventos_adversos.columns = ['Evento', 'Cantidad']
-    print(f"✅ Datos de eventos adversos cargados: {len(todos_eventos)} eventos, {len(df_eventos_adversos)} categorías")
+    print(f"Datos de eventos adversos cargados: {len(todos_eventos)} eventos, {len(df_eventos_adversos)} categorías")
 except Exception as e:
-    print(f"⚠️ Error cargando eventos adversos: {e}")
+    print(f"Error cargando eventos adversos: {e}")
 
 # --- CARGA DE DATOS GRAM - SOT (Trasplantes/Donaciones) ---
 df_gram_sot = pd.DataFrame()
@@ -341,9 +341,9 @@ try:
     
     df_gram_sot = pd.DataFrame([gram_data])
     df_gram_sot = df_gram_sot.reindex(columns=meses_gram, fill_value=0)
-    print(f"✅ Datos GRAM-SOT cargados: {df_gram_sot.values.sum()} total")
+    print(f"Datos GRAM-SOT cargados: {df_gram_sot.values.sum()} total")
 except Exception as e:
-    print(f"⚠️ Error cargando GRAM-SOT: {e}")
+    print(f"Error cargando GRAM-SOT: {e}")
 
 # Meses disponibles
 meses_disponibles = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Agos', 'Sep', 'Oct', 'Nov', 'Dic']
@@ -396,13 +396,13 @@ def safe_get_row(row_name, columns, silent=False):
             return df.loc[actual_row, columns]
         else:
             if not silent:
-                print(f"⚠️ No se encontró la fila: '{row_name}'")
+                print(f"No se encontró la fila: '{row_name}'")
             if isinstance(columns, list):
                 return pd.Series([0] * len(columns), index=columns)
             return 0
     except Exception as e:
         if not silent:
-            print(f"⚠️ Error al obtener '{row_name}': {e}")
+            print(f"Error al obtener '{row_name}': {e}")
         if isinstance(columns, list):
             return pd.Series([0] * len(columns), index=columns)
         return 0
@@ -608,7 +608,7 @@ def create_donut_chart(labels, values, title, colors=None, auto_sort=True):
     )
     return fig
 
-def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=None, trend_value=None, inverse=False):
+def create_kpi_card(title, value, subtitle="", color=None, icon=None, trend=None, trend_value=None, inverse=False):
     """
     Crea una tarjeta KPI con indicador de tendencia opcional.
     
@@ -662,22 +662,22 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
             'textAlign': 'center',
             'marginTop': '8px',
             'padding': '8px 12px',
-            'borderRadius': '12px',
+            'borderRadius': '8px',
             'background': f'{trend_color}10',
             'border': f'1px solid {trend_color}25'
         })
     
     card_content = [
         html.Div([
-            html.Span(icon, style={
-                'fontSize': '28px', 
-                'filter': 'drop-shadow(0 0 6px rgba(255,255,255,0.2))'
+            html.Div(style={
+                'width': '8px', 'height': '8px', 'borderRadius': '50%',
+                'background': accent_color
             })
         ], style={
-            'width': '52px', 'height': '52px', 'borderRadius': '14px',
-            'background': f'linear-gradient(135deg, {accent_color}30 0%, {accent_color}15 100%)',
+            'width': '40px', 'height': '40px', 'borderRadius': '10px',
+            'background': f'linear-gradient(135deg, {accent_color}20 0%, {accent_color}10 100%)',
             'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center',
-            'marginBottom': '14px', 'border': f'1px solid {accent_color}40'
+            'marginBottom': '12px', 'border': f'1px solid {accent_color}30'
         }),
         html.H6(capitalizar_texto(title), style={
             'color': '#94a3b8', 'fontSize': '11px', 'marginBottom': '8px', 
@@ -686,10 +686,10 @@ def create_kpi_card(title, value, subtitle="", color=None, icon="📊", trend=No
         }),
         html.H2(value, style={
             'color': '#f1f5f9', 'fontWeight': '700', 
-            'marginBottom': '6px', 'fontSize': '28px', 'lineHeight': '1'
+            'marginBottom': '6px', 'fontSize': '26px', 'lineHeight': '1'
         }),
         html.P(capitalizar_texto(subtitle), style={
-            'color': '#64748b', 'fontSize': '12px', 'margin': '0', 'fontWeight': '500',
+            'color': '#64748b', 'fontSize': '11px', 'margin': '0', 'fontWeight': '500',
             'minHeight': '18px'
         })
     ]
@@ -768,95 +768,110 @@ app.index_string = '''
     <head>
         {%metas%}
         <title>{%title%}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         {%favicon%}
         {%css%}
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
             
             * {
                 box-sizing: border-box;
+                -webkit-tap-highlight-color: transparent;
             }
             
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-                background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+                background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
                 color: #f1f5f9;
                 min-height: 100vh;
+                margin: 0;
+                padding: 0;
             }
             
             @keyframes fadeInUp {
-                from { opacity: 0; transform: translateY(20px); }
+                from { opacity: 0; transform: translateY(10px); }
                 to { opacity: 1; transform: translateY(0); }
             }
             
             .kpi-card {
-                transition: all 0.3s ease;
-                border-radius: 16px !important;
-                backdrop-filter: blur(10px);
+                transition: all 0.2s ease;
+                border-radius: 12px !important;
+                backdrop-filter: blur(8px);
+                border: 1px solid rgba(148,163,184,0.1) !important;
             }
             
             .kpi-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 12px 30px rgba(0,0,0,0.4) !important;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+                border-color: rgba(148,163,184,0.2) !important;
             }
             
-            .fade-in { animation: fadeInUp 0.6s ease-out; }
+            .fade-in { animation: fadeInUp 0.4s ease-out; }
             
             .nav-tabs {
                 border-bottom: none !important;
-                gap: 6px;
+                gap: 4px;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .nav-tabs::-webkit-scrollbar {
+                display: none;
             }
             
             .nav-tabs .nav-link {
                 color: #94a3b8;
                 border: none;
-                border-radius: 10px;
-                transition: all 0.3s ease;
-                background: rgba(30, 41, 59, 0.6);
+                border-radius: 6px 6px 0 0;
+                transition: all 0.2s ease;
+                background: transparent;
                 font-weight: 500;
-                padding: 12px 18px;
-                font-size: 14px;
-                border: 1px solid transparent;
+                padding: 12px 20px;
+                font-size: 13px;
+                white-space: nowrap;
+                border-bottom: 2px solid transparent;
             }
             
             .nav-tabs .nav-link:hover {
-                color: #f1f5f9;
-                background: rgba(99, 102, 241, 0.15);
-                border-color: rgba(99, 102, 241, 0.3);
+                color: #e2e8f0;
+                background: rgba(148,163,184,0.08);
             }
             
             .nav-tabs .nav-link.active {
                 color: #f1f5f9;
-                background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(139, 92, 246, 0.15) 100%);
+                background: rgba(148,163,184,0.1);
                 font-weight: 600;
-                border-color: rgba(99, 102, 241, 0.4);
+                border-bottom: 2px solid #3b82f6;
             }
             
             .tab-content {
                 background: transparent;
-                border-radius: 16px;
-                padding: 24px;
-                padding-top: 8px;
+                border-radius: 0 0 12px 12px;
+                padding: 24px 28px;
                 border: none;
                 margin-top: 0;
             }
             
             /* Dropdown styles */
             .Select-control { 
-                background: rgba(30, 41, 59, 0.9) !important; 
-                border: 1px solid rgba(99, 102, 241, 0.3) !important; 
-                border-radius: 10px !important;
-                min-height: 42px !important;
+                background: rgba(30, 41, 59, 0.95) !important; 
+                border: 1px solid rgba(148,163,184,0.2) !important; 
+                border-radius: 6px !important;
+                min-height: 40px !important;
             }
             .Select-control:hover {
-                border-color: rgba(99, 102, 241, 0.5) !important;
+                border-color: rgba(148,163,184,0.35) !important;
             }
             .Select-value-label, .Select-placeholder, .Select-value { color: #f1f5f9 !important; }
             .Select-menu-outer { 
                 background: #1e293b !important; 
-                border: 1px solid rgba(99, 102, 241, 0.3) !important;
-                border-radius: 10px !important;
+                border: 1px solid rgba(148,163,184,0.2) !important;
+                border-radius: 6px !important;
                 margin-top: 4px !important;
+                z-index: 1000 !important;
             }
             .Select-option { 
                 background: #1e293b !important; 
@@ -864,64 +879,52 @@ app.index_string = '''
                 padding: 10px 14px !important;
             }
             .Select-option:hover, .Select-option.is-focused { 
-                background: rgba(99, 102, 241, 0.25) !important; 
+                background: rgba(59, 130, 246, 0.15) !important; 
             }
             .Select-option.is-selected { 
-                background: rgba(99, 102, 241, 0.4) !important; 
+                background: rgba(59, 130, 246, 0.25) !important; 
             }
             
             /* Button styles */
             .btn {
-                border-radius: 10px !important;
-                font-weight: 600 !important;
-                font-size: 14px !important;
-                transition: all 0.3s ease !important;
+                border-radius: 6px !important;
+                font-weight: 500 !important;
+                font-size: 13px !important;
+                transition: all 0.2s ease !important;
                 border: none !important;
-                display: flex !important;
+                display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
             }
             
             .btn-success {
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+                background: #059669 !important;
             }
             
             .btn-success:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+                background: #047857 !important;
+                transform: translateY(-1px);
             }
             
             .btn-primary {
-                background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+                background: #3b82f6 !important;
             }
             
             .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+                background: #2563eb !important;
+                transform: translateY(-1px);
             }
             
             .btn-secondary {
-                background: rgba(51, 65, 85, 0.8) !important;
-                border: 1px solid rgba(148, 163, 184, 0.2) !important;
+                background: rgba(71, 85, 105, 0.8) !important;
             }
             
             .btn-secondary:hover {
-                background: rgba(71, 85, 105, 0.9) !important;
-                transform: translateY(-2px);
+                background: rgba(100, 116, 139, 0.9) !important;
             }
             
             .dashboard-footer {
                 background: transparent;
-                padding: 0 0 20px 0;
-            }
-            
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.7; }
-            }
-            
-            .pulse-animation {
-                animation: pulse 2s ease-in-out infinite;
             }
             
             /* Scrollbar */
@@ -930,48 +933,55 @@ app.index_string = '''
                 height: 6px;
             }
             ::-webkit-scrollbar-track {
-                background: #0f172a;
+                background: transparent;
             }
             ::-webkit-scrollbar-thumb {
-                background: #334155;
+                background: #475569;
                 border-radius: 3px;
             }
             ::-webkit-scrollbar-thumb:hover {
-                background: #475569;
+                background: #64748b;
             }
             
             /* Graph containers */
             .js-plotly-plot {
-                border-radius: 12px;
+                border-radius: 8px;
                 overflow: hidden;
             }
             
             /* Section titles */
-            h5 {
-                color: #f1f5f9 !important;
-                -webkit-text-fill-color: #f1f5f9 !important;
+            h5, h6 {
+                color: #e2e8f0 !important;
+                -webkit-text-fill-color: #e2e8f0 !important;
             }
             
-            h6 {
-                color: #cbd5e1 !important;
-                -webkit-text-fill-color: #cbd5e1 !important;
+            /* ========== RESPONSIVE TABLET ========== */
+            @media (max-width: 992px) {
+                .tab-content {
+                    padding: 20px !important;
+                }
+                
+                .kpi-card {
+                    margin-bottom: 12px;
+                }
             }
             
             /* ========== RESPONSIVE MOBILE ========== */
             @media (max-width: 768px) {
                 /* Header */
                 h1 {
-                    font-size: 16px !important;
+                    font-size: 18px !important;
                 }
                 
                 /* KPI Cards */
                 .kpi-card {
-                    min-height: 180px !important;
-                    margin-bottom: 12px;
+                    min-height: auto !important;
+                    margin-bottom: 10px;
+                    padding: 12px !important;
                 }
                 
                 .kpi-card h2 {
-                    font-size: 22px !important;
+                    font-size: 20px !important;
                 }
                 
                 .kpi-card h6 {
@@ -980,24 +990,18 @@ app.index_string = '''
                 
                 /* Tabs */
                 .nav-tabs .nav-link {
-                    padding: 8px 12px !important;
+                    padding: 10px 14px !important;
                     font-size: 12px !important;
-                }
-                
-                .nav-tabs {
-                    flex-wrap: nowrap;
-                    overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
                 }
                 
                 /* Tab content */
                 .tab-content {
-                    padding: 12px 8px !important;
+                    padding: 16px 12px !important;
                 }
                 
                 /* Graphs */
                 .js-plotly-plot {
-                    margin-bottom: 16px;
+                    margin-bottom: 12px;
                 }
                 
                 /* Footer */
@@ -1007,12 +1011,13 @@ app.index_string = '''
                 }
                 
                 .dashboard-footer p {
-                    font-size: 11px !important;
+                    font-size: 10px !important;
                 }
                 
                 .dashboard-footer > div > div {
                     flex-direction: column !important;
                     text-align: center !important;
+                    gap: 8px !important;
                 }
                 
                 .dashboard-footer > div > div > div {
@@ -1024,39 +1029,75 @@ app.index_string = '''
                     padding: 12px !important;
                 }
                 
+                .filtros-section > div > div:last-child {
+                    flex-direction: column !important;
+                    width: 100%;
+                }
+                
+                .filtros-section > div > div:last-child > div:first-child {
+                    width: 100%;
+                }
+                
+                .filtros-section > div > div:last-child > div:first-child .Select {
+                    min-width: 100% !important;
+                }
+                
+                .filtros-section > div > div:last-child > div:last-child {
+                    margin-left: 0 !important;
+                    margin-top: 10px;
+                    width: 100%;
+                    justify-content: center;
+                }
+                
                 /* Buttons */
                 .btn {
-                    padding: 6px 12px !important;
+                    padding: 8px 14px !important;
                     font-size: 12px !important;
                 }
                 
                 /* Container padding */
                 .container-fluid {
-                    padding-left: 8px !important;
-                    padding-right: 8px !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                }
+                
+                /* Row margins */
+                .row {
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
+                }
+                
+                .col, [class*="col-"] {
+                    padding-left: 6px !important;
+                    padding-right: 6px !important;
                 }
             }
             
             @media (max-width: 480px) {
                 h1 {
-                    font-size: 14px !important;
+                    font-size: 16px !important;
                 }
                 
                 .kpi-card h2 {
-                    font-size: 20px !important;
+                    font-size: 18px !important;
                 }
                 
                 .nav-tabs .nav-link {
-                    padding: 6px 10px !important;
+                    padding: 8px 12px !important;
                     font-size: 11px !important;
                 }
                 
                 .logo-img {
-                    height: 40px !important;
+                    height: 45px !important;
+                    max-height: 45px !important;
                 }
                 
                 .header-subtitle {
                     display: none;
+                }
+                
+                .tab-content {
+                    padding: 12px 8px !important;
                 }
             }
         </style>
@@ -1074,72 +1115,82 @@ app.index_string = '''
 
 app.layout = html.Div([
     dbc.Container([
-        # Header
+        # Header profesional
         html.Div([
             html.Div([
                 html.Div([
                     html.Img(src='/assets/Logo.png', style={
-                        'height': '70px', 
-                        'filter': 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
-                        'maxHeight': '50px'
+                        'height': '60px', 
+                        'filter': 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                        'maxHeight': '60px'
                     }, className="logo-img"),
                     html.Div([
-                        html.H1("DASHBOARD UCI ADULTOS 2025", style={
-                            'color': '#f8fafc', 'fontWeight': '700', 'marginBottom': '4px',
-                            'fontSize': '24px', 'letterSpacing': '-0.3px', 'margin': '0'
+                        html.H1("UCI ADULTOS", style={
+                            'color': '#f8fafc', 'fontWeight': '700', 'marginBottom': '2px',
+                            'fontSize': '22px', 'letterSpacing': '0.5px', 'margin': '0',
+                            'textTransform': 'uppercase'
                         }),
-                        html.P("Sistema de Monitoreo y Análisis de Indicadores", style={
-                            'color': '#64748b', 'fontSize': '13px', 'marginBottom': '0', 'fontWeight': '500'
+                        html.P("Panel de Indicadores 2025", style={
+                            'color': '#94a3b8', 'fontSize': '12px', 'marginBottom': '0', 'fontWeight': '400',
+                            'letterSpacing': '0.3px'
                         }, className="header-subtitle")
-                    ], style={'marginLeft': '20px'})
-                ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '20px', 'flexWrap': 'wrap', 'gap': '10px'})
+                    ], style={'marginLeft': '16px'})
+                ], style={'display': 'flex', 'alignItems': 'center'})
             ]),
             html.Div([
-                dbc.Button("📤 Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
-                dbc.Button("📄 Exportar CSV", id="btn-export-csv", color="primary", size="sm"),
+                dbc.Button("Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2",
+                          style={'fontWeight': '500', 'letterSpacing': '0.3px'}),
+                dbc.Button("Exportar CSV", id="btn-export-csv", color="primary", size="sm",
+                          style={'fontWeight': '500', 'letterSpacing': '0.3px'}),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
-            ], style={'marginBottom': '24px', 'display': 'flex', 'gap': '12px', 'flexWrap': 'wrap'})
-        ], className="fade-in", style={'padding': '0 24px'}),
+            ], style={'marginTop': '16px', 'display': 'flex', 'gap': '10px', 'flexWrap': 'wrap'})
+        ], className="fade-in", style={
+            'padding': '24px 28px',
+            'background': 'linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.98) 100%)',
+            'borderBottom': '1px solid rgba(148,163,184,0.1)',
+            'marginBottom': '0'
+        }),
         
-        # Tabs
+        # Tabs profesionales
         dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
-            dbc.Tab(label='📊 Resumen General', tab_id='tab-resumen'),
-            dbc.Tab(label='⚙️ Gestión y Calidad', tab_id='tab-gestion'),
-            dbc.Tab(label='🏥 Especialidades', tab_id='tab-especialidades'),
-            dbc.Tab(label='📋 Mortalidad', tab_id='tab-mortalidad'),
-        ], style={'marginBottom': '0', 'borderBottom': 'none', 'padding': '0 24px'}),
+            dbc.Tab(label='Resumen General', tab_id='tab-resumen'),
+            dbc.Tab(label='Gestión y Calidad', tab_id='tab-gestion'),
+            dbc.Tab(label='Especialidades', tab_id='tab-especialidades'),
+            dbc.Tab(label='Mortalidad', tab_id='tab-mortalidad'),
+        ], style={'marginBottom': '0', 'borderBottom': 'none', 'padding': '16px 28px 0 28px',
+                 'background': 'rgba(15,23,42,0.5)'}),
         
         html.Div(id='tab-content', className="tab-content"),
         
-        # Footer
+        # Footer profesional
         html.Div([
             html.Hr(style={
                 'borderColor': '#334155',
                 'borderWidth': '1px',
-                'margin': '0 0 20px 0',
-                'opacity': '0.5'
+                'margin': '0 0 16px 0',
+                'opacity': '0.3'
             }),
             html.Div([
                 html.Div([
                     html.P("Hospital Infantil Universitario de San José", style={
-                        'color': '#f1f5f9', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px'
+                        'color': '#e2e8f0', 'fontWeight': '600', 'margin': '0', 'fontSize': '13px'
                     }),
-                    html.P("Unidad de Cuidados Intensivos - Adultos", style={
-                        'color': '#64748b', 'margin': '0', 'fontSize': '12px'
+                    html.P("Unidad de Cuidados Intensivos Adultos", style={
+                        'color': '#64748b', 'margin': '0', 'fontSize': '11px', 'marginTop': '2px'
                     })
                 ]),
                 html.Div([
-                    html.P("© 2025 - Dashboard de Indicadores UCI", style={
-                        'color': '#475569', 'margin': '0', 'fontSize': '12px'
+                    html.P("2025 Panel de Indicadores UCI", style={
+                        'color': '#475569', 'margin': '0', 'fontSize': '11px'
                     })
                 ], style={'textAlign': 'right'})
-            ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
-        ], className="dashboard-footer", style={'marginTop': '40px', 'paddingBottom': '20px', 'paddingLeft': '24px', 'paddingRight': '24px'})
+            ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '12px'})
+        ], className="dashboard-footer", style={'marginTop': '32px', 'paddingBottom': '24px', 'paddingLeft': '28px', 'paddingRight': '28px'})
         
-    ], fluid=True, style={'maxWidth': '1440px', 'padding': '32px 0'}, id='main-container')
+    ], fluid=True, style={'maxWidth': '1400px', 'padding': '0'}, id='main-container')
 ], style={
-    'background': 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+    'background': 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
     'minHeight': '100vh', 
     'fontFamily': "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
 }, id='app-container')
@@ -1149,16 +1200,16 @@ def render_tab_content(tab):
     if tab == 'tab-resumen':
         try:
             if len(df.columns) == 0:
-                return html.Div([html.H3("⚠️ No hay datos", style={'color': '#ffffff'})])
+                return html.Div([html.H3("No hay datos disponibles", style={'color': '#ffffff'})])
             
             filtros = html.Div([
                 html.Div([
                     html.Div([
-                        html.Span("📅", style={'fontSize': '16px', 'marginRight': '8px'}),
-                        html.Span("Filtrar por Meses", style={
-                            'color': '#f1f5f9', 'fontWeight': '600', 'fontSize': '14px'
+                        html.Span("Período de análisis", style={
+                            'color': '#e2e8f0', 'fontWeight': '600', 'fontSize': '13px',
+                            'textTransform': 'uppercase', 'letterSpacing': '0.5px'
                         })
-                    ], style={'display': 'flex', 'alignItems': 'center', 'marginBottom': '12px'}),
+                    ], style={'marginBottom': '12px'}),
                     html.Div([
                         html.Div([
                             dcc.Dropdown(
@@ -1166,23 +1217,22 @@ def render_tab_content(tab):
                                 options=[{'label': meses_completos[mes], 'value': mes} for mes in meses_disponibles],
                                 value=meses_disponibles,
                                 multi=True,
-                                placeholder="Selecciona meses...",
-                                style={'fontSize': '13px', 'minWidth': '400px'}
+                                placeholder="Seleccionar meses...",
+                                style={'fontSize': '13px', 'minWidth': '380px'}
                             )
                         ]),
                         html.Div([
-                            dbc.Button("✓ Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
-                                      style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '600'}),
+                            dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
+                                      style={'fontSize': '12px', 'padding': '8px 20px', 'fontWeight': '500'}),
                             dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
-                                      style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '600', 'marginLeft': '8px'})
+                                      style={'fontSize': '12px', 'padding': '8px 16px', 'fontWeight': '500', 'marginLeft': '8px'})
                         ], style={'marginLeft': '12px', 'display': 'flex', 'alignItems': 'center'})
                     ], style={'display': 'flex', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '8px'}),
                 ])
             ], style={
-                'background': 'linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.95) 100%)',
-                'padding': '16px 20px', 'borderRadius': '12px', 'marginBottom': '20px',
-                'border': '1px solid rgba(99,102,241,0.25)',
-                'boxShadow': '0 2px 10px rgba(0,0,0,0.15)'
+                'background': 'rgba(30,41,59,0.6)',
+                'padding': '16px 20px', 'borderRadius': '8px', 'marginBottom': '24px',
+                'border': '1px solid rgba(148,163,184,0.15)'
             }, className="filtros-section")
             
             return html.Div([filtros, html.Div(id='resumen-content')])
@@ -1222,14 +1272,14 @@ def render_tab_content(tab):
             mediana_dias = dias_estancia_validos.median()
             
             # KPIs principales
-            kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Dic", "#e74c3c", "🕊️")
-            kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad_general), "Ene - Dic", "#c0392b", "⚰️")
-            kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Dic", "#34495e", "🦠")
-            kpi4 = create_kpi_card("% Mortalidad Trauma", formato_porcentaje(mortalidad_trauma), "Promedio", "#f39c12", "🚑")
+            kpi1 = create_kpi_card("Total Fallecidos", f"{int(total_fallecidos)}", "Ene - Dic", "#e74c3c")
+            kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad_general), "Ene - Dic", "#c0392b")
+            kpi3 = create_kpi_card("Fallecidos COVID-19", f"{int(fallecidos_covid)}", "Ene - Dic", "#34495e")
+            kpi4 = create_kpi_card("% Mortalidad Trauma", formato_porcentaje(mortalidad_trauma), "Promedio", "#f39c12")
             
             # KPIs de días de estancia fallecidos
-            kpi_prom_dias = create_kpi_card("Promedio Días Estancia", f"{promedio_dias:.1f}", "Fallecidos", "#9b59b6", "📊")
-            kpi_mediana_dias = create_kpi_card("Mediana Días de Estancia", f"{mediana_dias:.1f}", "Fallecidos", "#3498db", "📈")
+            kpi_prom_dias = create_kpi_card("Promedio Días Estancia", f"{promedio_dias:.1f}", "Fallecidos", "#9b59b6")
+            kpi_mediana_dias = create_kpi_card("Mediana Días de Estancia", f"{mediana_dias:.1f}", "Fallecidos", "#3498db")
             
             fig_mortalidad = create_line_chart('% DE MORTALIDAD GENERAL', '% Mortalidad General', color='#e74c3c', decimals=1)
             fig_trauma = create_grouped_bar_chart(
@@ -1326,10 +1376,10 @@ def render_tab_content(tab):
             pct_neuro = (total_neuro / total_especialidades * 100)
             pct_neurologia = (total_neurologia / total_especialidades * 100)
             
-            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{formato_porcentaje(pct_medicina, False)}% del total", "#3498db", "🩺")
-            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{formato_porcentaje(pct_cirugia, False)}% del total", "#27ae60", "💉")
-            kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", f"{formato_porcentaje(pct_neuro, False)}% del total", "#16a085", "🧠")
-            kpi4 = create_kpi_card("Neurología", f"{int(total_neurologia)}", f"{formato_porcentaje(pct_neurologia, False)}% del total", "#9b59b6", "🧬")
+            kpi1 = create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{formato_porcentaje(pct_medicina, False)}% del total", "#3498db")
+            kpi2 = create_kpi_card("Cirugía General", f"{int(total_cirugia)}", f"{formato_porcentaje(pct_cirugia, False)}% del total", "#27ae60")
+            kpi3 = create_kpi_card("Neurocirugía", f"{int(total_neuro)}", f"{formato_porcentaje(pct_neuro, False)}% del total", "#16a085")
+            kpi4 = create_kpi_card("Neurología", f"{int(total_neurologia)}", f"{formato_porcentaje(pct_neurologia, False)}% del total", "#9b59b6")
             
             fig_medicina = create_bar_chart('MEDICINA INTERNA', 'Medicina Interna', color='#3498db', silent=True, decimals=0)
             fig_cirugia = create_bar_chart('CIRUGIA GENERAL', 'Cirugía General', color='#27ae60', silent=True, decimals=0)
@@ -1380,11 +1430,11 @@ def render_tab_content(tab):
             promedio_vm_validos = [v for v in promedio_vm if v > 0]
             promedio_vm_general = sum(promedio_vm_validos) / len(promedio_vm_validos) if promedio_vm_validos else 0
             
-            kpi1 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50", "⏱️")
-            kpi2 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", "Promedio", "#27ae60", "🔄")
-            kpi3 = create_kpi_card("Total Días Estancia", f"{int(total_dias)}", "Ene - Dic", "#16a085", "📅")
-            kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12", "🛏️")
-            kpi5 = create_kpi_card("Promedio Días VM", f"{promedio_vm_general:.2f}", "Ventilación Mecánica", "#9b59b6", "🫁")
+            kpi1 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", "Días", "#2c3e50")
+            kpi2 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", "Promedio", "#27ae60")
+            kpi3 = create_kpi_card("Total Días Estancia", f"{int(total_dias)}", "Ene - Dic", "#16a085")
+            kpi4 = create_kpi_card("Capacidad UCI", f"{int(capacidad)}", "Camas", "#f39c12")
+            kpi5 = create_kpi_card("Promedio Días VM", f"{promedio_vm_general:.2f}", "Ventilación Mecánica", "#9b59b6")
             
             fig_estancia = create_bar_chart('PROMEDIO ESTANCIA', 'Estancia Promedio (Días)', color='#16a085', decimals=1)
             fig_giro = create_bar_chart('GIRO CAMA', 'Giro de Cama', color='#27ae60', decimals=2)
@@ -1588,11 +1638,11 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         if pd.isna(mortalidad): mortalidad = (total_fallecidos / total_egresos * 100)
         
         # KPIs
-        kpi_ingresos = create_kpi_card("Total Ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db", "📥")
-        kpi1 = create_kpi_card("% Ocupación Promedio", formato_porcentaje(promedio_ocupacional), rango_texto, "#2c3e50", "🏥")
-        kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad), f"Total {rango_texto}", "#e74c3c", "💔")
-        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60", "⏱️")
-        kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12", "🔄")
+        kpi_ingresos = create_kpi_card("Total Ingresos", f"{int(total_ingresos)}", rango_texto, "#3498db")
+        kpi1 = create_kpi_card("% Ocupación Promedio", formato_porcentaje(promedio_ocupacional), rango_texto, "#2c3e50")
+        kpi2 = create_kpi_card("% Mortalidad General", formato_porcentaje(mortalidad), f"Total {rango_texto}", "#e74c3c")
+        kpi3 = create_kpi_card("Estancia Promedio", f"{promedio_estancia:.2f}", f"Días - {rango_texto}", "#27ae60")
+        kpi4 = create_kpi_card("Giro de Cama", f"{giro_cama:.2f}", f"Promedio {rango_texto}", "#f39c12")
         
         # EPS - Todas las EPS individuales
         total_famisanar = safe_get_row('FAMISANAR', suma_col, silent=True)
