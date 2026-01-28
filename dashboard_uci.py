@@ -974,7 +974,7 @@ app.index_string = '''
             /* ========== RESPONSIVE MOBILE ========== */
             @media (max-width: 768px) {
                 .header-main {
-                    padding: 12px;
+                    padding: 14px 12px;
                 }
                 
                 .header-main > div {
@@ -992,28 +992,34 @@ app.index_string = '''
                 }
                 
                 h1 {
-                    font-size: 16px !important;
+                    font-size: 18px !important;
+                    font-weight: 700 !important;
                 }
                 
-                /* KPI Cards móvil */
+                /* KPI Cards móvil - MÁS LEGIBLES */
                 .kpi-card {
-                    margin-bottom: 6px !important;
-                    padding: 12px 10px !important;
+                    margin-bottom: 8px !important;
+                    padding: 14px 12px !important;
                 }
                 
                 .kpi-card h2 {
-                    font-size: 20px !important;
+                    font-size: 24px !important;
+                    font-weight: 700 !important;
+                    color: #0f172a !important;
                 }
                 
                 .kpi-card h6 {
-                    font-size: 9px !important;
-                    margin-bottom: 4px !important;
+                    font-size: 11px !important;
+                    margin-bottom: 6px !important;
                     min-height: auto !important;
+                    font-weight: 600 !important;
+                    color: #475569 !important;
                 }
                 
                 .kpi-card p {
-                    font-size: 10px !important;
+                    font-size: 12px !important;
                     min-height: auto !important;
+                    color: #64748b !important;
                 }
                 
                 /* Tabs móvil */
@@ -1028,43 +1034,51 @@ app.index_string = '''
                 }
                 
                 .nav-tabs .nav-link {
-                    padding: 12px 14px !important;
-                    font-size: 12px !important;
+                    padding: 14px 16px !important;
+                    font-size: 13px !important;
+                    font-weight: 500 !important;
                     flex-shrink: 0;
                 }
                 
                 .tab-content {
-                    padding: 12px 8px !important;
+                    padding: 14px 10px !important;
                 }
                 
                 .graph-card {
-                    padding: 8px;
-                    margin-bottom: 8px;
+                    padding: 10px;
+                    margin-bottom: 10px;
+                }
+                
+                /* Gráficas más grandes en móvil */
+                .js-plotly-plot .plotly .main-svg {
+                    font-size: 12px !important;
                 }
                 
                 .dashboard-footer {
-                    padding: 12px 16px;
+                    padding: 14px 16px;
                 }
                 
                 .dashboard-footer p {
-                    font-size: 10px !important;
+                    font-size: 11px !important;
                 }
                 
-                /* Filtros compactos */
+                /* Filtros más legibles */
                 .filtros-section {
-                    padding: 12px !important;
-                    margin-bottom: 12px !important;
+                    padding: 14px !important;
+                    margin-bottom: 14px !important;
                 }
                 
                 .filtros-section > div > span {
-                    font-size: 12px !important;
-                    margin-bottom: 8px !important;
+                    font-size: 14px !important;
+                    font-weight: 600 !important;
+                    margin-bottom: 10px !important;
+                    display: block;
                 }
                 
                 .filtros-section > div > div {
                     flex-direction: column !important;
                     width: 100%;
-                    gap: 8px !important;
+                    gap: 10px !important;
                 }
                 
                 .filtros-section > div > div > div:first-child {
@@ -1073,17 +1087,22 @@ app.index_string = '''
                 
                 .filtros-section > div > div > div:first-child .Select {
                     min-width: 100% !important;
+                    font-size: 14px !important;
                 }
                 
                 .filtros-section > div > div > div:last-child {
                     margin-left: 0 !important;
                     width: 100%;
                     display: flex;
-                    gap: 8px;
+                    gap: 10px;
+                    justify-content: center;
                 }
                 
                 .filtros-section > div > div > div:last-child .btn {
                     flex: 1;
+                    max-width: 140px;
+                    font-size: 13px !important;
+                    padding: 10px 16px !important;
                 }
                 
                 .container-fluid {
@@ -1101,65 +1120,82 @@ app.index_string = '''
                     padding-right: 4px !important;
                 }
                 
-                /* Reducir espacio entre filas */
+                /* Espaciado móvil */
                 .mb-3 {
-                    margin-bottom: 8px !important;
+                    margin-bottom: 10px !important;
                 }
                 
                 .mb-4 {
-                    margin-bottom: 12px !important;
+                    margin-bottom: 14px !important;
                 }
                 
-                .g-3 {
+                .mb-5 {
+                    margin-bottom: 18px !important;
+                }
+                
+                .g-3, .g-4 {
                     --bs-gutter-x: 8px !important;
                     --bs-gutter-y: 8px !important;
                 }
                 
-                /* Títulos de sección móvil */
+                /* Títulos de sección móvil - MÁS LEGIBLES */
                 h5 {
-                    font-size: 14px !important;
+                    font-size: 16px !important;
+                    font-weight: 600 !important;
                     text-align: center;
-                    margin-bottom: 12px !important;
+                    margin-bottom: 14px !important;
+                    color: #1e293b !important;
                 }
                 
                 h6 {
-                    font-size: 12px !important;
-                    margin-top: 16px !important;
-                    margin-bottom: 12px !important;
+                    font-size: 14px !important;
+                    font-weight: 600 !important;
+                    margin-top: 18px !important;
+                    margin-bottom: 14px !important;
+                    color: #1e293b !important;
                 }
                 
                 /* Footer móvil centrado */
                 .dashboard-footer > div {
                     flex-direction: column !important;
                     text-align: center !important;
+                    gap: 8px !important;
+                }
+                
+                .dashboard-footer p {
+                    font-size: 12px !important;
                 }
             }
             
             @media (max-width: 480px) {
                 h1 {
-                    font-size: 14px !important;
+                    font-size: 16px !important;
                 }
                 
                 .kpi-card {
-                    padding: 10px 8px !important;
+                    padding: 12px 10px !important;
                 }
                 
                 .kpi-card h2 {
-                    font-size: 18px !important;
+                    font-size: 22px !important;
                 }
                 
                 .kpi-card h6 {
-                    font-size: 8px !important;
+                    font-size: 10px !important;
                 }
                 
-                .nav-tabs .nav-link {
-                    padding: 8px 10px !important;
+                .kpi-card p {
                     font-size: 11px !important;
                 }
                 
+                .nav-tabs .nav-link {
+                    padding: 12px 12px !important;
+                    font-size: 12px !important;
+                }
+                
                 .logo-img {
-                    height: 32px !important;
-                    max-height: 32px !important;
+                    height: 36px !important;
+                    max-height: 36px !important;
                 }
                 
                 .header-subtitle {
@@ -1167,12 +1203,20 @@ app.index_string = '''
                 }
                 
                 .btn {
-                    font-size: 11px !important;
-                    padding: 6px 10px !important;
+                    font-size: 12px !important;
+                    padding: 8px 12px !important;
                 }
                 
                 .filtros-section > div > div > div:last-child .btn {
-                    max-width: 100px;
+                    max-width: 120px;
+                }
+                
+                h5 {
+                    font-size: 15px !important;
+                }
+                
+                h6 {
+                    font-size: 13px !important;
                 }
             }
         </style>
