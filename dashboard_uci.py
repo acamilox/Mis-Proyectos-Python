@@ -1611,34 +1611,33 @@ def render_tab_content(tab):
                     '#38bdf8', '#c084fc', '#fbbf24', '#2dd4bf', '#f472b6'
                 ]
                 
-                # Invertir orden para que el mayor quede arriba
-                df_eventos_plot = df_eventos_adversos.iloc[::-1].reset_index(drop=True)
+                # Ordenar de mayor a menor
+                df_eventos_plot = df_eventos_adversos.sort_values('Cantidad', ascending=False)
                 n_eventos = len(df_eventos_plot)
                 
                 # Asignar colores únicos a cada barra
-                bar_colors = [colors_eventos[i % len(colors_eventos)] for i in range(n_eventos)][::-1]
+                bar_colors = [colors_eventos[i % len(colors_eventos)] for i in range(n_eventos)]
+                max_val = df_eventos_plot['Cantidad'].max() if not df_eventos_plot.empty else 10
                 
                 fig_eventos = go.Figure(data=[go.Bar(
-                    y=df_eventos_plot['Evento'],
-                    x=df_eventos_plot['Cantidad'],
-                    orientation='h',
+                    x=df_eventos_plot['Evento'],
+                    y=df_eventos_plot['Cantidad'],
                     marker_color=bar_colors,
                     text=df_eventos_plot['Cantidad'],
                     textposition='outside',
-                    textfont=dict(color='#1e293b', size=11),
-                    hovertemplate='<b>%{y}</b><br>Casos: %{x}<extra></extra>'
+                    textfont=dict(color='#f1f5f9', size=11, weight='bold'),
+                    hovertemplate='<b>%{x}</b><br>Casos: %{y}<extra></extra>'
                 )])
             
-            max_val = df_eventos_adversos['Cantidad'].max() if not df_eventos_adversos.empty else 10
             fig_eventos.update_layout(
                 title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                xaxis={'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#94a3b8', 'dtick': 2, 'range': [0, max_val + 3], 'title': ''},
-                yaxis={'gridcolor': 'rgba(148, 163, 184, 0.05)', 'color': '#f1f5f9', 'tickfont': {'size': 10}, 'title': '', 'ticksuffix': '  '},
-                margin=dict(l=280, r=50, t=50, b=30),
+                xaxis={'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#f1f5f9', 'tickfont': {'size': 9}, 'title': '', 'tickangle': -45},
+                yaxis={'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#94a3b8', 'title': '', 'range': [0, max_val * 1.15]},
+                margin=dict(l=50, r=30, t=50, b=180),
                 height=480,
                 hoverlabel=dict(bgcolor='#0f172a', font_color='#ffffff', font_size=12),
-                bargap=0.2
+                bargap=0.3
             )
 
             # Gráfico GRAM-SOT (Donaciones/Trasplantes)
