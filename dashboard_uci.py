@@ -1424,21 +1424,37 @@ def render_tab_content(tab):
                     insidetextanchor='middle'
                 ))
                 
+                # Agregar porcentajes como anotaciones afuera de las barras
                 max_val = max(max(hombres_vals), max(mujeres_vals)) if len(hombres_vals) > 0 else 5
+                annotations = []
+                for i, (h_val, h_pct, m_val, m_pct) in enumerate(zip(hombres_vals, hombres_pct, mujeres_vals, mujeres_pct)):
+                    rango = edad_sexo.index[i]
+                    # Porcentaje hombres (izquierda)
+                    annotations.append(dict(
+                        x=-(h_val + 1.5), y=rango, text=f'{h_pct:.1f}%',
+                        showarrow=False, font=dict(size=11, color='#94a3b8'), xanchor='right'
+                    ))
+                    # Porcentaje mujeres (derecha)
+                    annotations.append(dict(
+                        x=m_val + 1.5, y=rango, text=f'{m_pct:.1f}%',
+                        showarrow=False, font=dict(size=11, color='#94a3b8'), xanchor='left'
+                    ))
+                
                 fig_edad_sexo.update_layout(
                     title={'text': 'Pirámide de Edad y Sexo - Fallecidos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                     barmode='relative', 
                     plot_bgcolor='#1e293b',
                     paper_bgcolor='#1e293b',
                     xaxis={'title': '', 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#94a3b8',
-                           'range': [-(max_val + 3), max_val + 3], 'showticklabels': False, 'zeroline': False},
+                           'range': [-(max_val + 6), max_val + 6], 'showticklabels': False, 'zeroline': False},
                     yaxis={'title': '', 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#f1f5f9', 'tickfont': {'size': 12}},
                     legend=dict(orientation="h", y=-0.12, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', 
                                font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.2)', borderwidth=1),
                     hoverlabel=dict(bgcolor='#0f172a', font_color='#ffffff', font_size=14),
-                    margin=dict(l=70, r=30, t=50, b=60),
+                    margin=dict(l=70, r=70, t=50, b=60),
                     height=400,
-                    bargap=0.15
+                    bargap=0.15,
+                    annotations=annotations
                 )
             
             return html.Div([
