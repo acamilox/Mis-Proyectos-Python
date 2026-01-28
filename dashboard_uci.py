@@ -1891,68 +1891,32 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 hoverlabel=dict(bgcolor='#0f172a', font_size=13, font_color='#ffffff')
             )
             
-            # Dos donuts: Morbilidad Hombres y Morbilidad Mujeres
-            fig_morbilidad_hombres = go.Figure()
-            fig_morbilidad_mujeres = go.Figure()
-            
-            colores_morb = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#2563eb', '#84cc16', '#06b6d4', '#a855f7']
-            
-            # Donut Hombres
-            df_hombres = df_morbilidad[df_morbilidad['Hombre'] > 0].sort_values('Hombre', ascending=False)
-            total_hombres = df_hombres['Hombre'].sum()
-            fig_morbilidad_hombres = go.Figure(data=[go.Pie(
-                labels=df_hombres.index,
-                values=df_hombres['Hombre'],
-                hole=0.5,
-                marker=dict(colors=colores_morb[:len(df_hombres)], line=dict(color='#1e293b', width=2)),
-                textinfo='percent',
-                textposition='inside',
-                textfont=dict(size=10, color='white', weight='bold'),
-                hovertemplate='<b>%{label}</b><br>Casos: %{value}<br>%{percent}<extra></extra>'
-            )])
-            fig_morbilidad_hombres.add_annotation(
-                text=f"<b>Hombres</b><br>{int(total_hombres)}",
-                x=0.5, y=0.5, font=dict(size=13, color='#3b82f6'), showarrow=False
-            )
-            fig_morbilidad_hombres.update_layout(
-                title={'text': 'Hombres', 'font': {'size': 14, 'color': '#3b82f6'}, 'x': 0.5},
-                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                showlegend=True,
-                legend=dict(orientation='v', yanchor='middle', y=0.5, xanchor='left', x=1.02,
-                    bgcolor='rgba(30, 41, 59, 0.8)', bordercolor='rgba(148, 163, 184, 0.2)', borderwidth=1,
-                    font=dict(color='#f1f5f9', size=9)),
-                margin=dict(l=20, r=120, t=40, b=20),
-                height=350,
-                hoverlabel=dict(bgcolor='#0f172a', font_color='#ffffff')
-            )
-            
-            # Donut Mujeres
-            df_mujeres = df_morbilidad[df_morbilidad['Mujer'] > 0].sort_values('Mujer', ascending=False)
-            total_mujeres = df_mujeres['Mujer'].sum()
-            fig_morbilidad_mujeres = go.Figure(data=[go.Pie(
-                labels=df_mujeres.index,
-                values=df_mujeres['Mujer'],
-                hole=0.5,
-                marker=dict(colors=colores_morb[:len(df_mujeres)], line=dict(color='#1e293b', width=2)),
-                textinfo='percent',
-                textposition='inside',
-                textfont=dict(size=10, color='white', weight='bold'),
-                hovertemplate='<b>%{label}</b><br>Casos: %{value}<br>%{percent}<extra></extra>'
-            )])
-            fig_morbilidad_mujeres.add_annotation(
-                text=f"<b>Mujeres</b><br>{int(total_mujeres)}",
-                x=0.5, y=0.5, font=dict(size=13, color='#ec4899'), showarrow=False
-            )
-            fig_morbilidad_mujeres.update_layout(
-                title={'text': 'Mujeres', 'font': {'size': 14, 'color': '#ec4899'}, 'x': 0.5},
-                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                showlegend=True,
-                legend=dict(orientation='v', yanchor='middle', y=0.5, xanchor='left', x=1.02,
-                    bgcolor='rgba(30, 41, 59, 0.8)', bordercolor='rgba(148, 163, 184, 0.2)', borderwidth=1,
-                    font=dict(color='#f1f5f9', size=9)),
-                margin=dict(l=20, r=120, t=40, b=20),
-                height=350,
-                hoverlabel=dict(bgcolor='#0f172a', font_color='#ffffff')
+            # Gráfico de barras verticales - Morbilidad por Sexo
+            fig_morbilidad_genero = go.Figure()
+            fig_morbilidad_genero.add_trace(go.Bar(
+                name='Hombres', x=df_morbilidad.index, y=df_morbilidad['Hombre'], 
+                marker_color='#3b82f6',
+                text=df_morbilidad['Hombre'], texttemplate='%{y:.0f}', 
+                textposition='outside', textfont=dict(color='#3b82f6', size=11, weight='bold')
+            ))
+            fig_morbilidad_genero.add_trace(go.Bar(
+                name='Mujeres', x=df_morbilidad.index, y=df_morbilidad['Mujer'], 
+                marker_color='#ec4899',
+                text=df_morbilidad['Mujer'], texttemplate='%{y:.0f}', 
+                textposition='outside', textfont=dict(color='#ec4899', size=11, weight='bold')
+            ))
+            max_y = max(df_morbilidad['Hombre'].max(), df_morbilidad['Mujer'].max())
+            fig_morbilidad_genero.update_layout(
+                title={'text': 'Morbilidad por Sexo', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b', 
+                xaxis={'gridcolor': 'rgba(148, 163, 184, 0.1)', 'showline': True, 'linecolor': 'rgba(148, 163, 184, 0.2)', 'color': '#f1f5f9', 'tickangle': -35, 'title': '', 'tickfont': {'size': 10}},
+                yaxis={'gridcolor': 'rgba(148, 163, 184, 0.1)', 'showline': True, 'linecolor': 'rgba(148, 163, 184, 0.2)', 'color': '#94a3b8', 'title': '', 'range': [0, max_y * 1.15]}, 
+                margin=dict(l=50, r=30, t=50, b=100),
+                height=420,
+                legend=dict(orientation="h", y=-0.28, x=0.5, xanchor="center",
+                    bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.2)', borderwidth=1), 
+                hoverlabel=dict(bgcolor='#0f172a', font_color='#ffffff'),
+                bargap=0.25
             )
 
         return meses_filtrados, html.Div([
@@ -1963,8 +1927,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps_donut, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_total, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-2 g-2"),
             html.H6("Morbilidad por Sexo", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '20px', 'marginBottom': '12px', 'textAlign': 'center', 'fontSize': '14px'}),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_morbilidad_hombres, config=GRAPH_CONFIG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_morbilidad_mujeres, config=GRAPH_CONFIG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_morbilidad_genero, config=GRAPH_CONFIG), xs=12)
             ], className="g-2")
         ])
     except Exception as e:
