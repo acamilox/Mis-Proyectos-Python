@@ -1839,7 +1839,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             hovertemplate='<b>%{x}</b><br>Pacientes: %{y}<extra></extra>'
         )])
         fig_eps_donut.update_layout(
-            title={'text': f'Distribución por EPS (Total: {sum(eps_values):,})'.replace(',', '.'), 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            title={'text': f'Distribución por EPS (Total: {int(sum(eps_values)):,})'.replace(',', '.'), 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             plot_bgcolor='#1e293b',
             paper_bgcolor='#1e293b',
             xaxis={'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#f1f5f9', 'tickangle': -35, 'tickfont': {'size': 10}, 'title': ''},
