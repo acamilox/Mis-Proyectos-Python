@@ -1829,6 +1829,15 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             title='Distribución por EPS',
             auto_sort=False  # Ya está ordenado
         )
+        # Expandir el gráfico de EPS para mejor visualización
+        fig_eps_donut.update_layout(
+            height=450,
+            margin=dict(l=50, r=200, t=60, b=50),
+            legend=dict(
+                font=dict(size=11),
+                itemsizing='constant'
+            )
+        )
 
         # Gráficos
         datos_ocup = safe_get_row('% OCUPACIONAL', meses_filtrados)
@@ -1937,7 +1946,8 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                      dbc.Col(kpi2, xs=6, sm=6, md=True, className="mb-2"), dbc.Col(kpi3, xs=6, sm=6, md=True, className="mb-2"),
                      dbc.Col(kpi4, xs=6, sm=6, md=True, className="mb-2")], className="mb-3 g-2"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocupacional, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_ingresos_egresos, config=GRAPH_CONFIG), xs=12, md=6)], className="g-2"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps_donut, config=GRAPH_CONFIG), xs=12, md=6), dbc.Col(dcc.Graph(figure=fig_morbilidad_total, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-2 g-2"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps_donut, config=GRAPH_CONFIG), xs=12)], className="mt-2 g-2"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morbilidad_total, config=GRAPH_CONFIG), xs=12)], className="mt-2 g-2"),
             html.H6("Morbilidad por Sexo", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '20px', 'marginBottom': '12px', 'textAlign': 'center', 'fontSize': '14px'}),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_morbilidad_genero, config=GRAPH_CONFIG), xs=12)
