@@ -1773,7 +1773,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         total_sura = safe_get_row('SURA', suma_col, silent=True)
         total_aliansalud = safe_get_row('ALIANSALUD', suma_col, silent=True)
         total_emssanar = safe_get_row('EMSSANAR', suma_col, silent=True)
-        total_previsora = safe_get_row('FIDUCIARIA LA PREVISORA', suma_col, silent=True)
+        total_previsora = safe_get_row('FIDUSUARIA LA PREVISORA', suma_col, silent=True)
         
         # Limpiar valores nulos
         if pd.isna(total_famisanar): total_famisanar = 0
