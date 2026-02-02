@@ -1822,21 +1822,32 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         eps_labels = [e[0] for e in eps_data]
         eps_values = [e[1] for e in eps_data]
         
-        # Donut de distribución EPS - Ordenado de mayor a menor
-        fig_eps_donut = create_donut_chart(
-            labels=eps_labels,
-            values=eps_values,
-            title='Distribución por EPS',
-            auto_sort=False  # Ya está ordenado
-        )
-        # Expandir el gráfico de EPS para mejor visualización
+        # Gráfico de barras verticales - Distribución por EPS
+        eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
+        eps_df = eps_df.sort_values('Cantidad', ascending=False)
+        
+        colores_eps = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#2563eb', '#84cc16', '#06b6d4', '#a855f7', '#eab308', '#64748b', '#22c55e']
+        max_eps = eps_df['Cantidad'].max()
+        
+        fig_eps_donut = go.Figure(data=[go.Bar(
+            x=eps_df['EPS'],
+            y=eps_df['Cantidad'],
+            marker_color=colores_eps[:len(eps_df)],
+            text=eps_df['Cantidad'],
+            textposition='outside',
+            textfont=dict(color='#f1f5f9', size=12, weight='bold'),
+            hovertemplate='<b>%{x}</b><br>Pacientes: %{y}<extra></extra>'
+        )])
         fig_eps_donut.update_layout(
-            height=450,
-            margin=dict(l=50, r=200, t=60, b=50),
-            legend=dict(
-                font=dict(size=11),
-                itemsizing='constant'
-            )
+            title={'text': f'Distribución por EPS (Total: {sum(eps_values):,})'.replace(',', '.'), 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            plot_bgcolor='#1e293b',
+            paper_bgcolor='#1e293b',
+            xaxis={'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#f1f5f9', 'tickangle': -35, 'tickfont': {'size': 10}, 'title': ''},
+            yaxis={'gridcolor': 'rgba(148, 163, 184, 0.1)', 'color': '#94a3b8', 'title': '', 'range': [0, max_eps * 1.12]},
+            margin=dict(l=50, r=30, t=50, b=120),
+            height=420,
+            hoverlabel=dict(bgcolor='#0f172a', font_color='#ffffff'),
+            bargap=0.3
         )
 
         # Gráficos
