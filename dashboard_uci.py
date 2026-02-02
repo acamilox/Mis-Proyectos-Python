@@ -1899,7 +1899,8 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         if not df_morbilidad.empty:
             # Gráfico de barras verticales para morbilidad por diagnóstico - ordenado de mayor a menor
             df_morb_sorted = df_morbilidad.sort_values('Total', ascending=False)
-            colores_morbilidad = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#2563eb', '#84cc16', '#06b6d4', '#a855f7', '#eab308']
+            # Paleta diferente a EPS: tonos más cálidos y terrosos
+            colores_morbilidad = ['#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#be185d', '#059669', '#9333ea', '#ea580c', '#0284c7', '#65a30d', '#db2777', '#0d9488', '#d97706']
             max_total = df_morb_sorted['Total'].max()
             fig_morbilidad_total = go.Figure(data=[
                 go.Bar(
