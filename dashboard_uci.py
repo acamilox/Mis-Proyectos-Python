@@ -1774,6 +1774,10 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         total_aliansalud = safe_get_row('ALIANSALUD', suma_col, silent=True)
         total_emssanar = safe_get_row('EMSSANAR', suma_col, silent=True)
         total_previsora = safe_get_row('FIDUSUARIA LA PREVISORA', suma_col, silent=True)
+        total_soat = safe_get_row('SOAT', suma_col, silent=True)
+        total_particular = safe_get_row('PARTICULAR', suma_col, silent=True)
+        total_admin_sgss = safe_get_row('ADMINISTRADORA DE RECURSOS SGSS', suma_col, silent=True)
+        total_otra = safe_get_row('OTRA', suma_col, silent=True)
         
         # Limpiar valores nulos
         if pd.isna(total_famisanar): total_famisanar = 0
@@ -1787,6 +1791,10 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         if pd.isna(total_aliansalud): total_aliansalud = 0
         if pd.isna(total_emssanar): total_emssanar = 0
         if pd.isna(total_previsora): total_previsora = 0
+        if pd.isna(total_soat): total_soat = 0
+        if pd.isna(total_particular): total_particular = 0
+        if pd.isna(total_admin_sgss): total_admin_sgss = 0
+        if pd.isna(total_otra): total_otra = 0
         
         # Crear lista de EPS con sus valores (solo las que tienen datos > 0)
         eps_data = [
@@ -1801,6 +1809,10 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             ('Aliansalud', total_aliansalud),
             ('Emssanar', total_emssanar),
             ('La Previsora', total_previsora),
+            ('SOAT', total_soat),
+            ('Particular', total_particular),
+            ('Admin. SGSS', total_admin_sgss),
+            ('Otra', total_otra),
         ]
         
         # Filtrar EPS con valores > 0 y ordenar de mayor a menor
