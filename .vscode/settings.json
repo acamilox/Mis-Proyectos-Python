@@ -1,2 +1,14 @@
 {
+    "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+    "python.typeCheckingMode": "basic",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.autoComplete.addBrackets": true,
+    "python.languageServer": "Pylance",
+    "editor.formatOnSave": false,
+    "python.formatting.provider": "none",
+    "files.associations": {
+        "*.css": "css"
+    }
 }
