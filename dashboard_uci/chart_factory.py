@@ -75,8 +75,8 @@ class ChartFactory:
                 'gridcolor': 'rgba(148, 163, 184, 0.1)', 
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
-                'color': '#94a3b8', 
-                'tickfont': {'size': 11, 'color': '#94a3b8'}, 
+                'color': '#cbd5e1', 
+                'tickfont': {'size': 11, 'color': '#cbd5e1'}, 
                 'title': ''
             },
             yaxis={
@@ -88,7 +88,7 @@ class ChartFactory:
                 'tickfont': {'size': 11, 'color': '#94a3b8'}, 
                 'title': ''
             },
-            margin=dict(l=50, r=30, t=50, b=40),
+            margin=dict(l=50, r=30, t=50, b=50),
             height=350,
             hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#ffffff'),
             bargap=0.3
@@ -136,8 +136,8 @@ class ChartFactory:
             'gridcolor': 'rgba(148, 163, 184, 0.1)', 
             'showline': True, 
             'linecolor': 'rgba(148, 163, 184, 0.2)', 
-            'color': self.colors['muted'], 
-            'tickfont': {'size': 11}
+            'color': '#94a3b8', 
+            'tickfont': {'size': 11, 'color': '#94a3b8'}
         }
         
         if isinstance(data, pd.Series):
@@ -159,12 +159,12 @@ class ChartFactory:
                 'gridcolor': 'rgba(148, 163, 184, 0.1)', 
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
-                'color': self.colors['muted'], 
-                'tickfont': {'size': 11}, 
+                'color': '#cbd5e1', 
+                'tickfont': {'size': 11, 'color': '#cbd5e1'}, 
                 'title': ''
             },
             yaxis=yaxis_config,
-            margin=dict(l=50, r=30, t=50, b=40),
+            margin=dict(l=50, r=30, t=50, b=50),
             height=350,
             hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#ffffff')
         )

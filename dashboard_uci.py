@@ -214,8 +214,8 @@ def render_gestion():
         fig_vm.update_layout(
             title={'text': 'Promedio de Días de VM', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=350, bargap=0.3,
-            xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            height=350, bargap=0.3, margin=dict(l=50, r=30, t=50, b=50),
+            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
         
@@ -231,10 +231,30 @@ def render_gestion():
         
         # Gérmenes
         if not DATA['germenes'].empty:
-            fig_germenes = chart_factory.create_donut_chart(
-                labels=DATA['germenes']['Germen'].tolist(),
-                values=DATA['germenes']['Cantidad'].tolist(),
-                title='Gérmenes Aislados (IAAS)'
+            germenes_labels = DATA['germenes']['Germen'].tolist()
+            germenes_values = DATA['germenes']['Cantidad'].tolist()
+            
+            # Ordenar de mayor a menor
+            datos_germenes = sorted(zip(germenes_values, germenes_labels), reverse=True)
+            germenes_values_sorted = [d[0] for d in datos_germenes]
+            germenes_labels_sorted = [d[1] for d in datos_germenes]
+            
+            colors_germenes = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16']
+            
+            fig_germenes = go.Figure(data=[go.Bar(
+                x=germenes_labels_sorted,
+                y=germenes_values_sorted,
+                marker_color=[colors_germenes[i % len(colors_germenes)] for i in range(len(germenes_labels_sorted))],
+                text=germenes_values_sorted,
+                textposition='outside',
+                textfont=dict(color='#f1f5f9', size=11)
+            )])
+            fig_germenes.update_layout(
+                title={'text': f'Gérmenes Aislados (IAAS) - Total: {sum(germenes_values)}', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                height=500, margin=dict(l=50, r=30, t=50, b=200),
+                xaxis={'tickfont': {'color': '#cbd5e1', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
             fig_germenes = go.Figure()
@@ -242,7 +262,7 @@ def render_gestion():
         # Eventos adversos
         if not DATA['eventos_adversos'].empty:
             df_eventos = DATA['eventos_adversos'].sort_values('Cantidad', ascending=False)
-            colors_eventos = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6']
+            colors_eventos = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899']
             fig_eventos = go.Figure(data=[go.Bar(
                 x=df_eventos['Evento'],
                 y=df_eventos['Cantidad'],
@@ -254,8 +274,8 @@ def render_gestion():
             fig_eventos.update_layout(
                 title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=480, margin=dict(l=50, r=30, t=50, b=180),
-                xaxis={'tickfont': {'color': '#94a3b8', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                height=520, margin=dict(l=50, r=30, t=50, b=220),
+                xaxis={'tickfont': {'color': '#cbd5e1', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
@@ -423,20 +443,20 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
-            colors_eps = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+            colors_eps = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899']
             fig_eps = go.Figure(data=[go.Bar(
                 x=eps_df['EPS'],
                 y=eps_df['Cantidad'],
                 marker_color=[colors_eps[i % len(colors_eps)] for i in range(len(eps_df))],
-                text=eps_df['Cantidad'],
+                text=eps_df['Cantidad'].astype(int),
                 textposition='outside',
-                textfont=dict(color='#f1f5f9', size=12)
+                textfont=dict(color='#f1f5f9', size=11)
             )])
             fig_eps.update_layout(
                 title={'text': f'Distribución por EPS (Total: {int(sum(eps_values)):,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=420, margin=dict(l=50, r=30, t=50, b=120),
-                xaxis={'tickfont': {'color': '#94a3b8', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                height=450, margin=dict(l=50, r=30, t=50, b=150),
+                xaxis={'tickfont': {'color': '#cbd5e1', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
@@ -457,8 +477,8 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         fig_ocup.update_layout(
             title={'text': '% Ocupacional Mensual', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=350,
-            xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            height=350, margin=dict(l=50, r=30, t=50, b=50),
+            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
         
@@ -471,27 +491,28 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         fig_ie.update_layout(
             title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=380, legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9'}),
-            xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            height=380, margin=dict(l=50, r=30, t=50, b=70),
+            legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1),
+            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
         
         # Morbilidad
         if not DATA['morbilidad'].empty:
             df_morb = DATA['morbilidad'].sort_values('Total', ascending=False)
-            colors_morb = ['#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#be185d']
+            colors_morb = ['#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#be185d', '#059669', '#7c3aed']
             fig_morb = go.Figure(data=[go.Bar(
                 x=df_morb.index, y=df_morb['Total'],
                 marker_color=[colors_morb[i % len(colors_morb)] for i in range(len(df_morb))],
                 text=df_morb['Total'],
                 textposition='outside',
-                textfont=dict(color='#f1f5f9', size=12)
+                textfont=dict(color='#f1f5f9', size=11)
             )])
             fig_morb.update_layout(
                 title={'text': 'Morbilidad por Diagnóstico', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=380, margin=dict(l=50, r=30, t=50, b=110),
-                xaxis={'tickfont': {'color': '#94a3b8', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                height=400, margin=dict(l=50, r=30, t=50, b=120),
+                xaxis={'tickfont': {'color': '#cbd5e1', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
             
@@ -507,8 +528,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             fig_morb_gen.update_layout(
                 title={'text': 'Morbilidad por Sexo', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=420, legend=dict(orientation="h", y=-0.28, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9'}),
-                xaxis={'tickfont': {'color': '#94a3b8', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                height=450, margin=dict(l=50, r=30, t=50, b=120),
+                legend=dict(orientation="h", y=-0.22, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1),
+                xaxis={'tickfont': {'color': '#cbd5e1', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
