@@ -67,7 +67,7 @@ body {
 .nav-tabs {
     border-bottom: none !important;
     background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
-    padding: 8px 24px;
+    padding: 6px 24px;
     gap: 8px;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -110,9 +110,8 @@ body {
 /* Tab content - Diseño mejorado */
 .tab-content {
     background: transparent;
-    padding: 28px;
+    padding: 20px 28px;
     border: none;
-    min-height: calc(100vh - 200px);
 }
 
 /* Cards/Sections - Diseño Premium */

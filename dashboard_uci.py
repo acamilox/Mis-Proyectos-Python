@@ -196,9 +196,9 @@ def render_resumen():
         ], style={'display': 'flex', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '8px'})
     ], style={
         'background': 'rgba(30, 41, 59, 0.8)',
-        'padding': '16px 20px',
+        'padding': '14px 20px',
         'borderRadius': '8px',
-        'marginBottom': '20px',
+        'marginBottom': '16px',
         'border': '1px solid rgba(148, 163, 184, 0.15)'
     }, className="filtros-section")
     
@@ -328,34 +328,34 @@ def render_gestion():
             fig_eventos = go.Figure()
         
         return html.Div([
-            html.H5("Indicadores de Gestión", style={'color': '#f1f5f9', 'fontWeight': '600'}, className="mb-4"),
+            html.H5("Indicadores de Gestión", style={'color': '#f1f5f9', 'fontWeight': '600'}, className="mb-3"),
             dbc.Row([
                 dbc.Col(kpi1, xs=12, md=True), 
                 dbc.Col(kpi2, xs=12, md=True), 
                 dbc.Col(kpi3, xs=12, md=True), 
                 dbc.Col(kpi4, xs=12, md=True), 
                 dbc.Col(kpi5, xs=12, md=True)
-            ], className="mb-5 g-4"),
+            ], className="mb-4 g-3"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_estancia, config=GRAPH_CONFIG), xs=12, md=6), 
                 dbc.Col(dcc.Graph(figure=fig_giro, config=GRAPH_CONFIG), xs=12, md=6)
-            ], className="mb-4 g-4"),
+            ], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=3),
                 dbc.Col(dcc.Graph(figure=fig_vm, config=GRAPH_CONFIG), xs=12, md=6),
                 dbc.Col(xs=12, md=3)
-            ], className="mb-5", justify="center"),
-            html.H5("Indicadores de Calidad e Infecciones", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
+            ], className="mb-4", justify="center"),
+            html.H5("Indicadores de Calidad e Infecciones", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=GRAPH_CONFIG), xs=12, md=6), 
                 dbc.Col(dcc.Graph(figure=fig_nav, config=GRAPH_CONFIG), xs=12, md=6)
-            ], className="mb-4 g-4"),
-            html.H5("Gérmenes Aislados y Eventos Adversos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '30px', 'marginBottom': '30px', 'textAlign': 'center'}),
+            ], className="mb-3 g-3"),
+            html.H5("Gérmenes Aislados y Eventos Adversos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
                 dbc.Col(dcc.Graph(figure=fig_germenes, config=GRAPH_CONFIG), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
-            ], className="mb-5", justify="center"),
+            ], className="mb-4", justify="center"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=GRAPH_CONFIG), xs=12)])
         ])
     except Exception as e:
@@ -386,16 +386,16 @@ def render_especialidades():
         fig_neurologia = chart_factory.create_bar_chart(PROCESSOR.safe_get_row('NEUROLOGIA', MESES), 'Neurología', color='#9b59b6', decimals=0)
         
         return html.Div([
-            html.H5("Principales Especialidades", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '20px'}),
-            dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
+            html.H5("Principales Especialidades", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '12px'}),
+            dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_medicina, config=GRAPH_CONFIG), xs=12, md=6), 
                 dbc.Col(dcc.Graph(figure=fig_cirugia, config=GRAPH_CONFIG), xs=12, md=6)
-            ], className="mb-4"),
+            ], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_neuro, config=GRAPH_CONFIG), xs=12, md=6), 
                 dbc.Col(dcc.Graph(figure=fig_neurologia, config=GRAPH_CONFIG), xs=12, md=6)
-            ])
+            ], className="g-3")
         ])
     except Exception as e:
         logger.error(f"Error en render_especialidades: {e}")
@@ -429,18 +429,18 @@ def render_mortalidad():
         fig_piramide = chart_factory.create_pyramid_chart(DATA['fallecidos'])
         
         return html.Div([
-            dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-4"),
-            html.H6("Días de Estancia - Fallecidos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '15px', 'marginTop': '10px'}),
-            dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=6), dbc.Col(kpi_mediana, xs=12, md=6)], className="mb-4"),
+            dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
+            html.H6("Días de Estancia - Fallecidos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '10px', 'marginTop': '8px'}),
+            dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=6), dbc.Col(kpi_mediana, xs=12, md=6)], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
                 dbc.Col(dcc.Graph(figure=fig_mort, config=GRAPH_CONFIG), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
-            ], className="mb-4", justify="center"),
+            ], className="mb-3", justify="center"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_trauma, config=GRAPH_CONFIG), xs=12, md=6), 
                 dbc.Col(dcc.Graph(figure=fig_piramide, config=GRAPH_CONFIG), xs=12, md=6)
-            ], className="mt-3")
+            ], className="g-3")
         ])
     except Exception as e:
         logger.error(f"Error en render_mortalidad: {e}")
