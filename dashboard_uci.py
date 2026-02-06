@@ -229,7 +229,7 @@ def render_gestion():
             'Tasa NAV', color='#e74c3c', decimals=1
         )
         
-        # Gérmenes - Barras verticales con etiquetas visibles
+        # Gérmenes - Donut para distribución
         if not DATA['germenes'].empty:
             germenes_labels = DATA['germenes']['Germen'].tolist()
             germenes_values = DATA['germenes']['Cantidad'].tolist()
@@ -239,22 +239,37 @@ def render_gestion():
             germenes_values_sorted = [d[0] for d in datos_germenes]
             germenes_labels_sorted = [d[1] for d in datos_germenes]
             
-            colors_germenes = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16']
+            colors_germenes = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16', '#14b8a6', '#a855f7', '#eab308', '#2563eb', '#22c55e', '#e11d48', '#0ea5e9', '#d946ef']
             
-            fig_germenes = go.Figure(data=[go.Bar(
-                x=germenes_labels_sorted,
-                y=germenes_values_sorted,
-                marker_color=[colors_germenes[i % len(colors_germenes)] for i in range(len(germenes_labels_sorted))],
-                text=germenes_values_sorted,
+            fig_germenes = go.Figure(data=[go.Pie(
+                labels=germenes_labels_sorted,
+                values=germenes_values_sorted,
+                hole=0.45,
+                marker=dict(colors=colors_germenes[:len(germenes_labels_sorted)], line=dict(color='#1e293b', width=2)),
+                textinfo='percent',
                 textposition='outside',
-                textfont=dict(color='#f1f5f9', size=11)
+                textfont=dict(size=9, color='#f1f5f9'),
+                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
+                direction='clockwise',
+                sort=False
             )])
+            total_germenes = sum(germenes_values)
+            fig_germenes.add_annotation(
+                text=f"<b>Total</b><br>{int(total_germenes)}",
+                x=0.5, y=0.5,
+                font=dict(size=14, color='#f1f5f9'),
+                showarrow=False
+            )
             fig_germenes.update_layout(
-                title={'text': f'Gérmenes Aislados (IAAS) - Total: {sum(germenes_values)}', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=550, margin=dict(l=50, r=30, t=50, b=250),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 8}, 'tickangle': 45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
+                height=500, margin=dict(l=20, r=220, t=50, b=30),
+                legend=dict(
+                    orientation='v', yanchor='middle', y=0.5, xanchor='left', x=1.02,
+                    bgcolor='rgba(30, 41, 59, 0.8)', font=dict(color='#f1f5f9', size=9),
+                    bordercolor='rgba(148, 163, 184, 0.2)', borderwidth=1
+                ),
+                showlegend=True
             )
         else:
             fig_germenes = go.Figure()
@@ -497,44 +512,66 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
         
-        # Morbilidad - Barras verticales con etiquetas visibles
+        # Morbilidad - Donut para distribución
         if not DATA['morbilidad'].empty:
             df_morb = DATA['morbilidad'].sort_values('Total', ascending=False)
-            colors_morb = ['#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#be185d', '#059669', '#6366f1']
-            fig_morb = go.Figure(data=[go.Bar(
-                x=df_morb.index, y=df_morb['Total'],
-                marker_color=[colors_morb[i % len(colors_morb)] for i in range(len(df_morb))],
-                text=df_morb['Total'],
+            colors_morb = ['#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#be185d', '#059669', '#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#06b6d4']
+            
+            fig_morb = go.Figure(data=[go.Pie(
+                labels=df_morb.index,
+                values=df_morb['Total'],
+                hole=0.45,
+                marker=dict(colors=colors_morb[:len(df_morb)], line=dict(color='#1e293b', width=2)),
+                textinfo='percent',
                 textposition='outside',
-                textfont=dict(color='#f1f5f9', size=11)
+                textfont=dict(size=10, color='#f1f5f9'),
+                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
+                direction='clockwise',
+                sort=False
             )])
+            total_morb = df_morb['Total'].sum()
+            fig_morb.add_annotation(
+                text=f"<b>Total</b><br>{int(total_morb)}",
+                x=0.5, y=0.5,
+                font=dict(size=14, color='#f1f5f9'),
+                showarrow=False
+            )
             fig_morb.update_layout(
                 title={'text': 'Morbilidad por Diagnóstico', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=450, margin=dict(l=50, r=30, t=50, b=140),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 10}, 'tickangle': 45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
+                height=450, margin=dict(l=20, r=180, t=50, b=30),
+                legend=dict(
+                    orientation='v', yanchor='middle', y=0.5, xanchor='left', x=1.02,
+                    bgcolor='rgba(30, 41, 59, 0.8)', font=dict(color='#f1f5f9', size=10),
+                    bordercolor='rgba(148, 163, 184, 0.2)', borderwidth=1
+                ),
+                showlegend=True
             )
             
-            # Morbilidad por Sexo - Barras verticales
-            fig_morb_gen = go.Figure()
-            fig_morb_gen.add_trace(go.Bar(
-                name='Hombres', x=df_morb.index, y=df_morb['Hombre'], 
-                marker_color='#3b82f6',
-                text=df_morb['Hombre'], textposition='outside', textfont=dict(color='#f1f5f9', size=9)
-            ))
-            fig_morb_gen.add_trace(go.Bar(
-                name='Mujeres', x=df_morb.index, y=df_morb['Mujer'], 
-                marker_color='#ec4899',
-                text=df_morb['Mujer'], textposition='outside', textfont=dict(color='#f1f5f9', size=9)
-            ))
+            # Morbilidad por Sexo - Donut simple
+            total_hombres = df_morb['Hombre'].sum()
+            total_mujeres = df_morb['Mujer'].sum()
+            fig_morb_gen = go.Figure(data=[go.Pie(
+                labels=['Hombres', 'Mujeres'],
+                values=[total_hombres, total_mujeres],
+                hole=0.5,
+                marker=dict(colors=['#3b82f6', '#ec4899'], line=dict(color='#1e293b', width=2)),
+                textinfo='label+percent',
+                textposition='outside',
+                textfont=dict(size=12, color='#f1f5f9'),
+                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>'
+            )])
+            fig_morb_gen.add_annotation(
+                text=f"<b>Total</b><br>{int(total_hombres + total_mujeres)}",
+                x=0.5, y=0.5,
+                font=dict(size=16, color='#f1f5f9'),
+                showarrow=False
+            )
             fig_morb_gen.update_layout(
-                title={'text': 'Morbilidad por Sexo', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
-                barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=500, margin=dict(l=50, r=30, t=50, b=160),
-                legend=dict(orientation="h", y=1.02, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 10}, 'tickangle': 45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
+                title={'text': 'Distribución por Sexo', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                height=380, margin=dict(l=50, r=50, t=50, b=30),
+                showlegend=False
             )
         else:
             fig_morb = go.Figure()
@@ -554,8 +591,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             ], className="g-2"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=GRAPH_CONFIG), xs=12)], className="mt-2 g-2"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_morb, config=GRAPH_CONFIG), xs=12)], className="mt-2 g-2"),
-            html.H6("Morbilidad por Sexo", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '20px', 'marginBottom': '12px', 'textAlign': 'center'}),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morb_gen, config=GRAPH_CONFIG), xs=12)])
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morb_gen, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-2 g-2", justify="center")
         ])
     except Exception as e:
         logger.error(f"Error en actualizar_resumen: {e}")
