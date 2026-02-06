@@ -23,8 +23,6 @@ body {
     border-bottom: 1px solid rgba(99, 102, 241, 0.2);
     backdrop-filter: blur(15px);
     padding: 16px 24px;
-    position: sticky;
-    top: 0;
     z-index: 100;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
