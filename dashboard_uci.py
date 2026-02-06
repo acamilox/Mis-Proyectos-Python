@@ -214,7 +214,9 @@ def render_gestion():
         fig_vm.update_layout(
             title={'text': 'Promedio de Días de VM', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=350, bargap=0.3
+            height=350, bargap=0.3,
+            xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
         
         # Infecciones
@@ -252,7 +254,9 @@ def render_gestion():
             fig_eventos.update_layout(
                 title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=480, margin=dict(l=50, r=30, t=50, b=180)
+                height=480, margin=dict(l=50, r=30, t=50, b=180),
+                xaxis={'tickfont': {'color': '#94a3b8', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
             fig_eventos = go.Figure()
@@ -352,7 +356,8 @@ def render_mortalidad():
         
         fig_trauma = chart_factory.create_grouped_bar_chart(
             ['Pacientes con diagnóstico de Trauma', 'Pacientes fallecidos por Trauma'],
-            ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos', decimals=0
+            ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos',
+            processor=PROCESSOR, decimals=0
         )
         
         fig_piramide = chart_factory.create_pyramid_chart(DATA['fallecidos'])
@@ -430,7 +435,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             fig_eps.update_layout(
                 title={'text': f'Distribución por EPS (Total: {int(sum(eps_values)):,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=420, margin=dict(l=50, r=30, t=50, b=120)
+                height=420, margin=dict(l=50, r=30, t=50, b=120),
+                xaxis={'tickfont': {'color': '#94a3b8', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
             fig_eps = go.Figure()
@@ -450,7 +457,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         fig_ocup.update_layout(
             title={'text': '% Ocupacional Mensual', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=350
+            height=350,
+            xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
         
         # Ingresos vs Egresos
@@ -462,7 +471,9 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         fig_ie.update_layout(
             title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=380, legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9'})
+            height=380, legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9'}),
+            xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
         
         # Morbilidad
@@ -479,16 +490,26 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             fig_morb.update_layout(
                 title={'text': 'Morbilidad por Diagnóstico', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=380, margin=dict(l=50, r=30, t=50, b=110)
+                height=380, margin=dict(l=50, r=30, t=50, b=110),
+                xaxis={'tickfont': {'color': '#94a3b8', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
             
             fig_morb_gen = go.Figure()
-            fig_morb_gen.add_trace(go.Bar(name='Hombres', x=df_morb.index, y=df_morb['Hombre'], marker_color='#3b82f6'))
-            fig_morb_gen.add_trace(go.Bar(name='Mujeres', x=df_morb.index, y=df_morb['Mujer'], marker_color='#ec4899'))
+            fig_morb_gen.add_trace(go.Bar(
+                name='Hombres', x=df_morb.index, y=df_morb['Hombre'], marker_color='#3b82f6',
+                text=df_morb['Hombre'], textposition='outside', textfont=dict(color='#f1f5f9', size=10)
+            ))
+            fig_morb_gen.add_trace(go.Bar(
+                name='Mujeres', x=df_morb.index, y=df_morb['Mujer'], marker_color='#ec4899',
+                text=df_morb['Mujer'], textposition='outside', textfont=dict(color='#f1f5f9', size=10)
+            ))
             fig_morb_gen.update_layout(
                 title={'text': 'Morbilidad por Sexo', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=420, legend=dict(orientation="h", y=-0.28, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9'})
+                height=420, legend=dict(orientation="h", y=-0.28, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9'}),
+                xaxis={'tickfont': {'color': '#94a3b8', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
             fig_morb = go.Figure()

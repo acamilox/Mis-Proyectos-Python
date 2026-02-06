@@ -17,6 +17,7 @@ class DataProcessor:
     """Clase para procesar y transformar datos del Dashboard"""
     
     def __init__(self, data: Dict[str, pd.DataFrame]):
+        from .config import MESES
         self.data = data
         self.df = data.get('estadistica', pd.DataFrame())
         self.df_morbilidad = data.get('morbilidad', pd.DataFrame())
@@ -24,6 +25,7 @@ class DataProcessor:
         self.df_fallecidos = data.get('fallecidos', pd.DataFrame())
         self.df_eventos = data.get('eventos_adversos', pd.DataFrame())
         self.df_gram = data.get('gram_sot', pd.DataFrame())
+        self.meses = MESES  # Lista de meses disponibles
     
     def get_suma_column(self) -> str:
         """Obtiene el nombre de la columna de suma"""

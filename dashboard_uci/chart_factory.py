@@ -75,17 +75,17 @@ class ChartFactory:
                 'gridcolor': 'rgba(148, 163, 184, 0.1)', 
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
-                'color': self.colors['muted'], 
-                'tickfont': {'size': 11}, 
+                'color': '#94a3b8', 
+                'tickfont': {'size': 11, 'color': '#94a3b8'}, 
                 'title': ''
             },
             yaxis={
                 'gridcolor': 'rgba(148, 163, 184, 0.1)', 
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
-                'color': self.colors['muted'], 
+                'color': '#94a3b8', 
                 'tickformat': 'd', 
-                'tickfont': {'size': 11}, 
+                'tickfont': {'size': 11, 'color': '#94a3b8'}, 
                 'title': ''
             },
             margin=dict(l=50, r=30, t=50, b=40),
@@ -176,6 +176,7 @@ class ChartFactory:
         row_names: List[str], 
         labels: List[str], 
         title: str,
+        processor = None,
         meses: List[str] = None,
         decimals: int = 0
     ) -> go.Figure:
@@ -186,21 +187,22 @@ class ChartFactory:
             row_names: Nombres de las filas a graficar
             labels: Etiquetas para cada serie
             title: Título del gráfico
+            processor: DataProcessor con datos cargados
             meses: Lista de meses
             decimals: Decimales a mostrar
         """
-        from .processors import DataProcessor
-        
         if meses is None:
             meses = self.meses
         
-        processor = DataProcessor({})
         colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
         
         fig = go.Figure()
         
         for i, (row_name, label) in enumerate(zip(row_names, labels)):
-            data = processor.safe_get_row(row_name, meses)
+            if processor is not None:
+                data = processor.safe_get_row(row_name, meses)
+            else:
+                data = pd.Series([0] * len(meses), index=meses)
             
             if decimals == 0:
                 hover_template = f'<b>%{{x}}</b><br>{label}: %{{y:.0f}}<extra></extra>'
@@ -239,7 +241,7 @@ class ChartFactory:
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
                 'color': self.colors['muted'], 
-                'tickfont': {'size': 11}, 
+                'tickfont': {'size': 11, 'color': '#94a3b8'}, 
                 'title': ''
             },
             yaxis={
@@ -248,7 +250,7 @@ class ChartFactory:
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
                 'color': self.colors['muted'], 
                 'tickformat': 'd', 
-                'tickfont': {'size': 11}, 
+                'tickfont': {'size': 11, 'color': '#94a3b8'}, 
                 'title': ''
             },
             margin=dict(l=50, r=30, t=50, b=70),
