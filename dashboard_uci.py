@@ -522,58 +522,33 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
         
-        # Morbilidad - Donut profesional con diseño mejorado
+        # Morbilidad - Barras verticales
         if not DATA['morbilidad'].empty:
             df_morb = DATA['morbilidad'].sort_values('Total', ascending=False)
             total_morb = df_morb['Total'].sum()
             
-            # Paleta de colores vibrante y profesional
+            # Paleta de colores vibrante
             colors_morb = ['#ef4444', '#8b5cf6', '#06b6d4', '#f59e0b', '#ec4899', '#10b981', '#6366f1', '#14b8a6', '#f97316', '#a855f7', '#0ea5e9', '#84cc16']
             
-            # Calcular porcentajes para mostrar
-            df_morb['Porcentaje'] = (df_morb['Total'] / total_morb * 100).round(1)
-            
-            fig_morb = go.Figure(data=[go.Pie(
-                labels=df_morb.index,
-                values=df_morb['Total'],
-                hole=0.55,
-                marker=dict(
-                    colors=colors_morb[:len(df_morb)], 
-                    line=dict(color='#0f172a', width=3)
-                ),
-                textinfo='percent',
-                textposition='inside',
-                textfont=dict(size=11, color='white', family='Inter'),
-                hovertemplate='<b>%{label}</b><br>Pacientes: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-                direction='clockwise',
-                sort=False,
-                pull=[0.02 if i == 0 else 0 for i in range(len(df_morb))]  # Destacar el mayor
+            fig_morb = go.Figure(data=[go.Bar(
+                x=df_morb.index,
+                y=df_morb['Total'],
+                marker_color=colors_morb[:len(df_morb)],
+                text=df_morb['Total'],
+                textposition='outside',
+                textfont=dict(color='#f1f5f9', size=11, family='Inter')
             )])
             
-            # Anotación central elegante
-            fig_morb.add_annotation(
-                text=f"<b style='font-size:24px'>{int(total_morb)}</b><br><span style='color:#94a3b8'>Pacientes</span>",
-                x=0.5, y=0.5,
-                font=dict(size=16, color='#f1f5f9', family='Inter'),
-                showarrow=False
-            )
-            
             fig_morb.update_layout(
-                title={'text': 'Morbilidad por Diagnóstico', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
+                title={'text': f'Morbilidad por Diagnóstico (Total: {int(total_morb)})', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=480, margin=dict(l=30, r=200, t=60, b=30),
-                legend=dict(
-                    orientation='v', yanchor='middle', y=0.5, xanchor='left', x=1.0,
-                    bgcolor='rgba(15, 23, 42, 0.9)', 
-                    font=dict(color='#e2e8f0', size=10, family='Inter'),
-                    bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1,
-                    itemsizing='constant',
-                    tracegroupgap=5
-                ),
-                showlegend=True
+                height=420, margin=dict(l=50, r=30, t=60, b=120),
+                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                bargap=0.3
             )
             
-            # Morbilidad por Sexo - Donut elegante con gradiente visual
+            # Morbilidad por Sexo - Donut elegante
             total_hombres = df_morb['Hombre'].sum()
             total_mujeres = df_morb['Mujer'].sum()
             total_sexo = total_hombres + total_mujeres
@@ -632,10 +607,8 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 dbc.Col(dcc.Graph(figure=fig_ie, config=GRAPH_CONFIG), xs=12, md=6)
             ], className="g-2"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=GRAPH_CONFIG), xs=12)], className="mt-2 g-2"),
-            dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_morb, config=GRAPH_CONFIG), xs=12, lg=7),
-                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=GRAPH_CONFIG), xs=12, lg=5)
-            ], className="mt-3 g-3")
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morb, config=GRAPH_CONFIG), xs=12)], className="mt-3 g-3"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morb_gen, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-2 g-3", justify="center")
         ])
     except Exception as e:
         logger.error(f"Error en actualizar_resumen: {e}")
