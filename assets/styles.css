@@ -318,25 +318,40 @@ body {
 /* ========== RESPONSIVE MOBILE ========== */
 @media (max-width: 768px) {
     .header-main {
-        padding: 14px 12px;
+        padding: 16px 12px;
     }
     
     .header-main > div {
         flex-direction: column !important;
         align-items: center !important;
+        gap: 16px !important;
+        padding: 10px 0 !important;
+    }
+    
+    /* Logo y título en columna en móvil */
+    .header-main > div > div:first-child {
+        flex-direction: column !important;
+        justify-content: center;
+        text-align: center;
         gap: 12px !important;
     }
     
-    .header-main > div > div:first-child {
-        justify-content: center;
+    /* Logo centrado y más pequeño en móvil */
+    .logo-img {
+        height: 55px !important;
+        max-height: 55px !important;
+        margin-right: 0 !important;
     }
     
+    /* Botones centrados */
     .header-main > div > div:last-child {
+        position: static !important;
         justify-content: center;
+        width: 100%;
     }
     
     h1 {
-        font-size: 18px !important;
+        font-size: 22px !important;
         font-weight: 700 !important;
     }
     
@@ -512,8 +527,22 @@ body {
 }
 
 @media (max-width: 480px) {
+    /* Header en pantallas muy pequeñas */
+    .header-main {
+        padding: 12px 10px !important;
+    }
+    
+    .logo-img {
+        height: 45px !important;
+        max-height: 45px !important;
+    }
+    
     h1 {
-        font-size: 16px !important;
+        font-size: 18px !important;
+    }
+    
+    .header-subtitle {
+        font-size: 11px !important;
     }
     
     .kpi-card {
@@ -533,21 +562,12 @@ body {
     }
     
     .nav-tabs .nav-link {
-        padding: 12px 12px !important;
-        font-size: 12px !important;
-    }
-    
-    .logo-img {
-        height: 36px !important;
-        max-height: 36px !important;
-    }
-    
-    .header-subtitle {
-        display: none !important;
+        padding: 10px 10px !important;
+        font-size: 11px !important;
     }
     
     .btn {
-        font-size: 12px !important;
+        font-size: 11px !important;
         padding: 8px 12px !important;
     }
     
