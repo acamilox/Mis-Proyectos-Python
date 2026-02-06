@@ -540,15 +540,15 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             )])
             
             fig_morb.update_layout(
-                title={'text': f'Morbilidad por Diagnóstico (Total: {int(total_morb)})', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
+                title={'text': f'Morbilidad por Diagnóstico (Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=420, margin=dict(l=50, r=30, t=60, b=120),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 10}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                height=380, margin=dict(l=50, r=30, t=50, b=100),
+                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                bargap=0.3
+                bargap=0.25
             )
             
-            # Morbilidad por Sexo - Donut elegante
+            # Morbilidad por Sexo - Gráfico de Torta (Pie)
             total_hombres = df_morb['Hombre'].sum()
             total_mujeres = df_morb['Mujer'].sum()
             total_sexo = total_hombres + total_mujeres
@@ -556,59 +556,58 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             pct_m = round(total_mujeres / total_sexo * 100, 1)
             
             fig_morb_gen = go.Figure(data=[go.Pie(
-                labels=[f'Hombres ({pct_h}%)', f'Mujeres ({pct_m}%)'],
+                labels=['Hombres', 'Mujeres'],
                 values=[total_hombres, total_mujeres],
-                hole=0.6,
+                hole=0,  # Sin hueco = torta
                 marker=dict(
                     colors=['#3b82f6', '#ec4899'], 
-                    line=dict(color='#0f172a', width=4)
+                    line=dict(color='#0f172a', width=2)
                 ),
-                textinfo='value',
+                textinfo='label+percent+value',
                 textposition='inside',
-                textfont=dict(size=18, color='white', family='Inter'),
-                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<extra></extra>',
+                textfont=dict(size=14, color='white', family='Inter'),
+                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
                 direction='clockwise',
-                sort=False
+                sort=False,
+                pull=[0.02, 0.02]
             )])
             
-            fig_morb_gen.add_annotation(
-                text=f"<b style='font-size:28px'>{int(total_sexo)}</b><br><span style='color:#94a3b8'>Total</span>",
-                x=0.5, y=0.5,
-                font=dict(size=18, color='#f1f5f9', family='Inter'),
-                showarrow=False
-            )
-            
             fig_morb_gen.update_layout(
-                title={'text': 'Distribución por Sexo', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
+                title={'text': f'Distribución por Sexo (Total: {int(total_sexo)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=400, margin=dict(l=40, r=40, t=60, b=40),
-                legend=dict(
-                    orientation='h', yanchor='top', y=-0.05, xanchor='center', x=0.5,
-                    bgcolor='rgba(15, 23, 42, 0.9)', 
-                    font=dict(color='#e2e8f0', size=13, family='Inter'),
-                    bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
-                ),
-                showlegend=True
+                height=380, margin=dict(l=20, r=20, t=50, b=20),
+                showlegend=False
             )
         else:
             fig_morb = go.Figure()
             fig_morb_gen = go.Figure()
         
         return meses_filtrados, html.Div([
+            # KPIs en fila
             dbc.Row([
                 dbc.Col(kpi_ingresos, xs=6, sm=6, md=True), 
                 dbc.Col(kpi_ocup, xs=6, sm=6, md=True),
                 dbc.Col(kpi_mort, xs=6, sm=6, md=True), 
                 dbc.Col(kpi_estancia, xs=6, sm=6, md=True),
                 dbc.Col(kpi_giro, xs=6, sm=6, md=True)
-            ], className="mb-3 g-2"),
+            ], className="mb-4 g-3"),
+            
+            # Gráficos de línea y barras agrupadas
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_ocup, config=GRAPH_CONFIG), xs=12, md=6), 
-                dbc.Col(dcc.Graph(figure=fig_ie, config=GRAPH_CONFIG), xs=12, md=6)
-            ], className="g-2"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=GRAPH_CONFIG), xs=12)], className="mt-2 g-2"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morb, config=GRAPH_CONFIG), xs=12)], className="mt-3 g-3"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_morb_gen, config=GRAPH_CONFIG), xs=12, md=6)], className="mt-2 g-3", justify="center")
+                dbc.Col(dcc.Graph(figure=fig_ocup, config=GRAPH_CONFIG), xs=12, lg=6), 
+                dbc.Col(dcc.Graph(figure=fig_ie, config=GRAPH_CONFIG), xs=12, lg=6)
+            ], className="mb-4 g-3"),
+            
+            # EPS
+            dbc.Row([
+                dbc.Col(dcc.Graph(figure=fig_eps, config=GRAPH_CONFIG), xs=12)
+            ], className="mb-4 g-3"),
+            
+            # Morbilidad y Sexo lado a lado
+            dbc.Row([
+                dbc.Col(dcc.Graph(figure=fig_morb, config=GRAPH_CONFIG), xs=12, lg=8),
+                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=GRAPH_CONFIG), xs=12, lg=4)
+            ], className="mb-3 g-3")
         ])
     except Exception as e:
         logger.error(f"Error en actualizar_resumen: {e}")
