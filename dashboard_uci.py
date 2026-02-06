@@ -116,17 +116,31 @@ app.layout = html.Div([
     html.Div([
         html.Div([
             html.Div([
-                html.P("Hospital Infantil Universitario de San José", style={
-                    'color': '#f1f5f9', 'fontWeight': '600', 'margin': '0', 'fontSize': '13px'
+                html.Div([
+                    html.P("Hospital Infantil Universitario de San José", style={
+                        'color': '#f1f5f9', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px',
+                        'letterSpacing': '0.3px'
+                    }),
+                    html.P("Unidad de Cuidados Intensivos Adultos", style={
+                        'color': '#94a3b8', 'margin': '4px 0 0 0', 'fontSize': '12px'
+                    })
+                ]),
+            ], style={'display': 'flex', 'alignItems': 'center', 'gap': '12px'}),
+            html.Div([
+                html.Div(style={
+                    'width': '8px', 'height': '8px', 'borderRadius': '50%',
+                    'background': 'linear-gradient(135deg, #10b981, #059669)',
+                    'boxShadow': '0 0 10px rgba(16, 185, 129, 0.5)',
+                    'marginRight': '8px'
                 }),
-                html.P("Unidad de Cuidados Intensivos Adultos", style={
-                    'color': '#94a3b8', 'margin': '0', 'fontSize': '12px'
+                html.P("Sistema Activo", style={
+                    'color': '#10b981', 'margin': '0', 'fontSize': '12px', 'fontWeight': '500'
                 })
-            ]),
+            ], style={'display': 'flex', 'alignItems': 'center'}),
             html.P("2026 Panel de Indicadores", style={
                 'color': '#64748b', 'margin': '0', 'fontSize': '12px'
             })
-        ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '12px'})
+        ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
     ], className="dashboard-footer")
 ], style={
     'background': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',

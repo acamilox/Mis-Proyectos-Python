@@ -17,40 +17,62 @@ body {
     padding: 0;
 }
 
-/* Header */
+/* Header - Diseño Premium */
 .header-main {
-    background: rgba(30, 41, 59, 0.95);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-    backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 58, 95, 0.95) 100%);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    backdrop-filter: blur(15px);
     padding: 16px 24px;
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* KPI Cards */
+/* KPI Cards - Diseño Premium */
 .kpi-card {
-    background: rgba(30, 41, 59, 0.8) !important;
-    border: 1px solid rgba(148, 163, 184, 0.15) !important;
-    border-radius: 8px !important;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(5px);
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+    border: 1px solid rgba(148, 163, 184, 0.12) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .kpi-card:hover {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
-    border-color: rgba(148, 163, 184, 0.25) !important;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+    transform: translateY(-3px);
 }
 
-/* Tabs */
+.kpi-card:hover::before {
+    opacity: 1;
+}
+
+/* Tabs - Diseño Premium */
 .nav-tabs {
-    border-bottom: 1px solid rgba(148, 163, 184, 0.15) !important;
-    background: rgba(30, 41, 59, 0.6);
-    padding: 0 24px;
-    gap: 0;
+    border-bottom: none !important;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
+    padding: 8px 24px;
+    gap: 8px;
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .nav-tabs::-webkit-scrollbar {
@@ -59,153 +81,197 @@ body {
 
 .nav-tabs .nav-link {
     color: #94a3b8;
-    border: none !important;
-    border-radius: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
     background: transparent !important;
     font-weight: 500;
-    padding: 16px 24px;
+    padding: 12px 20px;
     font-size: 14px;
     white-space: nowrap;
-    border-bottom: 2px solid transparent !important;
-    margin-bottom: -1px;
+    transition: all 0.25s ease;
+    position: relative;
 }
 
 .nav-tabs .nav-link:hover {
     color: #f1f5f9;
-    background: rgba(255,255,255,0.05) !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+    transform: translateY(-1px);
 }
 
 .nav-tabs .nav-link.active {
-    color: #60a5fa !important;
-    background: rgba(59, 130, 246, 0.1) !important;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
     font-weight: 600;
-    border-bottom: 2px solid #2563eb !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
 }
 
-/* Tab content */
+/* Tab content - Diseño mejorado */
 .tab-content {
     background: transparent;
-    padding: 24px;
+    padding: 28px;
     border: none;
+    min-height: calc(100vh - 200px);
 }
 
-/* Cards/Sections */
+/* Cards/Sections - Diseño Premium */
 .section-card {
-    background: rgba(30, 41, 59, 0.8);
-    border: 1px solid rgba(148, 163, 184, 0.15);
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 16px;
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.75) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
-/* Dropdown styles */
+.section-card:hover {
+    border-color: rgba(99, 102, 241, 0.25);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Filtros section */
+.filtros-section {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.filtros-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
+}
+
+/* Dropdown styles - Diseño Premium */
 .Select-control { 
-    background: rgba(30, 41, 59, 0.9) !important; 
-    border: 1px solid rgba(148, 163, 184, 0.2) !important; 
-    border-radius: 6px !important;
-    min-height: 40px !important;
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%) !important; 
+    border: 1px solid rgba(99, 102, 241, 0.2) !important; 
+    border-radius: 8px !important;
+    min-height: 42px !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 .Select-control:hover {
-    border-color: rgba(148, 163, 184, 0.4) !important;
+    border-color: rgba(99, 102, 241, 0.4) !important;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15) !important;
 }
 .Select-value-label, .Select-placeholder { color: #f1f5f9 !important; }
 .Select-value { color: #f1f5f9 !important; }
 .Select-menu-outer { 
-    background: #1e293b !important; 
-    border: 1px solid rgba(148, 163, 184, 0.2) !important;
-    border-radius: 6px !important;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important; 
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    border-radius: 8px !important;
     margin-top: 4px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4) !important;
     z-index: 1000 !important;
 }
 .Select-option { 
-    background: #1e293b !important; 
+    background: transparent !important; 
     color: #f1f5f9 !important;
-    padding: 10px 14px !important;
+    padding: 12px 16px !important;
+    transition: all 0.2s ease !important;
 }
 .Select-option:hover, .Select-option.is-focused { 
-    background: rgba(59, 130, 246, 0.2) !important; 
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%) !important; 
 }
 .Select-option.is-selected { 
-    background: rgba(59, 130, 246, 0.3) !important;
-    color: #60a5fa !important;
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.35) 0%, rgba(139, 92, 246, 0.25) 100%) !important;
+    color: #a5b4fc !important;
 }
 .Select-multi-value-wrapper .Select-value {
-    background: rgba(59, 130, 246, 0.3) !important;
-    border: none !important;
-    color: #60a5fa !important;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 6px !important;
+    color: #a5b4fc !important;
 }
 .Select-value-icon {
     border-right: none !important;
 }
+.Select-arrow-zone {
+    color: #94a3b8 !important;
+}
 
-/* Button styles */
+/* Button styles - Diseño Premium */
 .btn {
-    border-radius: 6px !important;
-    font-weight: 500 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
     font-size: 13px !important;
-    padding: 8px 16px !important;
-    transition: all 0.15s ease !important;
+    padding: 10px 18px !important;
+    transition: all 0.25s ease !important;
     border: none !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-success {
-    background: #059669 !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
     color: #ffffff !important;
 }
 
 .btn-success:hover {
-    background: #047857 !important;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
+    transform: translateY(-2px);
 }
 
 .btn-primary {
-    background: #2563eb !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
     color: #ffffff !important;
 }
 
 .btn-primary:hover {
-    background: #1d4ed8 !important;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4) !important;
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
-    background: #f1f5f9 !important;
-    color: #475569 !important;
-    border: 1px solid #e2e8f0 !important;
+    background: linear-gradient(135deg, #475569 0%, #334155 100%) !important;
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
 
 .btn-secondary:hover {
-    background: #e2e8f0 !important;
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
+    box-shadow: 0 4px 15px rgba(71, 85, 105, 0.4) !important;
+    transform: translateY(-2px);
 }
 
-/* Footer */
+/* Footer - Diseño mejorado */
 .dashboard-footer {
-    background: rgba(30, 41, 59, 0.95);
-    border-top: 1px solid rgba(148, 163, 184, 0.1);
-    padding: 16px 24px;
-    margin-top: 24px;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 1) 100%);
+    border-top: 1px solid rgba(99, 102, 241, 0.2);
+    padding: 20px 24px;
+    margin-top: 32px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-::-webkit-scrollbar-track {
-    background: #0f172a;
-}
-::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
-}
+/* Scrollbar - Definido en sección de efectos */
 
-/* Graph containers */
+/* Graph containers - Con efectos hover */
 .js-plotly-plot {
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    background: #1e293b;
+    background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.js-plotly-plot:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+    transform: translateY(-2px);
 }
 
 /* Section titles */
@@ -215,16 +281,34 @@ body {
     font-weight: 600;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border-radius: 2px;
 }
 
 /* Graph wrapper */
 .graph-card {
-    background: rgba(30, 41, 59, 0.6);
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.6) 100%);
     border: 1px solid rgba(148, 163, 184, 0.1);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.graph-card:hover {
+    border-color: rgba(99, 102, 241, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* ========== RESPONSIVE TABLET ========== */
@@ -482,3 +566,153 @@ body {
         font-size: 13px !important;
     }
 }
+
+
+/* ========== EFECTOS Y ANIMACIONES ========== */
+
+/* Animación suave para elementos */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Aplicar animación a contenido de tabs */
+.tab-content > div {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Efecto glow para elementos activos */
+.nav-tabs .nav-link.active {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 25px rgba(99, 102, 241, 0.6);
+    }
+}
+
+/* Títulos de sección con estilo */
+h5[style*="color: #f1f5f9"] {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 8px;
+}
+
+h5[style*="color: #f1f5f9"]::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border-radius: 3px;
+}
+
+/* Mejora visual para filas de gráficos */
+.row.mb-4, .row.mb-5 {
+    position: relative;
+}
+
+/* Efecto de brillo en hover para KPIs */
+.kpi-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.03) 50%,
+        transparent 70%
+    );
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
+    opacity: 0;
+}
+
+.kpi-card:hover::after {
+    opacity: 1;
+    animation: shine 0.8s ease-out;
+}
+
+@keyframes shine {
+    from {
+        transform: rotate(45deg) translateX(-100%);
+    }
+    to {
+        transform: rotate(45deg) translateX(100%);
+    }
+}
+
+/* Scrollbar mejorado */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #475569 0%, #334155 100%);
+    border-radius: 5px;
+    border: 2px solid #0f172a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #64748b 0%, #475569 100%);
+}
+
+/* Mejora para el logo */
+.logo-img {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease;
+}
+
+.logo-img:hover {
+    filter: drop-shadow(0 4px 15px rgba(99, 102, 241, 0.3));
+    transform: scale(1.02);
+}
+
+/* Efecto para botones de exportar */
+.btn-success, .btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-success::before, .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.btn-success:hover::before, .btn-primary:hover::before {
+    left: 100%;
+}
+
