@@ -69,30 +69,37 @@ app.layout = html.Div([
     # Header
     html.Div([
         html.Div([
+            # Logo y título centrados
             html.Div([
                 html.Img(src='/assets/Logo.png', style={
-                    'height': '48px',
-                    'marginRight': '16px'
+                    'height': '56px',
+                    'marginRight': '20px'
                 }, className="logo-img"),
                 html.Div([
                     html.H1("UCI Adultos", style={
-                        'color': '#f8fafc', 'fontWeight': '700', 'margin': '0',
-                        'fontSize': '20px', 'lineHeight': '1.2'
+                        'color': '#ffffff', 'fontWeight': '800', 'margin': '0',
+                        'fontSize': '32px', 'lineHeight': '1.1', 'letterSpacing': '-0.5px'
                     }),
                     html.P("Panel de Indicadores 2026", style={
-                        'color': '#94a3b8', 'fontSize': '13px', 'margin': '0',
-                        'fontWeight': '400'
+                        'color': '#94a3b8', 'fontSize': '14px', 'margin': '4px 0 0 0',
+                        'fontWeight': '500', 'letterSpacing': '0.5px'
                     }, className="header-subtitle")
                 ])
-            ], style={'display': 'flex', 'alignItems': 'center'}),
+            ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'flex': '1'}),
+            
+            # Botones a la derecha
             html.Div([
                 dbc.Button("Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
                 dbc.Button("Exportar CSV", id="btn-export-csv", color="primary", size="sm"),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
-            ], style={'display': 'flex', 'gap': '8px', 'flexWrap': 'wrap'})
-        ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
-    ], className="header-main"),
+            ], style={'display': 'flex', 'gap': '8px', 'position': 'absolute', 'right': '20px'})
+        ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'position': 'relative', 'padding': '16px 0'})
+    ], className="header-main", style={
+        'background': 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
+        'borderBottom': '1px solid rgba(148, 163, 184, 0.2)',
+        'padding': '12px 24px'
+    }),
     
     # Tabs
     dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
