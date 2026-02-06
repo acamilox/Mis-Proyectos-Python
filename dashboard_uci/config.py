@@ -9,7 +9,7 @@ import os
 
 # Directorios
 BASE_DIR = Path(__file__).parent.parent
-EXCEL_PATH = BASE_DIR / "datos_iaas.xlsx"
+EXCEL_PATH = BASE_DIR / "data" / "datos_iaas.xlsx"
 ASSETS_DIR = BASE_DIR / "assets"
 
 # Meses
