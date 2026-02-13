@@ -68,6 +68,7 @@ class ChartFactory:
             plot_bgcolor=self.colors['bg_secondary'],
             paper_bgcolor=self.colors['bg_secondary'],
             title={
+                'text': title,
                 'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'Inter'}, 
                 'x': 0.5, 
                 'xanchor': 'center'
