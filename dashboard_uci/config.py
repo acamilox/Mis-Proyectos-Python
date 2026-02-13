@@ -91,7 +91,7 @@ MESES_MAP_GRAM = {
 
 # Configuración de gráficos
 GRAPH_CONFIG = {
-    'staticPlot': False,
+    'staticPlot': True,
     'displayModeBar': False
 }
 
