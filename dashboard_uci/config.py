@@ -92,7 +92,8 @@ MESES_MAP_GRAM = {
 # Configuración de gráficos
 GRAPH_CONFIG = {
     'staticPlot': True,
-    'displayModeBar': False
+    'displayModeBar': False,
+    'responsive': False
 }
 
 # EPS soportadas

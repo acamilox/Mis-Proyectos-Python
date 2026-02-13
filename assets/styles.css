@@ -239,20 +239,33 @@ body {
 
 /* Scrollbar - Definido en sección de efectos */
 
-/* Graph containers - Con efectos hover */
+/* Graph containers - Altura fija para evitar crecimiento infinito */
 .js-plotly-plot {
     border-radius: 12px;
     overflow: hidden;
     background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
     border: 1px solid rgba(148, 163, 184, 0.1);
-    /* transition: all 0.3s ease; */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.js-plotly-plot .plotly {
+    height: 100% !important;
+}
+
+.js-plotly-plot .main-svg {
+    height: 100% !important;
+}
+
+/* Contenedor de gráficos con altura fija */
+.dash-graph {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
 }
 
 .js-plotly-plot:hover {
     border-color: rgba(55, 118, 171, 0.3);
     box-shadow: 0 8px 30px rgba(55, 118, 171, 0.15);
-    /* transform: translateY(-2px); */
 }
 
 /* Section titles */
