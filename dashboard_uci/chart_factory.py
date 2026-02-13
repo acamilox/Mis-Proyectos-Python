@@ -58,8 +58,7 @@ class ChartFactory:
             hovertemplate=hover_format,
             text=data.values,
             texttemplate=text_template,
-            textposition='inside',
-            insidetextanchor='middle',
+            textposition='outside',
             textangle=-90,
             textfont=dict(color='white', size=11, family='Inter', weight=600)
         ))
@@ -224,8 +223,7 @@ class ChartFactory:
                 hovertemplate=hover_template,
                 text=data.values,
                 texttemplate=text_template,
-                textposition='inside',
-                insidetextanchor='middle',
+                textposition='outside',
                 textangle=-90,
                 textfont=dict(color='white', size=10, family='Inter')
             ))

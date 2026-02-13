@@ -233,7 +233,7 @@ def render_gestion():
             x=MESES, y=datos_vm_mensual,
             marker_color='#64748b',
             text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
-            textposition='inside',
+            textposition='outside',
             textangle=-90,
             textfont=dict(color='white', size=11)
         ))
@@ -327,7 +327,7 @@ def render_gestion():
                 title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=550, margin=dict(l=50, r=30, t=50, b=280),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 8}, 'tickangle': 45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 8}, 'tickangle': -90, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
@@ -509,7 +509,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 title={'text': f'Distribución por EPS (Total: {int(sum(eps_values)):,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=520, margin=dict(l=50, r=30, t=50, b=200),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': 45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -90, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
             )
         else:
@@ -539,8 +539,8 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         datos_ing = PROCESSOR.safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         datos_eg = PROCESSOR.safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
         fig_ie = go.Figure()
-        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='inside', textangle=-90, textfont=dict(color='white', size=9)))
-        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#3b82f6', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='inside', textangle=-90, textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='outside', textangle=-90, textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#3b82f6', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='outside', textangle=-90, textfont=dict(color='white', size=9)))
         fig_ie.update_layout(
             title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
@@ -572,7 +572,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 title={'text': f'Morbilidad por Diagnóstico (Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=50, r=30, t=50, b=100),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -90, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 bargap=0.25
             )
