@@ -588,6 +588,8 @@ body {
 /* ========== EFECTOS Y ANIMACIONES ========== */
 
 /* Animación suave para elementos */
+/* Animación desactivada por solicitud de usuario */
+/*
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -598,17 +600,19 @@ body {
         transform: translateY(0);
     }
 }
+*/
 
 /* Aplicar animación a contenido de tabs */
 .tab-content > div {
-    animation: fadeInUp 0.3s ease-out;
+    /* animation: fadeInUp 0.3s ease-out; */
 }
 
 /* Efecto glow para elementos activos */
 .nav-tabs .nav-link.active {
-    animation: pulse-glow 2s ease-in-out infinite;
+    /* animation: pulse-glow 2s ease-in-out infinite; */
 }
 
+/*
 @keyframes pulse-glow {
     0%, 100% {
         box-shadow: 0 4px 15px rgba(55, 118, 171, 0.4);
@@ -617,6 +621,7 @@ body {
         box-shadow: 0 4px 25px rgba(55, 118, 171, 0.6);
     }
 }
+*/
 
 /* Títulos de sección con estilo */
 h5[style*="color: #f1f5f9"] {
@@ -662,10 +667,11 @@ h5[style*="color: #f1f5f9"]::after {
 }
 
 .kpi-card:hover::after {
-    opacity: 1;
-    animation: shine 0.8s ease-out;
+    opacity: 0; /* Desactivado */
+    /* animation: shine 0.8s ease-out; */
 }
 
+/*
 @keyframes shine {
     from {
         transform: rotate(45deg) translateX(-100%);
@@ -674,6 +680,7 @@ h5[style*="color: #f1f5f9"]::after {
         transform: rotate(45deg) translateX(100%);
     }
 }
+*/
 
 /* Scrollbar mejorado */
 ::-webkit-scrollbar {
