@@ -60,6 +60,7 @@ class ChartFactory:
             texttemplate=text_template,
             textposition='inside',
             insidetextanchor='middle',
+            textangle=-90,
             textfont=dict(color='white', size=11, family='Inter', weight=600)
         ))
         
@@ -225,6 +226,7 @@ class ChartFactory:
                 texttemplate=text_template,
                 textposition='inside',
                 insidetextanchor='middle',
+                textangle=-90,
                 textfont=dict(color='white', size=10, family='Inter')
             ))
         

@@ -234,6 +234,7 @@ def render_gestion():
             marker_color='#64748b',
             text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
             textposition='inside',
+            textangle=-90,
             textfont=dict(color='white', size=11)
         ))
         fig_vm.update_layout(
@@ -319,6 +320,7 @@ def render_gestion():
                 marker_color=[colors_eventos[i % len(colors_eventos)] for i in range(len(df_eventos))],
                 text=df_eventos['Cantidad'],
                 textposition='outside',
+                textangle=-90,
                 textfont=dict(color='#f1f5f9', size=11)
             )])
             fig_eventos.update_layout(
@@ -500,6 +502,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 marker_color=[colors_eps[i % len(colors_eps)] for i in range(len(eps_df))],
                 text=eps_df['Cantidad'].astype(int),
                 textposition='outside',
+                textangle=-90,
                 textfont=dict(color='#f1f5f9', size=11)
             )])
             fig_eps.update_layout(
@@ -536,8 +539,8 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         datos_ing = PROCESSOR.safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         datos_eg = PROCESSOR.safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
         fig_ie = go.Figure()
-        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
-        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#3b82f6', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='inside', textangle=-90, textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#3b82f6', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='inside', textangle=-90, textfont=dict(color='white', size=9)))
         fig_ie.update_layout(
             title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
@@ -561,6 +564,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 marker_color=colors_morb[:len(df_morb)],
                 text=df_morb['Total'],
                 textposition='outside',
+                textangle=-90,
                 textfont=dict(color='#f1f5f9', size=11, family='Inter')
             )])
             
