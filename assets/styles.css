@@ -1,8 +1,7 @@
 /* Dashboard UCI Adultos - Estilos */
 /* Hospital Infantil Universitario de San José */
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
 
 * {
     box-sizing: border-box;
@@ -10,19 +9,23 @@
 }
 
 body {
-    font-family: 'JetBrains Mono', monospace !important;
-    background: #1e1f22; /* Color de fondo New UI JetBrains */
-    color: #bcbec4; /* Texto estándar JetBrains */
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #f1f5f9;
     min-height: 100vh;
     margin: 0;
     padding: 0;
 }
 
-/* Header - Diseño Estilo IDE */
+/* Header - Diseño Premium */
 .header-main {
-    background: #1e1f22;
-    border-bottom: 1px solid #323232;
-    padding: 12px 24px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 58, 95, 0.95) 100%);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    backdrop-filter: blur(15px);
+    padding: 16px 24px;
+    z-index: 100;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
     z-index: 100;
 }
 

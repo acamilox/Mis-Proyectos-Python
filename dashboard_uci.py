@@ -132,9 +132,9 @@ app.layout = html.Div([
         ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
     ], className="dashboard-footer")
 ], style={
-    'background': '#1e1f22',
+    'background': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
     'minHeight': '100vh',
-    'fontFamily': "'JetBrains Mono', monospace"
+    'fontFamily': "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"
 }, id='app-container')
 
 
