@@ -42,7 +42,7 @@ COLORS = {
     'border': '#334155',
     'gradient_start': '#0f172a',
     'gradient_end': '#1e3a5f',
-},
+}
 
 # Paleta extendida para gráficas (Colores bonitos y variados)
 CHART_COLORS = [
