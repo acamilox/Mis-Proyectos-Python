@@ -617,11 +617,14 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 dbc.Col(kpi_giro, xs=6, sm=6, md=True)
             ], className="mb-4 g-3"),
             
-            # Gráficos de línea y barras agrupadas
+            # Gráficos de línea y barras agrupadas (ahora apilados para mejor visualización)
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_ocup, config=GRAPH_CONFIG), xs=12, lg=6), 
-                dbc.Col(dcc.Graph(figure=fig_ie, config=GRAPH_CONFIG), xs=12, lg=6)
-            ], className="mb-4 g-3"),
+                dbc.Col(dcc.Graph(figure=fig_ocup, config=GRAPH_CONFIG), xs=12)
+            ], className="mb-4"),
+            
+            dbc.Row([
+                dbc.Col(dcc.Graph(figure=fig_ie, config=GRAPH_CONFIG), xs=12)
+            ], className="mb-4"),
             
             # EPS
             dbc.Row([
