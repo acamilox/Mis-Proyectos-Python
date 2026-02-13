@@ -20,7 +20,7 @@ body {
 /* Header - Diseño Premium */
 .header-main {
     background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 58, 95, 0.95) 100%);
-    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    border-bottom: 1px solid rgba(55, 118, 171, 0.3);
     backdrop-filter: blur(15px);
     padding: 16px 24px;
     z-index: 100;
@@ -46,14 +46,14 @@ body {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
+    background: linear-gradient(90deg, #3776ab, #ffd43b, #4b8bbe);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
 .kpi-card:hover {
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2) !important;
-    border-color: rgba(99, 102, 241, 0.3) !important;
+    box-shadow: 0 8px 30px rgba(55, 118, 171, 0.2) !important;
+    border-color: rgba(55, 118, 171, 0.3) !important;
     transform: translateY(-3px);
 }
 
@@ -92,17 +92,17 @@ body {
 
 .nav-tabs .nav-link:hover {
     color: #f1f5f9;
-    background: rgba(99, 102, 241, 0.15) !important;
-    border-color: rgba(99, 102, 241, 0.3) !important;
+    background: rgba(55, 118, 171, 0.15) !important;
+    border-color: rgba(55, 118, 171, 0.3) !important;
     transform: translateY(-1px);
 }
 
 .nav-tabs .nav-link.active {
     color: #ffffff !important;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+    background: linear-gradient(135deg, #3776ab 0%, #2b5b84 100%) !important;
     font-weight: 600;
     border-color: transparent !important;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 15px rgba(55, 118, 171, 0.4);
 }
 
 /* Tab content - Diseño mejorado */
@@ -115,7 +115,7 @@ body {
 /* Cards/Sections - Diseño Premium */
 .section-card {
     background: linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.75) 100%);
-    border: 1px solid rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(55, 118, 171, 0.15);
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 20px;
@@ -124,14 +124,14 @@ body {
 }
 
 .section-card:hover {
-    border-color: rgba(99, 102, 241, 0.25);
+    border-color: rgba(55, 118, 171, 0.25);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* Filtros section */
 .filtros-section {
     background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.85) 100%) !important;
-    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    border: 1px solid rgba(55, 118, 171, 0.2) !important;
     border-radius: 12px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
     position: relative;
@@ -145,27 +145,27 @@ body {
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4);
+    background: linear-gradient(90deg, #3776ab, #ffd43b, #4b8bbe);
 }
 
 /* Dropdown styles - Diseño Premium */
 .Select-control { 
     background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%) !important; 
-    border: 1px solid rgba(99, 102, 241, 0.2) !important; 
+    border: 1px solid rgba(55, 118, 171, 0.2) !important; 
     border-radius: 8px !important;
     min-height: 42px !important;
     transition: all 0.25s ease !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 .Select-control:hover {
-    border-color: rgba(99, 102, 241, 0.4) !important;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(55, 118, 171, 0.4) !important;
+    box-shadow: 0 4px 15px rgba(55, 118, 171, 0.15) !important;
 }
 .Select-value-label, .Select-placeholder { color: #f1f5f9 !important; }
 .Select-value { color: #f1f5f9 !important; }
 .Select-menu-outer { 
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important; 
-    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    border: 1px solid rgba(55, 118, 171, 0.2) !important;
     border-radius: 8px !important;
     margin-top: 4px !important;
     box-shadow: 0 8px 30px rgba(0,0,0,0.4) !important;
@@ -178,17 +178,17 @@ body {
     transition: all 0.2s ease !important;
 }
 .Select-option:hover, .Select-option.is-focused { 
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%) !important; 
+    background: linear-gradient(90deg, rgba(55, 118, 171, 0.2) 0%, rgba(255, 212, 59, 0.1) 100%) !important; 
 }
 .Select-option.is-selected { 
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.35) 0%, rgba(139, 92, 246, 0.25) 100%) !important;
-    color: #a5b4fc !important;
+    background: linear-gradient(90deg, rgba(55, 118, 171, 0.35) 0%, rgba(255, 212, 59, 0.2) 100%) !important;
+    color: #ffd43b !important;
 }
 .Select-multi-value-wrapper .Select-value {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%) !important;
-    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    background: linear-gradient(135deg, rgba(55, 118, 171, 0.3) 0%, rgba(255, 212, 59, 0.15) 100%) !important;
+    border: 1px solid rgba(55, 118, 171, 0.3) !important;
     border-radius: 6px !important;
-    color: #a5b4fc !important;
+    color: #ffd43b !important;
 }
 .Select-value-icon {
     border-right: none !important;
@@ -247,7 +247,7 @@ body {
 /* Footer - Diseño mejorado */
 .dashboard-footer {
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 1) 100%);
-    border-top: 1px solid rgba(99, 102, 241, 0.2);
+    border-top: 1px solid rgba(55, 118, 171, 0.2);
     padding: 20px 24px;
     margin-top: 32px;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
@@ -266,8 +266,8 @@ body {
 }
 
 .js-plotly-plot:hover {
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+    border-color: rgba(55, 118, 171, 0.3);
+    box-shadow: 0 8px 30px rgba(55, 118, 171, 0.15);
     transform: translateY(-2px);
 }
 
@@ -278,7 +278,7 @@ body {
     font-weight: 600;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    border-bottom: 1px solid rgba(55, 118, 171, 0.2);
     position: relative;
 }
 
@@ -289,7 +289,7 @@ body {
     left: 0;
     width: 60px;
     height: 2px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    background: linear-gradient(90deg, #3776ab, #ffd43b);
     border-radius: 2px;
 }
 
@@ -304,7 +304,7 @@ body {
 }
 
 .graph-card:hover {
-    border-color: rgba(99, 102, 241, 0.25);
+    border-color: rgba(55, 118, 171, 0.25);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -611,10 +611,10 @@ body {
 
 @keyframes pulse-glow {
     0%, 100% {
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        box-shadow: 0 4px 15px rgba(55, 118, 171, 0.4);
     }
     50% {
-        box-shadow: 0 4px 25px rgba(99, 102, 241, 0.6);
+        box-shadow: 0 4px 25px rgba(55, 118, 171, 0.6);
     }
 }
 
@@ -633,7 +633,7 @@ h5[style*="color: #f1f5f9"]::after {
     transform: translateX(-50%);
     width: 50px;
     height: 3px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    background: linear-gradient(90deg, #3776ab, #ffd43b);
     border-radius: 3px;
 }
 
@@ -703,7 +703,7 @@ h5[style*="color: #f1f5f9"]::after {
 }
 
 .logo-img:hover {
-    filter: drop-shadow(0 4px 15px rgba(99, 102, 241, 0.3));
+    filter: drop-shadow(0 4px 15px rgba(55, 118, 171, 0.3));
     transform: scale(1.02);
 }
 

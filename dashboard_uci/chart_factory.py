@@ -194,7 +194,7 @@ class ChartFactory:
         if meses is None:
             meses = self.meses
         
-        colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+        colors = [self.colors['primary'], self.colors['secondary'], self.colors['accent'], self.colors['success']]
         
         fig = go.Figure()
         
@@ -292,10 +292,9 @@ class ChartFactory:
         """
         if colors is None:
             colors = [
-                '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
-                '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6',
-                '#a855f7', '#eab308', '#2563eb', '#22c55e', '#e11d48',
-                '#0ea5e9', '#d946ef', '#facc15', '#64748b', '#fb923c',
+                '#3776ab', '#ffd43b', '#4b8bbe', '#10b981', '#ef4444', 
+                '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16',
+                '#f97316', '#14b8a6', '#a855f7', '#eab308', '#2563eb',
             ]
         
         if auto_sort:
@@ -417,7 +416,7 @@ class ChartFactory:
             y=edad_sexo.index.astype(str),
             x=[-v for v in hombres_vals],
             orientation='h',
-            marker_color='#3498db',
+            marker_color=self.colors['primary'],
             text=[f'{int(v)}' for v in hombres_vals],
             textposition='inside',
             textfont=dict(color='white', size=14, family='Inter', weight='bold'),
@@ -432,7 +431,7 @@ class ChartFactory:
             y=edad_sexo.index.astype(str),
             x=mujeres_vals,
             orientation='h',
-            marker_color='#e91e63',
+            marker_color='#ef4444',
             text=[f'{int(v)}' for v in mujeres_vals],
             textposition='inside',
             textfont=dict(color='white', size=14, family='Inter', weight='bold'),
@@ -519,9 +518,9 @@ class ChartFactory:
             trend_value: Valor de la tendencia
             inverse: Si True, invierte el color de la tendencia
         """
-        accent_color = color or "#2563eb"
-        if accent_color in ['#34495e', '#2c3e50', '#1e293b']:
-            accent_color = '#475569'
+        accent_color = color or self.colors['primary']
+        if accent_color in ['#34495e', '#2c3e50', '#1e293b', '#2c3e50']:
+            accent_color = self.colors['primary']
         
         # Elemento de tendencia
         trend_element = None

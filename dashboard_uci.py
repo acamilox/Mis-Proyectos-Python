@@ -81,7 +81,7 @@ app.layout = html.Div([
                         'fontSize': '32px', 'lineHeight': '1.1', 'letterSpacing': '-0.5px'
                     }),
                     html.P("Panel de Indicadores 2026", style={
-                        'color': '#94a3b8', 'fontSize': '14px', 'margin': '4px 0 0 0',
+                        'color': '#cbd5e1', 'fontSize': '14px', 'margin': '4px 0 0 0',
                         'fontWeight': '500', 'letterSpacing': '0.5px'
                     }, className="header-subtitle")
                 ])
@@ -103,10 +103,10 @@ app.layout = html.Div([
     
     # Tabs
     dbc.Tabs(id="tabs", active_tab='tab-resumen', children=[
-        dbc.Tab(label='Resumen General', tab_id='tab-resumen'),
-        dbc.Tab(label='Gestión y Calidad', tab_id='tab-gestion'),
-        dbc.Tab(label='Especialidades', tab_id='tab-especialidades'),
-        dbc.Tab(label='Mortalidad', tab_id='tab-mortalidad'),
+        dbc.Tab(label='Resumen General', tab_id='tab-resumen', label_style={'cursor': 'pointer'}),
+        dbc.Tab(label='Gestión y Calidad', tab_id='tab-gestion', label_style={'cursor': 'pointer'}),
+        dbc.Tab(label='Especialidades', tab_id='tab-especialidades', label_style={'cursor': 'pointer'}),
+        dbc.Tab(label='Mortalidad', tab_id='tab-mortalidad', label_style={'cursor': 'pointer'}),
     ]),
     
     # Content
@@ -210,18 +210,18 @@ def render_gestion():
     try:
         kpis = PROCESSOR.get_kpis_gestion()
         
-        kpi1 = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "Días", "#2c3e50")
-        kpi2 = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#27ae60")
-        kpi3 = chart_factory.create_kpi_card("Total Días Estancia", f"{int(kpis['total_dias_estancia'])}", "Ene - Dic", "#16a085")
-        kpi4 = chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#f39c12")
-        kpi5 = chart_factory.create_kpi_card("Promedio Días VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilación Mecánica", "#9b59b6")
+        kpi1 = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "Días", "#4b8bbe")
+        kpi2 = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3776ab")
+        kpi3 = chart_factory.create_kpi_card("Total Días Estancia", f"{int(kpis['total_dias_estancia'])}", "Ene - Dic", "#10b981")
+        kpi4 = chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#ffd43b")
+        kpi5 = chart_factory.create_kpi_card("Promedio Días VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilación Mecánica", "#64748b")
         
         # Gráficos
         datos_estancia = PROCESSOR.safe_get_row('PROMEDIO ESTANCIA', MESES)
-        fig_estancia = chart_factory.create_bar_chart(datos_estancia, 'Estancia Promedio (Días)', color='#16a085', decimals=1)
+        fig_estancia = chart_factory.create_bar_chart(datos_estancia, 'Estancia Promedio (Días)', color='#4b8bbe', decimals=1)
         
         datos_giro = PROCESSOR.safe_get_row('GIRO CAMA', MESES)
-        fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro de Cama', color='#27ae60', decimals=2)
+        fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro de Cama', color='#3776ab', decimals=2)
         
         # Gráfico de VM - datos mensuales
         datos_vm_mensual = kpis.get('promedio_dias_vm_mensual', [])
@@ -231,7 +231,7 @@ def render_gestion():
         fig_vm = go.Figure()
         fig_vm.add_trace(go.Bar(
             x=MESES, y=datos_vm_mensual,
-            marker_color='#9b59b6',
+            marker_color='#64748b',
             text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
             textposition='inside',
             textfont=dict(color='white', size=11)
@@ -247,11 +247,11 @@ def render_gestion():
         # Infecciones
         fig_bacteriemia = chart_factory.create_line_chart(
             PROCESSOR.safe_get_row('TASA DE BACTERIEMIA ASOC.  A C. CENTRAL', MESES),
-            'Tasa de ITS AC', color='#e74c3c', decimals=1
+            'Tasa de ITS AC', color='#ef4444', decimals=1
         )
         fig_nav = chart_factory.create_bar_chart(
             PROCESSOR.safe_get_row('TASA NEUMONÍA ASOCIADA A VENTILADOR', MESES),
-            'Tasa NAV', color='#e74c3c', decimals=1
+            'Tasa NAV', color='#ef4444', decimals=1
         )
         
         # Gérmenes - Donut profesional con diseño mejorado
@@ -266,7 +266,7 @@ def render_gestion():
             total_germenes = sum(germenes_values)
             
             # Paleta de colores distintiva
-            colors_germenes = ['#ef4444', '#8b5cf6', '#10b981', '#f59e0b', '#06b6d4', '#ec4899', '#6366f1', '#14b8a6', '#f97316', '#a855f7', '#0ea5e9', '#84cc16', '#22c55e', '#e11d48', '#0891b2', '#d946ef', '#facc15', '#2563eb']
+            colors_germenes = ['#3776ab', '#ffd43b', '#4b8bbe', '#10b981', '#ef4444', '#f59e0b', '#64748b', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6', '#a855f7', '#eab308', '#2563eb']
             
             fig_germenes = go.Figure(data=[go.Pie(
                 labels=germenes_labels_sorted,
@@ -482,18 +482,18 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         
         kpis = PROCESSOR.get_kpis_resumen(meses_filtrados)
         
-        kpi_ingresos = chart_factory.create_kpi_card("Total Ingresos", f"{int(kpis['total_ingresos'])}", rango_texto, "#3498db")
-        kpi_ocup = chart_factory.create_kpi_card("% Ocupación Promedio", PROCESSOR.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#2c3e50")
-        kpi_mort = chart_factory.create_kpi_card("% Mortalidad General", PROCESSOR.formatear_porcentaje(kpis['mortalidad']), f"Total {rango_texto}", "#e74c3c")
-        kpi_estancia = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", f"Días - {rango_texto}", "#27ae60")
-        kpi_giro = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#f39c12")
+        kpi_ingresos = chart_factory.create_kpi_card("Total Ingresos", f"{int(kpis['total_ingresos'])}", rango_texto, "#3776ab")
+        kpi_ocup = chart_factory.create_kpi_card("% Ocupación Promedio", PROCESSOR.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#4b8bbe")
+        kpi_mort = chart_factory.create_kpi_card("% Mortalidad General", PROCESSOR.formatear_porcentaje(kpis['mortalidad']), f"Total {rango_texto}", "#ef4444")
+        kpi_estancia = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", f"Días - {rango_texto}", "#10b981")
+        kpi_giro = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#ffd43b")
         
         # EPS - Barras verticales con etiquetas visibles
         eps_labels, eps_values = PROCESSOR.get_eps_data()
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
-            colors_eps = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899']
+            colors_eps = ['#3776ab', '#ffd43b', '#4b8bbe', '#10b981', '#ef4444', '#f59e0b', '#64748b']
             fig_eps = go.Figure(data=[go.Bar(
                 x=eps_df['EPS'],
                 y=eps_df['Cantidad'],
@@ -536,8 +536,8 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         datos_ing = PROCESSOR.safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         datos_eg = PROCESSOR.safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
         fig_ie = go.Figure()
-        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#3b82f6', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
-        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#10b981', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#3776ab', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#ffd43b', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
         fig_ie.update_layout(
             title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
@@ -553,7 +553,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             total_morb = df_morb['Total'].sum()
             
             # Paleta de colores vibrante
-            colors_morb = ['#ef4444', '#8b5cf6', '#06b6d4', '#f59e0b', '#ec4899', '#10b981', '#6366f1', '#14b8a6', '#f97316', '#a855f7', '#0ea5e9', '#84cc16']
+            colors_morb = ['#3776ab', '#ffd43b', '#4b8bbe', '#10b981', '#ef4444', '#f59e0b', '#64748b', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#a855f7']
             
             fig_morb = go.Figure(data=[go.Bar(
                 x=df_morb.index,

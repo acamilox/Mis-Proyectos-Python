@@ -22,15 +22,15 @@ MESES_COMPLETOS = {
     'Sep': 'Septiembre', 'Oct': 'Octubre', 'Nov': 'Noviembre', 'Dic': 'Diciembre'
 }
 
-# Paleta de colores - Tema Premium Moderno
+# Paleta de colores - Tema Python Islands Dark
 COLORS = {
-    'primary': '#6366f1',      # Indigo vibrante
-    'secondary': '#10b981',    # Esmeralda
-    'accent': '#06b6d4',       # Cyan
-    'success': '#22c55e',      # Verde brillante
+    'primary': '#3776ab',      # Azul Python (Python Blue)
+    'secondary': '#ffd43b',    # Amarillo Python (Python Yellow)
+    'accent': '#4b8bbe',       # Azul claro Python
+    'success': '#10b981',      # Esmeralda (mantenido para estados positivos)
     'danger': '#ef4444',       # Rojo coral
     'warning': '#f59e0b',      # Ámbar
-    'info': '#8b5cf6',         # Violeta
+    'info': '#64748b',         # Slate
     'light': '#f1f5f9',
     'dark': '#0f172a',
     'muted': '#94a3b8',
@@ -41,7 +41,7 @@ COLORS = {
     'text_secondary': '#cbd5e1',
     'border': '#334155',
     'gradient_start': '#0f172a',
-    'gradient_end': '#1e1b4b',
+    'gradient_end': '#1e3a5f', # Azul profundo (Islands Dark feel)
 }
 
 # Diagnósticos de morbilidad
