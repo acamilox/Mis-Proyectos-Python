@@ -22,42 +22,42 @@ MESES_COMPLETOS = {
     'Sep': 'Septiembre', 'Oct': 'Octubre', 'Nov': 'Noviembre', 'Dic': 'Diciembre'
 }
 
-# Paleta de colores - Tema Moderno y Elegante (Sin Amarillo)
+# Paleta de colores - Estilo JetBrains Darcula / New UI
 COLORS = {
-    'primary': '#3776ab',      # Azul Python
-    'secondary': '#6366f1',    # Indigo vibrante (Reemplazo del amarillo)
-    'accent': '#06b6d4',       # Cyan
-    'success': '#10b981',      # Esmeralda
-    'danger': '#ef4444',       # Rojo coral
+    'primary': '#3574f0',      # Azul selección JetBrains
+    'secondary': '#cc7832',    # Naranja keywords
+    'accent': '#629755',       # Verde comentarios
+    'success': '#6a8759',      # Verde strings
+    'danger': '#ff453a',       # Rojo error
     'warning': '#f59e0b',      # Ámbar
-    'info': '#8b5cf6',         # Violeta
-    'light': '#f1f5f9',
-    'dark': '#0f172a',
-    'muted': '#94a3b8',
-    'bg_primary': '#0f172a',   # Slate 900
-    'bg_secondary': '#1e293b', # Slate 800
-    'bg_card': '#1e293b',
-    'text_primary': '#f8fafc',
-    'text_secondary': '#cbd5e1',
-    'border': '#334155',
-    'gradient_start': '#0f172a',
-    'gradient_end': '#1e3a5f',
+    'info': '#9876aa',         # Violeta variables
+    'light': '#bcbec4',        # Texto estándar
+    'dark': '#1e1f22',         # Fondo New UI
+    'muted': '#70727a',        # Texto secundario
+    'bg_primary': '#1e1f22',   # Fondo principal
+    'bg_secondary': '#2b2d30', # Fondo secundario
+    'bg_card': '#2b2d30',
+    'text_primary': '#bcbec4',
+    'text_secondary': '#70727a',
+    'border': '#323232',
+    'gradient_start': '#1e1f22',
+    'gradient_end': '#2b2d30',
 }
 
-# Paleta extendida para gráficas (Colores bonitos y variados)
+# Paleta extendida para gráficas (Estilo Syntax Highlighting)
 CHART_COLORS = [
-    '#6366f1', # Indigo
-    '#10b981', # Esmeralda
-    '#3b82f6', # Azul brillante
-    '#8b5cf6', # Violeta
-    '#06b6d4', # Cyan
-    '#f43f5e', # Rosa fuerte
-    '#14b8a6', # Teal
-    '#f59e0b', # Ámbar/Naranja
-    '#84cc16', # Lima
-    '#ec4899', # Rosa
-    '#0ea5e9', # Sky
-    '#fb923c', # Naranja
+    '#cc7832', # Orange (Keyword)
+    '#6a8759', # Green (String)
+    '#9876aa', # Purple (Attribute)
+    '#6897bb', # Blue (Number)
+    '#ffc66d', # Yellow (Function)
+    '#629755', # Dark Green (Comment)
+    '#3574f0', # Bright Blue (Link)
+    '#e06c75', # Soft Red
+    '#56b6c2', # Cyan
+    '#abb2bf', # Grey
+    '#c678dd', # Magenta
+    '#d19a66', # Light Orange
 ]
 
 # Diagnósticos de morbilidad

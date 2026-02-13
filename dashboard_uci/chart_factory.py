@@ -59,7 +59,7 @@ class ChartFactory:
             text=data.values,
             texttemplate=text_template,
             textposition='auto',
-            textfont=dict(color='white', size=11, family='Inter', weight=600)
+            textfont=dict(color='white', size=11, family='JetBrains Mono', weight=600)
         ))
         
         fig.update_layout(
@@ -69,7 +69,7 @@ class ChartFactory:
             paper_bgcolor=self.colors['bg_secondary'],
             title={
                 'text': title,
-                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'Inter'}, 
+                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'JetBrains Mono'}, 
                 'x': 0.5, 
                 'xanchor': 'center'
             },
@@ -77,22 +77,22 @@ class ChartFactory:
                 'gridcolor': 'rgba(148, 163, 184, 0.1)', 
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
-                'color': '#cbd5e1', 
-                'tickfont': {'size': 11, 'color': '#cbd5e1'}, 
+                'color': '#bcbec4', 
+                'tickfont': {'size': 11, 'color': '#bcbec4', 'family': 'JetBrains Mono'}, 
                 'title': ''
             },
             yaxis={
                 'gridcolor': 'rgba(148, 163, 184, 0.1)', 
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
-                'color': '#94a3b8', 
+                'color': '#70727a', 
                 'tickformat': 'd', 
-                'tickfont': {'size': 11, 'color': '#94a3b8'}, 
+                'tickfont': {'size': 11, 'color': '#70727a', 'family': 'JetBrains Mono'}, 
                 'title': ''
             },
             margin=dict(l=50, r=30, t=50, b=50),
             height=350,
-            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#ffffff'),
+            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#bcbec4', font_family='JetBrains Mono'),
             bargap=0.3
         )
         
@@ -150,7 +150,7 @@ class ChartFactory:
         fig.update_layout(
             title={
                 'text': title, 
-                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'Inter'}, 
+                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'JetBrains Mono'}, 
                 'x': 0.5, 
                 'xanchor': 'center'
             },
@@ -162,14 +162,14 @@ class ChartFactory:
                 'gridcolor': 'rgba(148, 163, 184, 0.1)', 
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
-                'color': '#cbd5e1', 
-                'tickfont': {'size': 11, 'color': '#cbd5e1'}, 
+                'color': '#bcbec4', 
+                'tickfont': {'size': 11, 'color': '#bcbec4', 'family': 'JetBrains Mono'}, 
                 'title': ''
             },
             yaxis=yaxis_config,
             margin=dict(l=50, r=30, t=50, b=50),
             height=350,
-            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#ffffff')
+            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#bcbec4', font_family='JetBrains Mono')
         )
         
         return fig
@@ -225,13 +225,13 @@ class ChartFactory:
                 text=data.values,
                 texttemplate=text_template,
                 textposition='auto',
-                textfont=dict(color='white', size=10, family='Inter')
+                textfont=dict(color='white', size=10, family='JetBrains Mono')
             ))
         
         fig.update_layout(
             title={
                 'text': title, 
-                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'Inter'}, 
+                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'JetBrains Mono'}, 
                 'x': 0.5, 
                 'xanchor': 'center'
             },
@@ -244,7 +244,7 @@ class ChartFactory:
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
                 'color': self.colors['muted'], 
-                'tickfont': {'size': 11, 'color': '#94a3b8'}, 
+                'tickfont': {'size': 11, 'color': '#bcbec4', 'family': 'JetBrains Mono'}, 
                 'title': ''
             },
             yaxis={
@@ -253,7 +253,7 @@ class ChartFactory:
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
                 'color': self.colors['muted'], 
                 'tickformat': 'd', 
-                'tickfont': {'size': 11, 'color': '#94a3b8'}, 
+                'tickfont': {'size': 11, 'color': '#bcbec4', 'family': 'JetBrains Mono'}, 
                 'title': ''
             },
             margin=dict(l=50, r=30, t=50, b=70),
@@ -265,11 +265,11 @@ class ChartFactory:
                 xanchor="center", 
                 x=0.5,
                 bgcolor='rgba(30, 41, 59, 0.8)', 
-                font={'color': self.colors['text_primary'], 'size': 11}, 
+                font={'color': self.colors['text_primary'], 'size': 11, 'family': 'JetBrains Mono'}, 
                 bordercolor='rgba(148, 163, 184, 0.2)', 
                 borderwidth=1
             ),
-            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#ffffff'),
+            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#bcbec4', font_family='JetBrains Mono'),
             bargap=0.25
         )
         
@@ -323,7 +323,7 @@ class ChartFactory:
             marker=dict(colors=colors_final, line=dict(color=self.colors['bg_secondary'], width=2)),
             textinfo='percent',
             textposition='inside',
-            textfont=dict(size=11, color='white', family='Inter', weight='bold'),
+            textfont=dict(size=11, color='white', family='JetBrains Mono', weight='bold'),
             hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
             direction='clockwise',
             sort=False,
@@ -334,7 +334,7 @@ class ChartFactory:
         fig.add_annotation(
             text=f"<b>Total</b><br>{int(total):,}".replace(',', '.'),
             x=0.5, y=0.5,
-            font=dict(size=14, color=self.colors['text_primary']),
+            font=dict(size=14, color=self.colors['text_primary'], family='JetBrains Mono'),
             showarrow=False,
             xref='paper', yref='paper'
         )
@@ -342,7 +342,7 @@ class ChartFactory:
         fig.update_layout(
             title={
                 'text': title, 
-                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'Inter'}, 
+                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'JetBrains Mono'}, 
                 'x': 0.5, 
                 'xanchor': 'center'
             },
@@ -359,12 +359,12 @@ class ChartFactory:
                 bgcolor='rgba(30, 41, 59, 0.8)',
                 bordercolor='rgba(148, 163, 184, 0.2)',
                 borderwidth=1,
-                font=dict(color=self.colors['text_primary'], size=10),
+                font=dict(color=self.colors['text_primary'], size=10, family='JetBrains Mono'),
                 itemsizing='constant'
             ),
             margin=dict(l=20, r=150, t=50, b=30),
             height=380,
-            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#ffffff')
+            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#bcbec4', font_family='JetBrains Mono')
         )
         
         return fig
@@ -419,7 +419,7 @@ class ChartFactory:
             marker_color=self.colors['primary'],
             text=[f'{int(v)}' for v in hombres_vals],
             textposition='inside',
-            textfont=dict(color='white', size=14, family='Inter', weight='bold'),
+            textfont=dict(color='white', size=14, family='JetBrains Mono', weight='bold'),
             hovertemplate='<b>%{y}</b><br>Hombres: %{customdata[0]} (%{customdata[1]:.1f}%)<extra></extra>',
             customdata=list(zip(hombres_vals, hombres_pct)),
             insidetextanchor='middle'
@@ -431,10 +431,10 @@ class ChartFactory:
             y=edad_sexo.index.astype(str),
             x=mujeres_vals,
             orientation='h',
-            marker_color='#ef4444',
+            marker_color='#ff453a',
             text=[f'{int(v)}' for v in mujeres_vals],
             textposition='inside',
-            textfont=dict(color='white', size=14, family='Inter', weight='bold'),
+            textfont=dict(color='white', size=14, family='JetBrains Mono', weight='bold'),
             hovertemplate='<b>%{y}</b><br>Mujeres: %{customdata[0]} (%{customdata[1]:.1f}%)<extra></extra>',
             customdata=list(zip(mujeres_vals, mujeres_pct)),
             insidetextanchor='middle'
@@ -447,17 +447,17 @@ class ChartFactory:
             rango = str(edad_sexo.index[i])
             annotations.append(dict(
                 x=-(h_val + 1.5), y=rango, text=f'{h_pct:.1f}%',
-                showarrow=False, font=dict(size=11, color=self.colors['muted']), xanchor='right'
+                showarrow=False, font=dict(size=11, color=self.colors['muted'], family='JetBrains Mono'), xanchor='right'
             ))
             annotations.append(dict(
                 x=m_val + 1.5, y=rango, text=f'{m_pct:.1f}%',
-                showarrow=False, font=dict(size=11, color=self.colors['muted']), xanchor='left'
+                showarrow=False, font=dict(size=11, color=self.colors['muted'], family='JetBrains Mono'), xanchor='left'
             ))
         
         fig.update_layout(
             title={
                 'text': title, 
-                'font': {'size': 14, 'color': self.colors['text_primary']}, 
+                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'JetBrains Mono'}, 
                 'x': 0.5
             },
             barmode='relative',
@@ -476,7 +476,7 @@ class ChartFactory:
                 'title': '', 
                 'gridcolor': 'rgba(148, 163, 184, 0.1)', 
                 'color': self.colors['text_primary'], 
-                'tickfont': {'size': 12}
+                'tickfont': {'size': 12, 'family': 'JetBrains Mono'}
             },
             legend=dict(
                 orientation="h", 
@@ -484,11 +484,11 @@ class ChartFactory:
                 x=0.5, 
                 xanchor="center", 
                 bgcolor='rgba(30, 41, 59, 0.8)',
-                font={'color': self.colors['text_primary'], 'size': 12}, 
+                font={'color': self.colors['text_primary'], 'size': 12, 'family': 'JetBrains Mono'}, 
                 bordercolor='rgba(148, 163, 184, 0.2)', 
                 borderwidth=1
             ),
-            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_color='#ffffff', font_size=14),
+            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_color='#bcbec4', font_size=14, font_family='JetBrains Mono'),
             margin=dict(l=70, r=70, t=50, b=60),
             height=400,
             bargap=0.15,

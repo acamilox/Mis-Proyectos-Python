@@ -1,12 +1,12 @@
 ﻿# -*- coding: utf-8 -*-
 """
-Dashboard UCI Adultos - Panel de Indicadores
-Hospital Infantil Universitario de San José
-
-Aplicación Dash modular con visualizaciones Plotly.
-Versión refactorizada con arquitectura modular.
-
-Author: Hospital Infantil Universitario de San José
+┌──────────────────────────────────────────────────────────────────────────┐
+│ DASHBOARD UCI ADULTOS - PANEL DE INDICADORES                             │
+│ Hospital Infantil Universitario de San José                              │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Author: Hospital Infantil Universitario de San José                     │
+│ Version: 2.1.0 (PyCharm Styled)                                          │
+└──────────────────────────────────────────────────────────────────────────┘
 """
 
 import dash
@@ -32,9 +32,9 @@ from dashboard_uci import (
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# ============================================
+# ==============================================================================
 # INICIALIZACIÓN DE LA APLICACIÓN
-# ============================================
+# ==============================================================================
 
 app = dash.Dash(
     __name__, 
@@ -61,9 +61,9 @@ except Exception as e:
     }
     PROCESSOR = DataProcessor(DATA)
 
-# ============================================
+# ==============================================================================
 # LAYOUT DE LA APLICACIÓN
-# ============================================
+# ==============================================================================
 
 app.layout = html.Div([
     # Header
@@ -118,29 +118,29 @@ app.layout = html.Div([
             html.Div([
                 html.Div([
                     html.P("Hospital Infantil Universitario de San José", style={
-                        'color': '#f1f5f9', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px',
+                        'color': '#bcbec4', 'fontWeight': '600', 'margin': '0', 'fontSize': '14px',
                         'letterSpacing': '0.3px'
                     }),
                     html.P("Unidad de Cuidados Intensivos Adultos", style={
-                        'color': '#94a3b8', 'margin': '4px 0 0 0', 'fontSize': '12px'
+                        'color': '#70727a', 'margin': '4px 0 0 0', 'fontSize': '12px'
                     })
                 ]),
             ], style={'display': 'flex', 'alignItems': 'center', 'gap': '12px'}),
             html.P("2026 Panel de Indicadores", style={
-                'color': '#64748b', 'margin': '0', 'fontSize': '12px'
+                'color': '#70727a', 'margin': '0', 'fontSize': '12px'
             })
         ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
     ], className="dashboard-footer")
 ], style={
-    'background': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    'background': '#1e1f22',
     'minHeight': '100vh',
-    'fontFamily': "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+    'fontFamily': "'JetBrains Mono', monospace"
 }, id='app-container')
 
 
-# ============================================
+# ==============================================================================
 # CALLBACKS
-# ============================================
+# ==============================================================================
 
 @app.callback(Output('tab-content', 'children'), Input('tabs', 'active_tab'))
 def render_content(tab):

@@ -1,6 +1,7 @@
 /* Dashboard UCI Adultos - Estilos */
 /* Hospital Infantil Universitario de San José */
 
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * {
@@ -9,32 +10,27 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #f1f5f9;
+    font-family: 'JetBrains Mono', monospace !important;
+    background: #1e1f22; /* Color de fondo New UI JetBrains */
+    color: #bcbec4; /* Texto estándar JetBrains */
     min-height: 100vh;
     margin: 0;
     padding: 0;
 }
 
-/* Header - Diseño Premium */
+/* Header - Diseño Estilo IDE */
 .header-main {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 58, 95, 0.95) 100%);
-    border-bottom: 1px solid rgba(55, 118, 171, 0.3);
-    backdrop-filter: blur(15px);
-    padding: 16px 24px;
+    background: #1e1f22;
+    border-bottom: 1px solid #323232;
+    padding: 12px 24px;
     z-index: 100;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* KPI Cards - Diseño Premium */
+/* KPI Cards - Estilo Editor */
 .kpi-card {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
-    border: 1px solid rgba(148, 163, 184, 0.12) !important;
-    border-radius: 12px !important;
-    /* transition: all 0.3s ease; */
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: #2b2d30 !important;
+    border: 1px solid #393b40 !important;
+    border-radius: 4px !important;
     position: relative;
     overflow: hidden;
 }
@@ -45,10 +41,9 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #3776ab, #ffd43b, #4b8bbe);
-    opacity: 0;
-    /* transition: opacity 0.3s ease; */
+    height: 2px;
+    background: #cc7832; /* Color Naranja PyCharm */
+    opacity: 0.7;
 }
 
 .kpi-card:hover {
@@ -61,48 +56,34 @@ body {
     opacity: 1;
 }
 
-/* Tabs - Diseño Premium */
+/* Tabs - Estilo IDE */
 .nav-tabs {
-    border-bottom: none !important;
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
-    padding: 6px 24px;
-    gap: 8px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.nav-tabs::-webkit-scrollbar {
-    display: none;
+    border-bottom: 1px solid #323232 !important;
+    background: #1e1f22;
+    padding: 0 10px;
+    gap: 0;
 }
 
 .nav-tabs .nav-link {
     color: #94a3b8;
-    border: 1px solid transparent !important;
-    border-radius: 8px !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
     background: transparent !important;
-    font-weight: 500;
-    padding: 12px 20px;
-    font-size: 14px;
-    white-space: nowrap;
-    /* transition: all 0.25s ease; */
-    position: relative;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 10px 16px;
 }
 
 .nav-tabs .nav-link:hover {
-    color: #f1f5f9;
-    background: rgba(55, 118, 171, 0.15) !important;
-    border-color: rgba(55, 118, 171, 0.3) !important;
-    /* transform: translateY(-1px); */
+    color: #bcbec4;
+    background: #2b2d30 !important;
 }
 
 .nav-tabs .nav-link.active {
     color: #ffffff !important;
-    background: linear-gradient(135deg, #3776ab 0%, #2b5b84 100%) !important;
-    font-weight: 600;
-    border-color: transparent !important;
-    box-shadow: 0 4px 15px rgba(55, 118, 171, 0.4);
+    background: #2b2d30 !important;
+    border-bottom: 2px solid #3574f0 !important; /* Azul selección JetBrains */
 }
 
 /* Tab content - Diseño mejorado */
