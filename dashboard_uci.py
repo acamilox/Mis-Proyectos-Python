@@ -223,12 +223,16 @@ def render_gestion():
         datos_giro = PROCESSOR.safe_get_row('GIRO CAMA', MESES)
         fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro de Cama', color='#27ae60', decimals=2)
         
-        # Gráfico de VM
+        # Gráfico de VM - datos mensuales
+        datos_vm_mensual = kpis.get('promedio_dias_vm_mensual', [])
+        if not datos_vm_mensual or len(datos_vm_mensual) != len(MESES):
+            datos_vm_mensual = [round(kpis['promedio_dias_vm'], 2) for _ in MESES]
+        
         fig_vm = go.Figure()
         fig_vm.add_trace(go.Bar(
-            x=MESES, y=[round(kpis['promedio_dias_vm'], 2) for _ in MESES],
+            x=MESES, y=datos_vm_mensual,
             marker_color='#9b59b6',
-            text=[f'{round(kpis["promedio_dias_vm"], 1)}' for _ in MESES],
+            text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
             textposition='inside',
             textfont=dict(color='white', size=11)
         ))

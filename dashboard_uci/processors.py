@@ -254,7 +254,8 @@ class DataProcessor:
             'giro_cama': giro_cama,
             'total_dias_estancia': total_dias,
             'capacidad_uci': capacidad,
-            'promedio_dias_vm': promedio_vm_general
+            'promedio_dias_vm': promedio_vm_general,
+            'promedio_dias_vm_mensual': promedio_vm
         }
     
     def get_eps_data(self) -> Tuple[List[str], List[float]]:
