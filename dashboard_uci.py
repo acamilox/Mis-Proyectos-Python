@@ -210,18 +210,18 @@ def render_gestion():
     try:
         kpis = PROCESSOR.get_kpis_gestion()
         
-        kpi1 = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "Días", "#4b8bbe")
-        kpi2 = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3776ab")
+        kpi1 = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "Días", "#6366f1")
+        kpi2 = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3b82f6")
         kpi3 = chart_factory.create_kpi_card("Total Días Estancia", f"{int(kpis['total_dias_estancia'])}", "Ene - Dic", "#10b981")
-        kpi4 = chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#ffd43b")
-        kpi5 = chart_factory.create_kpi_card("Promedio Días VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilación Mecánica", "#64748b")
+        kpi4 = chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#8b5cf6")
+        kpi5 = chart_factory.create_kpi_card("Promedio Días VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilación Mecánica", "#06b6d4")
         
         # Gráficos
         datos_estancia = PROCESSOR.safe_get_row('PROMEDIO ESTANCIA', MESES)
-        fig_estancia = chart_factory.create_bar_chart(datos_estancia, 'Estancia Promedio (Días)', color='#4b8bbe', decimals=1)
+        fig_estancia = chart_factory.create_bar_chart(datos_estancia, 'Estancia Promedio (Días)', color='#6366f1', decimals=1)
         
         datos_giro = PROCESSOR.safe_get_row('GIRO CAMA', MESES)
-        fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro de Cama', color='#3776ab', decimals=2)
+        fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro de Cama', color='#3b82f6', decimals=2)
         
         # Gráfico de VM - datos mensuales
         datos_vm_mensual = kpis.get('promedio_dias_vm_mensual', [])
@@ -266,7 +266,7 @@ def render_gestion():
             total_germenes = sum(germenes_values)
             
             # Paleta de colores distintiva
-            colors_germenes = ['#3776ab', '#ffd43b', '#4b8bbe', '#10b981', '#ef4444', '#f59e0b', '#64748b', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#14b8a6', '#a855f7', '#eab308', '#2563eb']
+            colors_germenes = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
             
             fig_germenes = go.Figure(data=[go.Pie(
                 labels=germenes_labels_sorted,
@@ -482,18 +482,18 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         
         kpis = PROCESSOR.get_kpis_resumen(meses_filtrados)
         
-        kpi_ingresos = chart_factory.create_kpi_card("Total Ingresos", f"{int(kpis['total_ingresos'])}", rango_texto, "#3776ab")
-        kpi_ocup = chart_factory.create_kpi_card("% Ocupación Promedio", PROCESSOR.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#4b8bbe")
+        kpi_ingresos = chart_factory.create_kpi_card("Total Ingresos", f"{int(kpis['total_ingresos'])}", rango_texto, "#6366f1")
+        kpi_ocup = chart_factory.create_kpi_card("% Ocupación Promedio", PROCESSOR.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#3b82f6")
         kpi_mort = chart_factory.create_kpi_card("% Mortalidad General", PROCESSOR.formatear_porcentaje(kpis['mortalidad']), f"Total {rango_texto}", "#ef4444")
         kpi_estancia = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", f"Días - {rango_texto}", "#10b981")
-        kpi_giro = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#ffd43b")
+        kpi_giro = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#8b5cf6")
         
         # EPS - Barras verticales con etiquetas visibles
         eps_labels, eps_values = PROCESSOR.get_eps_data()
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
-            colors_eps = ['#3776ab', '#ffd43b', '#4b8bbe', '#10b981', '#ef4444', '#f59e0b', '#64748b']
+            colors_eps = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6']
             fig_eps = go.Figure(data=[go.Bar(
                 x=eps_df['EPS'],
                 y=eps_df['Cantidad'],
@@ -536,8 +536,8 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         datos_ing = PROCESSOR.safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         datos_eg = PROCESSOR.safe_get_row('NÚMERO DE EGRESOS DEL MES', meses_filtrados)
         fig_ie = go.Figure()
-        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#3776ab', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
-        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#ffd43b', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#3b82f6', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='inside', textfont=dict(color='white', size=9)))
         fig_ie.update_layout(
             title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
@@ -553,7 +553,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             total_morb = df_morb['Total'].sum()
             
             # Paleta de colores vibrante
-            colors_morb = ['#3776ab', '#ffd43b', '#4b8bbe', '#10b981', '#ef4444', '#f59e0b', '#64748b', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#a855f7']
+            colors_morb = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
             
             fig_morb = go.Figure(data=[go.Bar(
                 x=df_morb.index,

@@ -11,7 +11,7 @@ from typing import List, Optional, Dict, Any
 from dash import html
 import dash_bootstrap_components as dbc
 
-from .config import COLORS, MESES, GRAPH_CONFIG
+from .config import COLORS, MESES, GRAPH_CONFIG, CHART_COLORS
 
 
 class ChartFactory:
@@ -19,6 +19,7 @@ class ChartFactory:
     
     def __init__(self):
         self.colors = COLORS
+        self.chart_colors = CHART_COLORS
         self.graph_config = GRAPH_CONFIG
         self.meses = MESES
     
@@ -291,11 +292,7 @@ class ChartFactory:
             auto_sort: Si True, ordena de mayor a menor
         """
         if colors is None:
-            colors = [
-                '#3776ab', '#ffd43b', '#4b8bbe', '#10b981', '#ef4444', 
-                '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16',
-                '#f97316', '#14b8a6', '#a855f7', '#eab308', '#2563eb',
-            ]
+            colors = self.chart_colors
         
         if auto_sort:
             datos = sorted(zip(values, labels, colors[:len(labels)]), reverse=True)
