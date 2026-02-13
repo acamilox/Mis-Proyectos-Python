@@ -303,7 +303,12 @@ def render_gestion():
         # Eventos adversos - Barras verticales con etiquetas visibles
         if not DATA['eventos_adversos'].empty:
             df_eventos = DATA['eventos_adversos'].sort_values('Cantidad', ascending=False)
-            colors_eventos = ['#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899']
+            colors_eventos = [
+                '#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899',
+                '#f97316', '#14b8a6', '#a855f7', '#0ea5e9', '#84cc16', '#e11d48', '#22c55e',
+                '#3b82f6', '#eab308', '#d946ef', '#0891b2', '#f43f5e', '#4ade80', '#818cf8',
+                '#fb923c', '#2dd4bf', '#c084fc', '#38bdf8', '#a3e635', '#fb7185', '#34d399'
+            ]
             fig_eventos = go.Figure(data=[go.Bar(
                 x=df_eventos['Evento'],
                 y=df_eventos['Cantidad'],
