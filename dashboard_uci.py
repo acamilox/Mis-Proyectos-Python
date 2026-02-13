@@ -227,6 +227,7 @@ def render_gestion():
         ))
         fig_vm.update_layout(
             title={'text': 'Promedio de Días de VM', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=350, bargap=0.3, margin=dict(l=50, r=30, t=50, b=50),
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
@@ -283,6 +284,7 @@ def render_gestion():
             
             fig_germenes.update_layout(
                 title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
+                transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=520, margin=dict(l=30, r=280, t=60, b=30),
                 legend=dict(
@@ -312,6 +314,7 @@ def render_gestion():
             )])
             fig_eventos.update_layout(
                 title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=550, margin=dict(l=50, r=30, t=50, b=280),
                 xaxis={'tickfont': {'color': '#e2e8f0', 'size': 8}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
@@ -493,6 +496,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             )])
             fig_eps.update_layout(
                 title={'text': f'Distribución por EPS (Total: {int(sum(eps_values)):,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=520, margin=dict(l=50, r=30, t=50, b=200),
                 xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
@@ -515,6 +519,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         ))
         fig_ocup.update_layout(
             title={'text': '% Ocupacional Mensual', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=350, margin=dict(l=50, r=30, t=50, b=50),
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
@@ -529,6 +534,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
         fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#3b82f6', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='auto', textfont=dict(color='white', size=9)))
         fig_ie.update_layout(
             title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            transition={'duration': 0},
             barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=380, margin=dict(l=50, r=30, t=50, b=70),
             legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1),
@@ -555,6 +561,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             
             fig_morb.update_layout(
                 title={'text': f'Morbilidad por Diagnóstico (Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
+                transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=50, r=30, t=50, b=100),
                 xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
@@ -588,6 +595,7 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
             
             fig_morb_gen.update_layout(
                 title={'text': f'Distribución por Sexo (Total: {int(total_sexo)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
+                transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=20, r=20, t=50, b=20),
                 showlegend=False

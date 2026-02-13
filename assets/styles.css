@@ -32,7 +32,7 @@ body {
     background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
     border: 1px solid rgba(148, 163, 184, 0.12) !important;
     border-radius: 12px !important;
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     position: relative;
@@ -48,13 +48,13 @@ body {
     height: 3px;
     background: linear-gradient(90deg, #3776ab, #ffd43b, #4b8bbe);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    /* transition: opacity 0.3s ease; */
 }
 
 .kpi-card:hover {
     box-shadow: 0 8px 30px rgba(55, 118, 171, 0.2) !important;
     border-color: rgba(55, 118, 171, 0.3) !important;
-    transform: translateY(-3px);
+    /* transform: translateY(-3px); */
 }
 
 .kpi-card:hover::before {
@@ -86,7 +86,7 @@ body {
     padding: 12px 20px;
     font-size: 14px;
     white-space: nowrap;
-    transition: all 0.25s ease;
+    /* transition: all 0.25s ease; */
     position: relative;
 }
 
@@ -94,7 +94,7 @@ body {
     color: #f1f5f9;
     background: rgba(55, 118, 171, 0.15) !important;
     border-color: rgba(55, 118, 171, 0.3) !important;
-    transform: translateY(-1px);
+    /* transform: translateY(-1px); */
 }
 
 .nav-tabs .nav-link.active {
@@ -120,7 +120,7 @@ body {
     padding: 24px;
     margin-bottom: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
 }
 
 .section-card:hover {
@@ -154,7 +154,7 @@ body {
     border: 1px solid rgba(55, 118, 171, 0.2) !important; 
     border-radius: 8px !important;
     min-height: 42px !important;
-    transition: all 0.25s ease !important;
+    /* transition: all 0.25s ease !important; */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 .Select-control:hover {
@@ -203,7 +203,7 @@ body {
     font-weight: 600 !important;
     font-size: 13px !important;
     padding: 10px 18px !important;
-    transition: all 0.25s ease !important;
+    /* transition: all 0.25s ease !important; */
     border: none !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -218,7 +218,7 @@ body {
 .btn-success:hover {
     background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4) !important;
-    transform: translateY(-2px);
+    /* transform: translateY(-2px); */
 }
 
 .btn-primary {
@@ -229,7 +229,7 @@ body {
 .btn-primary:hover {
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4) !important;
-    transform: translateY(-2px);
+    /* transform: translateY(-2px); */
 }
 
 .btn-secondary {
@@ -241,7 +241,7 @@ body {
 .btn-secondary:hover {
     background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
     box-shadow: 0 4px 15px rgba(71, 85, 105, 0.4) !important;
-    transform: translateY(-2px);
+    /* transform: translateY(-2px); */
 }
 
 /* Footer - Diseño mejorado */
@@ -261,14 +261,14 @@ body {
     overflow: hidden;
     background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
     border: 1px solid rgba(148, 163, 184, 0.1);
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .js-plotly-plot:hover {
     border-color: rgba(55, 118, 171, 0.3);
     box-shadow: 0 8px 30px rgba(55, 118, 171, 0.15);
-    transform: translateY(-2px);
+    /* transform: translateY(-2px); */
 }
 
 /* Section titles */
@@ -300,7 +300,7 @@ body {
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
 }
 
 .graph-card:hover {
@@ -706,12 +706,12 @@ h5[style*="color: #f1f5f9"]::after {
 /* Mejora para el logo */
 .logo-img {
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-    transition: all 0.3s ease;
+    /* transition: all 0.3s ease; */
 }
 
 .logo-img:hover {
     filter: drop-shadow(0 4px 15px rgba(55, 118, 171, 0.3));
-    transform: scale(1.02);
+    /* transform: scale(1.02); */
 }
 
 /* Efecto para botones de exportar */

@@ -64,6 +64,7 @@ class ChartFactory:
         
         fig.update_layout(
             showlegend=False,
+            transition={'duration': 0},
             plot_bgcolor=self.colors['bg_secondary'],
             paper_bgcolor=self.colors['bg_secondary'],
             title={
@@ -153,6 +154,7 @@ class ChartFactory:
                 'x': 0.5, 
                 'xanchor': 'center'
             },
+            transition={'duration': 0},
             showlegend=False,
             plot_bgcolor=self.colors['bg_secondary'],
             paper_bgcolor=self.colors['bg_secondary'],
@@ -234,6 +236,7 @@ class ChartFactory:
                 'xanchor': 'center'
             },
             barmode='group',
+            transition={'duration': 0},
             plot_bgcolor=self.colors['bg_secondary'],
             paper_bgcolor=self.colors['bg_secondary'],
             xaxis={
@@ -343,6 +346,7 @@ class ChartFactory:
                 'x': 0.5, 
                 'xanchor': 'center'
             },
+            transition={'duration': 0},
             plot_bgcolor=self.colors['bg_secondary'],
             paper_bgcolor=self.colors['bg_secondary'],
             showlegend=True,
@@ -457,6 +461,7 @@ class ChartFactory:
                 'x': 0.5
             },
             barmode='relative',
+            transition={'duration': 0},
             plot_bgcolor=self.colors['bg_secondary'],
             paper_bgcolor=self.colors['bg_secondary'],
             xaxis={
