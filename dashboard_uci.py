@@ -268,7 +268,7 @@ def render_gestion():
                 ),
                 textinfo='percent',
                 textposition='inside',
-                textfont=dict(size=9, color='white', family='Inter'),
+                textfont=dict(size=12, color='white', family='Roboto'),
                 hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
                 direction='clockwise',
                 sort=False,
