@@ -175,7 +175,7 @@ body {
     background: transparent !important; 
     color: #f1f5f9 !important;
     padding: 12px 16px !important;
-    transition: all 0.2s ease !important;
+    /* transition: all 0.2s ease !important; */
 }
 .Select-option:hover, .Select-option.is-focused { 
     background: linear-gradient(90deg, rgba(55, 118, 171, 0.2) 0%, rgba(255, 212, 59, 0.1) 100%) !important; 
@@ -662,7 +662,7 @@ h5[style*="color: #f1f5f9"]::after {
         transparent 70%
     );
     transform: rotate(45deg);
-    transition: all 0.5s ease;
+    /* transition: all 0.5s ease; */
     opacity: 0;
 }
 
@@ -733,7 +733,7 @@ h5[style*="color: #f1f5f9"]::after {
         rgba(255, 255, 255, 0.2),
         transparent
     );
-    transition: left 0.5s ease;
+    /* transition: left 0.5s ease; */
 }
 
 .btn-success:hover::before, .btn-primary:hover::before {
