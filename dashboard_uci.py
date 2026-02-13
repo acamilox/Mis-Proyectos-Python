@@ -283,14 +283,14 @@ def render_gestion():
             )
             
             fig_germenes.update_layout(
-                title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Inter'}, 'x': 0.5},
+                title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=520, margin=dict(l=30, r=280, t=60, b=30),
+                height=520, margin=dict(l=30, r=300, t=60, b=30),
                 legend=dict(
-                    orientation='v', yanchor='middle', y=0.5, xanchor='left', x=0.95,
+                    orientation='v', yanchor='middle', y=0.5, xanchor='left', x=1.08,
                     bgcolor='rgba(15, 23, 42, 0.9)', 
-                    font=dict(color='#e2e8f0', size=9, family='Inter'),
+                    font=dict(color='#e2e8f0', size=9, family='Roboto'),
                     bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1,
                     itemsizing='constant',
                     tracegroupgap=3
