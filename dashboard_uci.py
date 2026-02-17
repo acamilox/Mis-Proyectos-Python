@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 +--------------------------------------------------------------------------+
 DASHBOARD UCI ADULTOS - PANEL DE INDICADORES                             ï¿½
