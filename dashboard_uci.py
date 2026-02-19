@@ -207,6 +207,7 @@ app.layout = html.Div([
 ], style={
     'background': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
     'minHeight': '100vh',
+    'paddingBottom': '92px',
     'fontFamily': "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"
 }, id='app-container')
 
