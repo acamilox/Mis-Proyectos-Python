@@ -244,13 +244,8 @@ body {
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 1) 100%);
     border-top: 1px solid rgba(55, 118, 171, 0.2);
     padding: 20px 24px;
-    margin-top: 0;
+    margin-top: 32px;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 90;
 }
 
 /* Scrollbar - Definido en sección de efectos */
