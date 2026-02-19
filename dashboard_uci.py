@@ -248,30 +248,36 @@ def render_resumen():
         ], style={'marginBottom': '12px'}),
         html.Div([
             html.Div([
+                html.Span("Año", style={
+                    'color': '#94a3b8', 'fontSize': '12px', 'fontWeight': '600', 'marginBottom': '6px'
+                }),
                 dcc.Dropdown(
                     id='filtro-anio',
                     options=[{'label': anio, 'value': anio} for anio in AVAILABLE_YEARS],
                     value=DEFAULT_YEAR,
                     clearable=False,
-                    style={'fontSize': '13px', 'minWidth': '120px'}
+                    style={'fontSize': '13px'}
                 )
-            ], style={'marginRight': '8px'}),
+            ], style={'display': 'flex', 'flexDirection': 'column', 'minWidth': '120px', 'maxWidth': '140px'}),
             html.Div([
+                html.Span("Meses", style={
+                    'color': '#94a3b8', 'fontSize': '12px', 'fontWeight': '600', 'marginBottom': '6px'
+                }),
                 dcc.Dropdown(
                     id='filtro-mes-inicio',
                     options=[{'label': MESES_COMPLETOS[mes], 'value': mes} for mes in MESES],
                     value=MESES,
                     multi=True,
                     placeholder="Seleccionar meses...",
-                    style={'fontSize': '13px', 'minWidth': '350px'}
+                    style={'fontSize': '13px'}
                 )
-            ]),
+            ], style={'display': 'flex', 'flexDirection': 'column', 'minWidth': '420px', 'flex': '1'}),
             html.Div([
                 dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm"),
                 dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
                           style={'marginLeft': '8px'})
-            ], style={'marginLeft': '12px', 'display': 'flex', 'alignItems': 'center'})
-        ], style={'display': 'flex', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '8px'})
+            ], style={'display': 'flex', 'alignItems': 'flex-end', 'paddingBottom': '1px'})
+        ], style={'display': 'flex', 'alignItems': 'stretch', 'flexWrap': 'wrap', 'gap': '12px'})
     ], style={
         'background': 'rgba(30, 41, 59, 0.8)',
         'padding': '14px 20px',
