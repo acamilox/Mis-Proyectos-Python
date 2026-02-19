@@ -5,10 +5,13 @@
     "python.analysis.autoImportCompletions": true,
     "python.analysis.diagnosticMode": "workspace",
     "python.autoComplete.addBrackets": true,
-    "python.languageServer": "Pylance",
+    "python.languageServer": "None",
     "editor.formatOnSave": false,
     "python.formatting.provider": "none",
     "files.associations": {
         "*.css": "css"
-    }
+    },
+    "cursorpyright.analysis.autoImportCompletions": true,
+    "cursorpyright.analysis.diagnosticMode": "workspace",
+    "cursorpyright.analysis.typeCheckingMode": "basic"
 }
