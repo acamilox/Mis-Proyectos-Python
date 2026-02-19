@@ -3,7 +3,7 @@
     "python.typeCheckingMode": "basic",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true,
-    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.diagnosticMode": "openFilesOnly",
     "python.autoComplete.addBrackets": true,
     "python.languageServer": "None",
     "editor.formatOnSave": false,
@@ -12,6 +12,14 @@
         "*.css": "css"
     },
     "cursorpyright.analysis.autoImportCompletions": true,
-    "cursorpyright.analysis.diagnosticMode": "workspace",
-    "cursorpyright.analysis.typeCheckingMode": "basic"
+    "cursorpyright.analysis.diagnosticMode": "openFilesOnly",
+    "cursorpyright.analysis.typeCheckingMode": "basic",
+    "python.analysis.exclude": [
+        "**/.venv/**",
+        "**/__pycache__/**"
+    ],
+    "cursorpyright.analysis.exclude": [
+        "**/.venv/**",
+        "**/__pycache__/**"
+    ]
 }
