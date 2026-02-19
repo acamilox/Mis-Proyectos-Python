@@ -9,13 +9,17 @@ from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import pandas as pd
+import json
 from io import BytesIO
 import logging
 from typing import Any
+from pathlib import Path
+from time import time
 
 # Imports del paquete modular (paquete dashboard_uci/, no este script)
 from dashboard_uci import (
-    load_data,
+    BASE_DIR,
+    DataLoader,
     DataProcessor,
     chart_factory,
     create_export_data,
@@ -30,6 +34,22 @@ _GRAPH_CFG: Any = GRAPH_CONFIG
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+
+def _debug_log(run_id: str, hypothesis_id: str, location: str, message: str, data: dict[str, Any]) -> None:
+    """Escribe logs NDJSON para depuracion en modo debug."""
+    payload = {
+        "sessionId": "57990a",
+        "runId": run_id,
+        "hypothesisId": hypothesis_id,
+        "location": location,
+        "message": message,
+        "data": data,
+        "timestamp": int(time() * 1000),
+    }
+    log_path = BASE_DIR / "debug-57990a.log"
+    with log_path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+
 # ==============================================================================
 # INICIALIZACION DE LA APLICACION
 # ==============================================================================
@@ -41,15 +61,16 @@ app = dash.Dash(
 )
 server = app.server
 
-# Cargar datos al inicio
+# Cargar datos al inicio (multianio)
 logger.info("Cargando datos...")
-try:
-    DATA = load_data()
-    PROCESSOR = DataProcessor(DATA)
-    logger.info("Datos cargados exitosamente")
-except Exception as e:
-    logger.error(f"Error cargando datos: {e}")
-    DATA = {
+YEAR_FILES = {
+    "2025": "Estadistica 2025.xlsx",
+    "2026": "Estadistica 2026.xlsx",
+}
+
+
+def _empty_data() -> dict[str, pd.DataFrame]:
+    return {
         'estadistica': pd.DataFrame(),
         'morbilidad': pd.DataFrame(),
         'germenes': pd.DataFrame(),
@@ -57,7 +78,68 @@ except Exception as e:
         'eventos_adversos': pd.DataFrame(),
         'gram_sot': pd.DataFrame()
     }
-    PROCESSOR = DataProcessor(DATA)
+
+
+DATA_BY_YEAR: dict[str, dict[str, pd.DataFrame]] = {}
+PROCESSOR_BY_YEAR: dict[str, DataProcessor] = {}
+
+for year, filename in YEAR_FILES.items():
+    excel_path = BASE_DIR / "data" / filename
+    if not excel_path.exists():
+        logger.warning("Archivo no encontrado para %s: %s", year, excel_path)
+        continue
+
+    try:
+        year_data = DataLoader(Path(excel_path)).load_all()
+        DATA_BY_YEAR[year] = year_data
+        PROCESSOR_BY_YEAR[year] = DataProcessor(year_data)
+        logger.info("Datos cargados para %s desde %s", year, filename)
+        # region agent log
+        _debug_log(
+            "pre-fix",
+            "H2",
+            "dashboard_uci.py:data_load_loop",
+            "Year loaded",
+            {
+                "year": year,
+                "file": filename,
+                "estadisticaRows": int(year_data.get("estadistica", pd.DataFrame()).shape[0]),
+                "morbilidadRows": int(year_data.get("morbilidad", pd.DataFrame()).shape[0]),
+            },
+        )
+        # endregion
+    except Exception as e:
+        logger.error("Error cargando datos de %s: %s", year, e)
+        # region agent log
+        _debug_log(
+            "pre-fix",
+            "H2",
+            "dashboard_uci.py:data_load_loop",
+            "Year failed to load",
+            {"year": year, "file": filename, "error": str(e)},
+        )
+        # endregion
+
+if not PROCESSOR_BY_YEAR:
+    DATA_BY_YEAR["2026"] = _empty_data()
+    PROCESSOR_BY_YEAR["2026"] = DataProcessor(DATA_BY_YEAR["2026"])
+
+AVAILABLE_YEARS = sorted(PROCESSOR_BY_YEAR.keys())
+DEFAULT_YEAR = "2026" if "2026" in PROCESSOR_BY_YEAR else AVAILABLE_YEARS[0]
+
+# Variables por compatibilidad con otras pestañas (default 2026)
+DATA = DATA_BY_YEAR[DEFAULT_YEAR]
+PROCESSOR = PROCESSOR_BY_YEAR[DEFAULT_YEAR]
+
+# region agent log
+_debug_log(
+    "pre-fix",
+    "H2",
+    "dashboard_uci.py:year_registry",
+    "Year registry initialized",
+    {"availableYears": AVAILABLE_YEARS, "defaultYear": DEFAULT_YEAR},
+)
+# endregion
 
 # ==============================================================================
 # LAYOUT DE LA APLICACION
@@ -77,7 +159,7 @@ app.layout = html.Div([
                         'color': '#ffffff', 'fontWeight': '800', 'margin': '0',
                         'fontSize': '32px', 'lineHeight': '1.1', 'letterSpacing': '-0.5px'
                     }),
-                    html.P("Panel de Indicadores 2026", style={
+                    html.P("Panel de Indicadores 2025-2026", style={
                         'color': '#cbd5e1', 'fontSize': '14px', 'margin': '4px 0 0 0',
                         'fontWeight': '500', 'letterSpacing': '0.5px'
                     }, className="header-subtitle")
@@ -128,7 +210,7 @@ app.layout = html.Div([
                     'color': '#10b981', 'margin': '0', 'fontSize': '12px', 'fontWeight': '500'
                 })
             ], style={'display': 'flex', 'alignItems': 'center'}),
-            html.P("2026 Panel de Indicadores", style={
+            html.P("Panel de Indicadores 2025-2026", style={
                 'color': '#64748b', 'margin': '0', 'fontSize': '12px'
             })
         ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
@@ -167,6 +249,15 @@ def render_resumen():
         html.Div([
             html.Div([
                 dcc.Dropdown(
+                    id='filtro-anio',
+                    options=[{'label': anio, 'value': anio} for anio in AVAILABLE_YEARS],
+                    value=DEFAULT_YEAR,
+                    clearable=False,
+                    style={'fontSize': '13px', 'minWidth': '120px'}
+                )
+            ], style={'marginRight': '8px'}),
+            html.Div([
+                dcc.Dropdown(
                     id='filtro-mes-inicio',
                     options=[{'label': MESES_COMPLETOS[mes], 'value': mes} for mes in MESES],
                     value=MESES,
@@ -193,6 +284,15 @@ def render_resumen():
 
 def render_gestion():
     try:
+        # region agent log
+        _debug_log(
+            "pre-fix",
+            "H5",
+            "dashboard_uci.py:render_gestion:entry",
+            "Gestion tab uses global processor",
+            {"globalDefaultYear": DEFAULT_YEAR},
+        )
+        # endregion
         kpis = PROCESSOR.get_kpis_gestion()
         kpi1 = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "D\u00edas", "#6366f1")
         kpi2 = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3b82f6")
@@ -423,15 +523,49 @@ def render_mortalidad():
     [Output('filtro-mes-inicio', 'value'),
      Output('resumen-content', 'children')],
     [Input('btn-todos-meses', 'n_clicks'),
-     Input('btn-aplicar-filtros', 'n_clicks')],
+     Input('btn-aplicar-filtros', 'n_clicks'),
+     Input('filtro-anio', 'value')],
     [State('filtro-mes-inicio', 'value')]
 )
-def actualizar_resumen(_btn_todos, _btn_aplicar, meses_seleccionados):
+def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_seleccionados):
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
+    # region agent log
+    _debug_log(
+        "pre-fix",
+        "H1",
+        "dashboard_uci.py:actualizar_resumen:entry",
+        "Resumen callback triggered",
+        {
+            "triggeredId": triggered_id,
+            "anioSeleccionado": anio_seleccionado,
+            "mesesSeleccionados": meses_seleccionados,
+        },
+    )
+    # endregion
     if triggered_id == 'btn-todos-meses':
         meses_seleccionados = MESES
     try:
+        year_key = str(anio_seleccionado) if anio_seleccionado is not None else DEFAULT_YEAR
+        if year_key not in PROCESSOR_BY_YEAR:
+            year_key = DEFAULT_YEAR
+
+        processor = PROCESSOR_BY_YEAR[year_key]
+        data_actual = DATA_BY_YEAR[year_key]
+        # region agent log
+        _debug_log(
+            "pre-fix",
+            "H3",
+            "dashboard_uci.py:actualizar_resumen:year_resolution",
+            "Year resolved for callback",
+            {
+                "resolvedYear": year_key,
+                "fallbackUsed": str(anio_seleccionado) != year_key if anio_seleccionado is not None else True,
+                "morbilidadRows": int(data_actual.get("morbilidad", pd.DataFrame()).shape[0]),
+            },
+        )
+        # endregion
+
         if meses_seleccionados and isinstance(meses_seleccionados, list) and len(meses_seleccionados) > 0:
             meses_filtrados = [m for m in meses_seleccionados if m in MESES]
         else:
@@ -444,15 +578,31 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, meses_seleccionados):
         else:
             rango_texto = ", ".join([MESES_COMPLETOS.get(m, m)[:3] for m in meses_filtrados])
 
-        kpis = PROCESSOR.get_kpis_resumen(meses_filtrados)
+        rango_texto = f"{rango_texto} {year_key}"
+
+        kpis = processor.get_kpis_resumen(meses_filtrados)
+        # region agent log
+        _debug_log(
+            "pre-fix",
+            "H4",
+            "dashboard_uci.py:actualizar_resumen:kpis",
+            "Resumen KPI snapshot",
+            {
+                "year": year_key,
+                "mesesFiltrados": meses_filtrados,
+                "totalIngresos": float(kpis.get("total_ingresos", 0) or 0),
+                "mortalidad": float(kpis.get("mortalidad", 0) or 0),
+            },
+        )
+        # endregion
         kpi_ingresos = chart_factory.create_kpi_card("Total Ingresos", f"{int(kpis['total_ingresos'])}", rango_texto, "#6366f1")
-        kpi_ocup = chart_factory.create_kpi_card("% Ocupaci\u00f3n Promedio", PROCESSOR.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#3b82f6")
-        kpi_mort = chart_factory.create_kpi_card("% Mortalidad General", PROCESSOR.formatear_porcentaje(kpis['mortalidad']), f"Total {rango_texto}", "#ef4444")
+        kpi_ocup = chart_factory.create_kpi_card("% Ocupaci\u00f3n Promedio", processor.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#3b82f6")
+        kpi_mort = chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis['mortalidad']), f"Total {rango_texto}", "#ef4444")
         kpi_estancia = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", f"D\u00edas - {rango_texto}", "#10b981")
         kpi_giro = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#8b5cf6")
 
         # EPS
-        eps_labels, eps_values = PROCESSOR.get_eps_data()
+        eps_labels, eps_values = processor.get_eps_data()
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
@@ -476,7 +626,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, meses_seleccionados):
             fig_eps = go.Figure()
 
         # Ocupacional
-        datos_ocup = PROCESSOR.safe_get_row('% OCUPACIONAL', meses_filtrados)
+        datos_ocup = processor.safe_get_row('% OCUPACIONAL', meses_filtrados)
         fig_ocup = go.Figure()
         fig_ocup.add_trace(go.Scatter(
             x=meses_filtrados, y=datos_ocup.values,
@@ -497,8 +647,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, meses_seleccionados):
         )
 
         # Ingresos vs Egresos
-        datos_ing = PROCESSOR.safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
-        datos_eg = PROCESSOR.safe_get_row('N\u00daMERO DE EGRESOS DEL MES', meses_filtrados)
+        datos_ing = processor.safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
+        datos_eg = processor.safe_get_row('N\u00daMERO DE EGRESOS DEL MES', meses_filtrados)
         fig_ie = go.Figure()
         fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='auto', textfont=dict(color='white', size=9)))
         fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#3b82f6', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='auto', textfont=dict(color='white', size=9)))
@@ -513,8 +663,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, meses_seleccionados):
         )
 
         # Morbilidad
-        if not DATA['morbilidad'].empty:
-            df_morb = DATA['morbilidad'].sort_values('Total', ascending=False)
+        if not data_actual['morbilidad'].empty:
+            df_morb = data_actual['morbilidad'].sort_values('Total', ascending=False)
             total_morb = df_morb['Total'].sum()
             colors_morb = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
             fig_morb = go.Figure(data=[go.Bar(
