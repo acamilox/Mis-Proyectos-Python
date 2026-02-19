@@ -11,17 +11,20 @@ import plotly.graph_objects as go
 import pandas as pd
 from io import BytesIO
 import logging
+from typing import Any
 
-# Imports del paquete modular
+# Imports del paquete modular (paquete dashboard_uci/, no este script)
 from dashboard_uci import (
     load_data,
     DataProcessor,
-    ChartFactory,
     chart_factory,
+    create_export_data,
     MESES,
     MESES_COMPLETOS,
     GRAPH_CONFIG
 )
+# Tipo para config de Plotly (dcc.Graph acepta dict pero el type checker espera Config)
+_GRAPH_CFG: Any = GRAPH_CONFIG
 
 # Configuracion de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -313,26 +316,26 @@ def render_gestion():
                 dbc.Col(kpi5, xs=12, md=True)
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_estancia, config=GRAPH_CONFIG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_giro, config=GRAPH_CONFIG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_estancia, config=_GRAPH_CFG), xs=12, md=6),
+                dbc.Col(dcc.Graph(figure=fig_giro, config=_GRAPH_CFG), xs=12, md=6)
             ], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=3),
-                dbc.Col(dcc.Graph(figure=fig_vm, config=GRAPH_CONFIG), xs=12, md=6),
+                dbc.Col(dcc.Graph(figure=fig_vm, config=_GRAPH_CFG), xs=12, md=6),
                 dbc.Col(xs=12, md=3)
             ], className="mb-4", justify="center"),
             html.H5("Indicadores de Calidad e Infecciones", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=GRAPH_CONFIG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_nav, config=GRAPH_CONFIG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=_GRAPH_CFG), xs=12, md=6),
+                dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG), xs=12, md=6)
             ], className="mb-3 g-3"),
             html.H5("G\u00e9rmenes Aislados y Eventos Adversos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_germenes, config=GRAPH_CONFIG), xs=12, md=8),
+                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
             ], className="mb-4", justify="center"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=GRAPH_CONFIG), xs=12)])
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG), xs=12)])
         ])
     except Exception as e:
         logger.error(f"Error en render_gestion: {e}")
@@ -362,12 +365,12 @@ def render_especialidades():
             html.H5("Principales Especialidades", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '12px'}),
             dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_medicina, config=GRAPH_CONFIG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_cirugia, config=GRAPH_CONFIG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_medicina, config=_GRAPH_CFG), xs=12, md=6),
+                dbc.Col(dcc.Graph(figure=fig_cirugia, config=_GRAPH_CFG), xs=12, md=6)
             ], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_neuro, config=GRAPH_CONFIG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_neurologia, config=GRAPH_CONFIG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_neuro, config=_GRAPH_CFG), xs=12, md=6),
+                dbc.Col(dcc.Graph(figure=fig_neurologia, config=_GRAPH_CFG), xs=12, md=6)
             ], className="g-3")
         ])
     except Exception as e:
@@ -402,12 +405,12 @@ def render_mortalidad():
             dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=6), dbc.Col(kpi_mediana, xs=12, md=6)], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_mort, config=GRAPH_CONFIG), xs=12, md=8),
+                dbc.Col(dcc.Graph(figure=fig_mort, config=_GRAPH_CFG), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
             ], className="mb-3", justify="center"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_trauma, config=GRAPH_CONFIG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_piramide, config=GRAPH_CONFIG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG), xs=12, md=6),
+                dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG), xs=12, md=6)
             ], className="g-3")
         ])
     except Exception as e:
@@ -423,7 +426,7 @@ def render_mortalidad():
      Input('btn-aplicar-filtros', 'n_clicks')],
     [State('filtro-mes-inicio', 'value')]
 )
-def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
+def actualizar_resumen(_btn_todos, _btn_aplicar, meses_seleccionados):
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
     if triggered_id == 'btn-todos-meses':
@@ -564,12 +567,12 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
                 dbc.Col(kpi_estancia, xs=6, sm=6, md=True),
                 dbc.Col(kpi_giro, xs=6, sm=6, md=True)
             ], className="mb-4 g-3"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocup, config=GRAPH_CONFIG), xs=12)], className="mb-4"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ie, config=GRAPH_CONFIG), xs=12)], className="mb-4"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=GRAPH_CONFIG), xs=12)], className="mb-4 g-3"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocup, config=_GRAPH_CFG), xs=12)], className="mb-4"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ie, config=_GRAPH_CFG), xs=12)], className="mb-4"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=_GRAPH_CFG), xs=12)], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_morb, config=GRAPH_CONFIG), xs=12, lg=8),
-                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=GRAPH_CONFIG), xs=12, lg=4)
+                dbc.Col(dcc.Graph(figure=fig_morb, config=_GRAPH_CFG), xs=12, lg=8),
+                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG), xs=12, lg=4)
             ], className="mb-3 g-3")
         ])
     except Exception as e:
@@ -583,14 +586,13 @@ def actualizar_resumen(btn_todos, btn_aplicar, meses_seleccionados):
     Input("btn-export-excel", "n_clicks"),
     prevent_initial_call=True
 )
-def export_excel(n_clicks):
-    from dashboard_uci import create_export_data
+def export_excel(_n_clicks):
     datos = create_export_data(DATA)
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         for sheet_name, df in datos.items():
             df.to_excel(writer, sheet_name=sheet_name[:31], index=False)
-    return dcc.send_bytes(output.getvalue(), "dashboard_uci_export.xlsx")
+    return dcc.send_bytes(output.getvalue(), "dashboard_uci_export.xlsx")  # type: ignore[attr-defined]
 
 
 @app.callback(
@@ -598,11 +600,10 @@ def export_excel(n_clicks):
     Input("btn-export-csv", "n_clicks"),
     prevent_initial_call=True
 )
-def export_csv(n_clicks):
-    from dashboard_uci import create_export_data
+def export_csv(_n_clicks):
     datos = create_export_data(DATA)
     if 'Resumen General' in datos:
-        return dcc.send_data_frame(datos['Resumen General'].to_csv, "dashboard_uci_resumen.csv")
+        return dcc.send_data_frame(datos['Resumen General'].to_csv, "dashboard_uci_resumen.csv")  # type: ignore[attr-defined]
     return dash.no_update
 
 

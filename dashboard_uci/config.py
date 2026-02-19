@@ -5,11 +5,10 @@ Hospital Infantil Universitario de San José
 """
 
 from pathlib import Path
-import os
 
 # Directorios
 BASE_DIR = Path(__file__).parent.parent
-EXCEL_PATH = BASE_DIR / "data" / "datos_iaas.xlsx"
+EXCEL_PATH = BASE_DIR / "data" / "Estadistica 2026.xlsx"
 ASSETS_DIR = BASE_DIR / "assets"
 
 # Meses

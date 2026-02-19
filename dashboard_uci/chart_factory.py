@@ -27,7 +27,7 @@ class ChartFactory:
         self, 
         data: pd.Series, 
         title: str, 
-        color: str = None,
+        color: Optional[str] = None,
         decimals: int = 0
     ) -> go.Figure:
         """
@@ -102,7 +102,7 @@ class ChartFactory:
         self, 
         data: pd.Series, 
         title: str, 
-        color: str = None,
+        color: Optional[str] = None,
         decimals: int = 1
     ) -> go.Figure:
         """
@@ -179,8 +179,8 @@ class ChartFactory:
         row_names: List[str], 
         labels: List[str], 
         title: str,
-        processor = None,
-        meses: List[str] = None,
+        processor: Optional[Any] = None,
+        meses: Optional[List[str]] = None,
         decimals: int = 0
     ) -> go.Figure:
         """
@@ -280,7 +280,7 @@ class ChartFactory:
         labels: List[str], 
         values: List[float], 
         title: str,
-        colors: List[str] = None,
+        colors: Optional[List[str]] = None,
         auto_sort: bool = True
     ) -> go.Figure:
         """
@@ -502,9 +502,9 @@ class ChartFactory:
         title: str, 
         value: str, 
         subtitle: str = "",
-        color: str = None,
-        trend: str = None,
-        trend_value: str = None,
+        color: Optional[str] = None,
+        trend: Optional[str] = None,
+        trend_value: Optional[str] = None,
         inverse: bool = False
     ) -> dbc.Card:
         """
@@ -606,10 +606,10 @@ class ChartFactory:
             }
         )
     
-    def _capitalizar(self, texto: str) -> str:
+    def _capitalizar(self, texto: Optional[str]) -> str:
         """Capitaliza la primera letra"""
         if not texto or not isinstance(texto, str):
-            return texto
+            return ""
         return texto[0].upper() + texto[1:].lower() if len(texto) > 1 else texto.upper()
     
     def get_graph_config(self) -> Dict[str, Any]:

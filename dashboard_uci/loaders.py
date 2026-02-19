@@ -109,6 +109,16 @@ class DataLoader:
         """Carga datos de gérmenes aislados (IAAS)"""
         try:
             df_iaas = pd.read_excel(self.excel_path, sheet_name='IAAS', header=None)
+
+            # Algunos archivos (p.ej. 2026 parcial) no incluyen la columna esperada.
+            # En ese caso devolvemos dataset vacio sin romper el flujo del dashboard.
+            if 5 not in df_iaas.columns:
+                logger.warning(
+                    "Hoja IAAS sin columna de germenes (columna 5). Se carga vacio."
+                )
+                self.df_germenes = pd.DataFrame(columns=['Germen', 'Cantidad'])
+                return
+
             germenes_raw = df_iaas[5].dropna()
             germenes_raw = germenes_raw[germenes_raw.astype(str).str.strip() != '']
             
@@ -306,6 +316,9 @@ class DataLoader:
             self.df_gram_sot = self.df_gram_sot.reindex(columns=MESES, fill_value=0)
             
             logger.info(f"Datos GRAM-SOT cargados: {self.df_gram_sot.values.sum()} total")
+        except ValueError:
+            logger.warning("Hoja GRAM - SOT no disponible en el archivo. Se carga vacio.")
+            self.df_gram_sot = pd.DataFrame()
         except Exception as e:
             logger.error(f"Error cargando GRAM - SOT: {e}")
             self.df_gram_sot = pd.DataFrame()
