@@ -385,6 +385,23 @@ def render_gestion():
             )
         else:
             fig_germenes = go.Figure()
+            fig_germenes.update_layout(
+                title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                plot_bgcolor='#1e293b',
+                paper_bgcolor='#1e293b',
+                height=520,
+                margin=dict(l=30, r=30, t=60, b=30),
+                xaxis={'visible': False},
+                yaxis={'visible': False},
+                showlegend=False
+            )
+            fig_germenes.add_annotation(
+                text="<b>Sin datos de gérmenes</b><br><span style='color:#94a3b8'>Carga IAAS para visualizar este gráfico</span>",
+                x=0.5, y=0.5, xref='paper', yref='paper',
+                showarrow=False,
+                font=dict(size=14, color='#e2e8f0', family='Roboto'),
+                align='center'
+            )
 
         # Eventos adversos
         if not DATA['eventos_adversos'].empty:
@@ -413,6 +430,22 @@ def render_gestion():
             )
         else:
             fig_eventos = go.Figure()
+            fig_eventos.update_layout(
+                title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                plot_bgcolor='#1e293b',
+                paper_bgcolor='#1e293b',
+                height=550,
+                margin=dict(l=50, r=30, t=50, b=80),
+                xaxis={'visible': False},
+                yaxis={'visible': False},
+                showlegend=False
+            )
+            fig_eventos.add_annotation(
+                text="<b>Sin datos de eventos adversos</b>",
+                x=0.5, y=0.5, xref='paper', yref='paper',
+                showarrow=False,
+                font=dict(size=14, color='#e2e8f0', family='Roboto')
+            )
 
         return html.Div([
             html.H5("Indicadores de Gesti\u00f3n", style={'color': '#f1f5f9', 'fontWeight': '600'}, className="mb-3"),
