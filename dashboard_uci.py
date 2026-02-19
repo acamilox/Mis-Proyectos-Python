@@ -199,17 +199,6 @@ app.layout = html.Div([
                     })
                 ]),
             ], style={'display': 'flex', 'alignItems': 'center', 'gap': '12px'}),
-            html.Div([
-                html.Div(style={
-                    'width': '8px', 'height': '8px', 'borderRadius': '50%',
-                    'background': 'linear-gradient(135deg, #10b981, #059669)',
-                    'boxShadow': '0 0 10px rgba(16, 185, 129, 0.5)',
-                    'marginRight': '8px'
-                }),
-                html.P("Sistema Activo", style={
-                    'color': '#10b981', 'margin': '0', 'fontSize': '12px', 'fontWeight': '500'
-                })
-            ], style={'display': 'flex', 'alignItems': 'center'}),
             html.P("Panel de Indicadores 2025-2026", style={
                 'color': '#64748b', 'margin': '0', 'fontSize': '12px'
             })
