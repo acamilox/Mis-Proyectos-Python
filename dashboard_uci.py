@@ -147,6 +147,7 @@ _debug_log(
 # ==============================================================================
 
 app.layout = html.Div([
+    dcc.Store(id='selected-year-store', data=DEFAULT_YEAR),
     # Header
     html.Div([
         html.Div([
@@ -216,16 +217,21 @@ app.layout = html.Div([
 # CALLBACKS
 # ==============================================================================
 
-@app.callback(Output('tab-content', 'children'), Input('tabs', 'active_tab'))
-def render_content(tab):
+@app.callback(
+    Output('tab-content', 'children'),
+    [Input('tabs', 'active_tab'), Input('selected-year-store', 'data')]
+)
+def render_content(tab, selected_year):
+    year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
+    year_key = year_candidate if year_candidate in PROCESSOR_BY_YEAR else DEFAULT_YEAR
     if tab == 'tab-resumen':
         return render_resumen()
     elif tab == 'tab-gestion':
-        return render_gestion()
+        return render_gestion(year_key)
     elif tab == 'tab-especialidades':
-        return render_especialidades()
+        return render_especialidades(year_key)
     elif tab == 'tab-mortalidad':
-        return render_mortalidad()
+        return render_mortalidad(year_key)
     return html.Div([html.H5("Selecciona una pesta\u00f1a", style={'color': '#1e293b'})])
 
 
@@ -290,27 +296,29 @@ def render_resumen():
     return html.Div([filtros, html.Div(id='resumen-content')])
 
 
-def render_gestion():
+def render_gestion(year_key: str):
     try:
+        processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
+        data_year = DATA_BY_YEAR.get(year_key, DATA)
         # region agent log
         _debug_log(
             "pre-fix",
             "H5",
             "dashboard_uci.py:render_gestion:entry",
-            "Gestion tab uses global processor",
-            {"globalDefaultYear": DEFAULT_YEAR},
+            "Gestion tab resolved year",
+            {"globalDefaultYear": DEFAULT_YEAR, "resolvedYear": year_key},
         )
         # endregion
-        kpis = PROCESSOR.get_kpis_gestion()
+        kpis = processor.get_kpis_gestion()
         kpi1 = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "D\u00edas", "#6366f1")
         kpi2 = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3b82f6")
         kpi3 = chart_factory.create_kpi_card("Total D\u00edas Estancia", f"{int(kpis['total_dias_estancia'])}", "Ene - Dic", "#10b981")
         kpi4 = chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#8b5cf6")
         kpi5 = chart_factory.create_kpi_card("Promedio D\u00edas VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilaci\u00f3n Mec\u00e1nica", "#06b6d4")
 
-        datos_estancia = PROCESSOR.safe_get_row('PROMEDIO ESTANCIA', MESES)
+        datos_estancia = processor.safe_get_row('PROMEDIO ESTANCIA', MESES)
         fig_estancia = chart_factory.create_line_chart(datos_estancia, 'Estancia Promedio (D\u00edas)', color='#6366f1', decimals=1)
-        datos_giro = PROCESSOR.safe_get_row('GIRO CAMA', MESES)
+        datos_giro = processor.safe_get_row('GIRO CAMA', MESES)
         fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro de Cama', color='#3b82f6', decimals=2)
 
         # Grafico de VM - datos mensuales
@@ -340,18 +348,18 @@ def render_gestion():
         )
 
         fig_bacteriemia = chart_factory.create_line_chart(
-            PROCESSOR.safe_get_row('TASA DE BACTERIEMIA ASOC.  A C. CENTRAL', MESES),
+            processor.safe_get_row('TASA DE BACTERIEMIA ASOC.  A C. CENTRAL', MESES),
             'Tasa de ITS AC', color='#ef4444', decimals=1
         )
         fig_nav = chart_factory.create_line_chart(
-            PROCESSOR.safe_get_row('TASA NEUMON\u00cdA ASOCIADA A VENTILADOR', MESES),
+            processor.safe_get_row('TASA NEUMON\u00cdA ASOCIADA A VENTILADOR', MESES),
             'Tasa NAV', color='#ef4444', decimals=1
         )
 
         # Germenes - Donut
-        if not DATA['germenes'].empty:
-            germenes_labels = DATA['germenes']['Germen'].tolist()
-            germenes_values = DATA['germenes']['Cantidad'].tolist()
+        if not data_year['germenes'].empty:
+            germenes_labels = data_year['germenes']['Germen'].tolist()
+            germenes_values = data_year['germenes']['Cantidad'].tolist()
             datos_germenes = sorted(zip(germenes_values, germenes_labels), reverse=True)
             germenes_values_sorted = [d[0] for d in datos_germenes]
             germenes_labels_sorted = [d[1] for d in datos_germenes]
@@ -411,8 +419,8 @@ def render_gestion():
             )
 
         # Eventos adversos
-        if not DATA['eventos_adversos'].empty:
-            df_eventos = DATA['eventos_adversos'].sort_values('Cantidad', ascending=False)
+        if not data_year['eventos_adversos'].empty:
+            df_eventos = data_year['eventos_adversos'].sort_values('Cantidad', ascending=False)
             total_eventos = max(float(df_eventos['Cantidad'].sum()), 1.0)
             df_eventos['Acumulado %'] = (df_eventos['Cantidad'].cumsum() / total_eventos) * 100
             colors_eventos = [
@@ -516,24 +524,25 @@ def render_gestion():
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
-def render_especialidades():
+def render_especialidades(year_key: str):
     try:
-        suma_col = PROCESSOR.get_suma_column()
-        total_medicina = PROCESSOR.safe_get_value('MEDICINA INTERNA', suma_col)
-        total_cirugia = PROCESSOR.safe_get_value('CIRUGIA GENERAL', suma_col)
-        total_neuro = PROCESSOR.safe_get_value('NEUROCIRUGIA', suma_col)
-        total_neurologia = PROCESSOR.safe_get_value('NEUROLOGIA', suma_col)
+        processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
+        suma_col = processor.get_suma_column()
+        total_medicina = processor.safe_get_value('MEDICINA INTERNA', suma_col)
+        total_cirugia = processor.safe_get_value('CIRUGIA GENERAL', suma_col)
+        total_neuro = processor.safe_get_value('NEUROCIRUGIA', suma_col)
+        total_neurologia = processor.safe_get_value('NEUROLOGIA', suma_col)
         total = max(total_medicina + total_cirugia + total_neuro + total_neurologia, 1)
 
-        kpi1 = chart_factory.create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{PROCESSOR.formatear_porcentaje(total_medicina/total*100, False)}%", "#3498db")
-        kpi2 = chart_factory.create_kpi_card("Cirug\u00eda General", f"{int(total_cirugia)}", f"{PROCESSOR.formatear_porcentaje(total_cirugia/total*100, False)}%", "#27ae60")
-        kpi3 = chart_factory.create_kpi_card("Neurocirug\u00eda", f"{int(total_neuro)}", f"{PROCESSOR.formatear_porcentaje(total_neuro/total*100, False)}%", "#16a085")
-        kpi4 = chart_factory.create_kpi_card("Neurolog\u00eda", f"{int(total_neurologia)}", f"{PROCESSOR.formatear_porcentaje(total_neurologia/total*100, False)}%", "#9b59b6")
+        kpi1 = chart_factory.create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{processor.formatear_porcentaje(total_medicina/total*100, False)}%", "#3498db")
+        kpi2 = chart_factory.create_kpi_card("Cirug\u00eda General", f"{int(total_cirugia)}", f"{processor.formatear_porcentaje(total_cirugia/total*100, False)}%", "#27ae60")
+        kpi3 = chart_factory.create_kpi_card("Neurocirug\u00eda", f"{int(total_neuro)}", f"{processor.formatear_porcentaje(total_neuro/total*100, False)}%", "#16a085")
+        kpi4 = chart_factory.create_kpi_card("Neurolog\u00eda", f"{int(total_neurologia)}", f"{processor.formatear_porcentaje(total_neurologia/total*100, False)}%", "#9b59b6")
 
-        series_medicina = pd.to_numeric(PROCESSOR.safe_get_row('MEDICINA INTERNA', MESES), errors='coerce').fillna(0)
-        series_cirugia = pd.to_numeric(PROCESSOR.safe_get_row('CIRUGIA GENERAL', MESES), errors='coerce').fillna(0)
-        series_neuro = pd.to_numeric(PROCESSOR.safe_get_row('NEUROCIRUGIA', MESES), errors='coerce').fillna(0)
-        series_neurologia = pd.to_numeric(PROCESSOR.safe_get_row('NEUROLOGIA', MESES), errors='coerce').fillna(0)
+        series_medicina = pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', MESES), errors='coerce').fillna(0)
+        series_cirugia = pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', MESES), errors='coerce').fillna(0)
+        series_neuro = pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', MESES), errors='coerce').fillna(0)
+        series_neurologia = pd.to_numeric(processor.safe_get_row('NEUROLOGIA', MESES), errors='coerce').fillna(0)
         df_especialidades = pd.DataFrame({
             'Mes': MESES,
             'Medicina Interna': series_medicina.values,
@@ -632,26 +641,28 @@ def render_especialidades():
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
-def render_mortalidad():
+def render_mortalidad(year_key: str):
     try:
-        kpis_mort = PROCESSOR.get_kpis_mortalidad()
+        processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
+        data_year = DATA_BY_YEAR.get(year_key, DATA)
+        kpis_mort = processor.get_kpis_mortalidad()
         kpi1 = chart_factory.create_kpi_card("Total Fallecidos", f"{int(kpis_mort['total_fallecidos'])}", "Ene - Dic", "#e74c3c")
-        kpi2 = chart_factory.create_kpi_card("% Mortalidad General", PROCESSOR.formatear_porcentaje(kpis_mort['mortalidad_general']), "Ene - Dic", "#c0392b")
+        kpi2 = chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis_mort['mortalidad_general']), "Ene - Dic", "#c0392b")
         kpi3 = chart_factory.create_kpi_card("Fallecidos COVID-19", f"{int(kpis_mort['fallecidos_covid'])}", "Ene - Dic", "#34495e")
-        kpi4 = chart_factory.create_kpi_card("% Mortalidad Trauma", PROCESSOR.formatear_porcentaje(kpis_mort['mortalidad_trauma']), "Promedio", "#f39c12")
+        kpi4 = chart_factory.create_kpi_card("% Mortalidad Trauma", processor.formatear_porcentaje(kpis_mort['mortalidad_trauma']), "Promedio", "#f39c12")
         kpi_prom_dias = chart_factory.create_kpi_card("Promedio D\u00edas Estancia", f"{kpis_mort['promedio_dias_estancia']:.1f}", "Fallecidos", "#9b59b6")
         kpi_mediana = chart_factory.create_kpi_card("Mediana D\u00edas de Estancia", f"{kpis_mort['mediana_dias_estancia']:.1f}", "Fallecidos", "#3498db")
 
         fig_mort = chart_factory.create_line_chart(
-            PROCESSOR.safe_get_row('% DE MORTALIDAD GENERAL', MESES),
+            processor.safe_get_row('% DE MORTALIDAD GENERAL', MESES),
             '% Mortalidad General', color='#e74c3c', decimals=1
         )
         fig_trauma = chart_factory.create_grouped_bar_chart(
             ['Pacientes con diagn\u00f3stico de Trauma', 'Pacientes fallecidos por Trauma'],
             ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos',
-            processor=PROCESSOR, decimals=0
+            processor=processor, decimals=0
         )
-        fig_piramide = chart_factory.create_pyramid_chart(DATA['fallecidos'])
+        fig_piramide = chart_factory.create_pyramid_chart(data_year['fallecidos'])
 
         return html.Div([
             dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
@@ -840,20 +851,38 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 if otros_total > 0:
                     df_morb_top.loc['OTROS'] = {'Hombre': 0, 'Mujer': 0, 'Total': otros_total}
             colors_morb = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
-            fig_morb = go.Figure(data=[go.Bar(
-                y=df_morb_top.index, x=df_morb_top['Total'],
-                orientation='h',
-                marker_color=colors_morb[:len(df_morb_top)],
-                text=df_morb_top['Total'], textposition='auto',
-                textfont=dict(color='#f1f5f9', size=11, family='Roboto')
-            )])
+            fig_morb = go.Figure()
+            for i, (diagnostico, fila) in enumerate(df_morb_top.iterrows()):
+                valor = float(fila['Total'])
+                fig_morb.add_trace(go.Bar(
+                    y=[diagnostico],
+                    x=[valor],
+                    name=str(diagnostico),
+                    orientation='h',
+                    marker_color=colors_morb[i % len(colors_morb)],
+                    text=[f"{int(valor)}"],
+                    textposition='auto',
+                    textfont=dict(color='#f1f5f9', size=11, family='Roboto'),
+                    hovertemplate='<b>%{y}</b><br>Total: %{x:.0f}<extra></extra>',
+                    showlegend=True
+                ))
             fig_morb.update_layout(
                 title={'text': f'Ranking de Morbilidad (Top diagnósticos, Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=380, margin=dict(l=50, r=30, t=50, b=40),
+                height=380, margin=dict(l=50, r=220, t=50, b=40),
                 xaxis={'tickfont': {'color': '#e2e8f0', 'size': 10}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'categoryorder': 'total ascending'},
+                legend=dict(
+                    title={'text': 'Diagnóstico', 'font': {'color': '#f1f5f9', 'size': 11}},
+                    orientation='v',
+                    yanchor='middle', y=0.5,
+                    xanchor='left', x=1.02,
+                    bgcolor='rgba(30, 41, 59, 0.82)',
+                    font={'color': '#f1f5f9', 'size': 10},
+                    bordercolor='rgba(148, 163, 184, 0.28)',
+                    borderwidth=1
+                ),
                 bargap=0.25
             )
 
@@ -926,14 +955,27 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#dc2626'})])
 
 
+@app.callback(
+    Output('selected-year-store', 'data'),
+    Input('filtro-anio', 'value'),
+    prevent_initial_call=True
+)
+def sync_selected_year(anio_seleccionado):
+    year_key = str(anio_seleccionado) if anio_seleccionado is not None else DEFAULT_YEAR
+    return year_key if year_key in PROCESSOR_BY_YEAR else DEFAULT_YEAR
+
+
 # Callbacks de exportacion
 @app.callback(
     Output("download-excel", "data"),
     Input("btn-export-excel", "n_clicks"),
+    State('selected-year-store', 'data'),
     prevent_initial_call=True
 )
-def export_excel(_n_clicks):
-    datos = create_export_data(DATA)
+def export_excel(_n_clicks, selected_year):
+    year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
+    year_key = year_candidate if year_candidate in DATA_BY_YEAR else DEFAULT_YEAR
+    datos = create_export_data(DATA_BY_YEAR[year_key])
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         for sheet_name, df in datos.items():
@@ -944,10 +986,13 @@ def export_excel(_n_clicks):
 @app.callback(
     Output("download-csv", "data"),
     Input("btn-export-csv", "n_clicks"),
+    State('selected-year-store', 'data'),
     prevent_initial_call=True
 )
-def export_csv(_n_clicks):
-    datos = create_export_data(DATA)
+def export_csv(_n_clicks, selected_year):
+    year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
+    year_key = year_candidate if year_candidate in DATA_BY_YEAR else DEFAULT_YEAR
+    datos = create_export_data(DATA_BY_YEAR[year_key])
     if 'Resumen General' in datos:
         return dcc.send_data_frame(datos['Resumen General'].to_csv, "dashboard_uci_resumen.csv")  # type: ignore[attr-defined]
     return dash.no_update
