@@ -825,8 +825,32 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
 
             eps_df['EPS_DISPLAY'] = eps_df['EPS'].apply(_short_eps_label)
             total_eps = int(sum(eps_values))
-            colors_eps = ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe',
-                          '#10b981', '#8b5cf6', '#f59e0b', '#64748b']
+            eps_color_map = {
+                'FAMISANAR': '#2563eb',
+                'COMPENSAR': '#ef4444',
+                'SALUD TOTAL': '#10b981',
+                'NUEVA EPS': '#f59e0b',
+                'NUEVA  EPS': '#f59e0b',
+                'FIDUSUARIA LA PREVISORA': '#8b5cf6',
+                'CAPITAL SALUD': '#06b6d4',
+                'CAPITAL SALUD ': '#06b6d4',
+                'SANITAS': '#ec4899',
+                'SURA': '#84cc16',
+                'ALIANSALUD': '#f97316',
+                'EMCOSALUD': '#14b8a6',
+                'EMSSANAR': '#eab308',
+                'SOAT': '#64748b',
+                'PARTICULAR': '#22c55e',
+                'ADRES': '#7c3aed',
+                'ADMINISTRADORA DE RECURSOS SGSS': '#7c3aed',
+                'OTRA': '#94a3b8',
+                'OTRAS EPS': '#475569',
+            }
+            fallback_colors = ['#0ea5e9', '#f43f5e', '#a855f7', '#f97316', '#14b8a6', '#65a30d']
+            resolved_eps_colors = []
+            for i, original_name in enumerate(eps_df['EPS'].tolist()):
+                key = str(original_name).strip().upper()
+                resolved_eps_colors.append(eps_color_map.get(key, fallback_colors[i % len(fallback_colors)]))
             fig_eps = go.Figure(data=[go.Pie(
                 labels=eps_df['EPS_DISPLAY'],
                 values=eps_df['Cantidad'],
@@ -834,7 +858,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 hole=0.58,
                 sort=False,
                 marker=dict(
-                    colors=colors_eps[:len(eps_df)],
+                    colors=resolved_eps_colors,
                     line=dict(color='#0f172a', width=2)
                 ),
                 textinfo='percent',
