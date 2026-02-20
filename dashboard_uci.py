@@ -859,10 +859,15 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 font={'color': '#f1f5f9'},
-                height=520, margin=dict(l=110, r=30, t=60, b=30),
+                height=520, margin=dict(l=155, r=55, t=60, b=30),
                 showlegend=False,
                 xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#cbd5e1'}, 'automargin': True, 'categoryorder': 'total ascending'}
+                yaxis={
+                    'tickfont': {'color': '#cbd5e1'},
+                    'automargin': True,
+                    'ticklabelstandoff': 10,
+                    'categoryorder': 'total ascending'
+                }
             )
         else:
             fig_eps = go.Figure()
@@ -940,39 +945,25 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 if otros_total > 0:
                     df_morb_top.loc['OTROS'] = {'Hombre': 0, 'Mujer': 0, 'Total': otros_total}
             colors_morb = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
-            fig_morb = go.Figure()
-            for i, (diagnostico, fila) in enumerate(df_morb_top.iterrows()):
-                valor = float(fila['Total'])
-                fig_morb.add_trace(go.Bar(
-                    y=[diagnostico],
-                    x=[valor],
-                    name=str(diagnostico),
-                    orientation='h',
-                    marker_color=colors_morb[i % len(colors_morb)],
-                    text=[f"{int(valor)}"],
-                    textposition='auto',
-                    textfont=dict(color='#f1f5f9', size=11, family='Roboto'),
-                    hovertemplate='<b>%{y}</b><br>Total: %{x:.0f}<extra></extra>',
-                    showlegend=True
-                ))
+            fig_morb = go.Figure(data=[go.Treemap(
+                labels=[str(idx) for idx in df_morb_top.index],
+                parents=[''] * len(df_morb_top),
+                values=[float(v) for v in df_morb_top['Total'].values],
+                marker=dict(
+                    colors=[colors_morb[i % len(colors_morb)] for i in range(len(df_morb_top))],
+                    line=dict(color='#0f172a', width=2)
+                ),
+                texttemplate='<b>%{label}</b><br>%{value:.0f}',
+                textfont=dict(size=11, color='white', family='Roboto'),
+                hovertemplate='<b>%{label}</b><br>Total: %{value:.0f}<br>Participación: %{percentRoot:.1%}<extra></extra>'
+            )])
             fig_morb.update_layout(
-                title={'text': f'Ranking de Morbilidad (Top diagnósticos, Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': f'Morbilidad por Diagnóstico (Top, Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=380, margin=dict(l=130, r=220, t=50, b=40),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 10}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'categoryorder': 'total ascending', 'automargin': True},
-                legend=dict(
-                    title={'text': 'Diagnóstico', 'font': {'color': '#f1f5f9', 'size': 11}},
-                    orientation='v',
-                    yanchor='middle', y=0.5,
-                    xanchor='left', x=1.02,
-                    bgcolor='rgba(30, 41, 59, 0.82)',
-                    font={'color': '#f1f5f9', 'size': 10},
-                    bordercolor='rgba(148, 163, 184, 0.28)',
-                    borderwidth=1
-                ),
-                bargap=0.25
+                height=380, margin=dict(l=20, r=20, t=50, b=20),
+                showlegend=False,
+                uniformtext=dict(minsize=10, mode='hide')
             )
 
             # Morbilidad por Sexo - Barras normales
