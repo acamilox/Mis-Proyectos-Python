@@ -802,15 +802,6 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
-            # Agrupar categorías pequeñas para mejorar legibilidad en donut
-            if len(eps_df) > 9:
-                otros_eps = int(eps_df.iloc[9:]['Cantidad'].sum())
-                eps_df = eps_df.head(9).copy()
-                if otros_eps > 0:
-                    eps_df = pd.concat(
-                        [eps_df, pd.DataFrame([{'EPS': 'OTRAS EPS', 'Cantidad': otros_eps}])],
-                        ignore_index=True
-                    )
             def _short_eps_label(name: str) -> str:
                 normalized = str(name).strip().upper()
                 label_map = {
@@ -850,49 +841,28 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
             for i, original_name in enumerate(eps_df['EPS'].tolist()):
                 key = str(original_name).strip().upper()
                 resolved_eps_colors.append(eps_color_map.get(key, fallback_colors[i % len(fallback_colors)]))
-            fig_eps = go.Figure(data=[go.Pie(
-                labels=eps_df['EPS_DISPLAY'],
-                values=eps_df['Cantidad'],
-                customdata=eps_df[['EPS']],
-                hole=0.58,
-                sort=False,
-                marker=dict(
-                    colors=resolved_eps_colors,
-                    line=dict(color='#0f172a', width=2)
-                ),
-                textinfo='percent',
-                textposition='inside',
-                textfont=dict(size=11, color='white', family='Roboto'),
-                hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>'
+            eps_df['Color'] = resolved_eps_colors
+            eps_df['Porcentaje'] = (eps_df['Cantidad'] / max(total_eps, 1)) * 100
+            fig_eps = go.Figure(data=[go.Bar(
+                y=eps_df['EPS_DISPLAY'],
+                x=eps_df['Cantidad'],
+                orientation='h',
+                marker=dict(color=eps_df['Color'], line=dict(color='#0f172a', width=1.5)),
+                customdata=eps_df[['EPS', 'Porcentaje']],
+                text=[f"{int(v)} ({p:.1f}%)" for v, p in zip(eps_df['Cantidad'], eps_df['Porcentaje'])],
+                textposition='auto',
+                textfont=dict(size=10, color='white', family='Roboto'),
+                hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{x:.0f}<br>Porcentaje: %{customdata[1]:.1f}%<extra></extra>'
             )])
-            fig_eps.add_annotation(
-                text=f"<b>Total</b><br>{total_eps:,}".replace(',', '.'),
-                x=0.5, y=0.5,
-                font=dict(size=14, color='#f1f5f9', family='Roboto'),
-                showarrow=False
-            )
-            fig_eps.update_traces(
-                texttemplate='%{percent}'
-            )
             fig_eps.update_layout(
-                title={'text': f'Distribuci\u00f3n por EPS - Donut (Total: {total_eps:,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': f'Distribuci\u00f3n por EPS - Barras (Total: {total_eps:,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 font={'color': '#f1f5f9'},
-                height=520, margin=dict(l=20, r=210, t=60, b=20),
-                uniformtext=dict(minsize=10, mode='hide'),
-                showlegend=True,
-                legend=dict(
-                    orientation='v',
-                    yanchor='middle',
-                    y=0.5,
-                    xanchor='left',
-                    x=1.02,
-                    bgcolor='rgba(30, 41, 59, 0.82)',
-                    bordercolor='rgba(148, 163, 184, 0.3)',
-                    borderwidth=1,
-                    font=dict(color='#f1f5f9', size=10)
-                )
+                height=520, margin=dict(l=110, r=30, t=60, b=30),
+                showlegend=False,
+                xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#cbd5e1'}, 'automargin': True, 'categoryorder': 'total ascending'}
             )
         else:
             fig_eps = go.Figure()
