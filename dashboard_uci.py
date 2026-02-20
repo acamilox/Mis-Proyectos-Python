@@ -508,8 +508,10 @@ def render_gestion(year_key: str):
                 dbc.Col(kpi5, xs=12, md=True)
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_estancia, config=_GRAPH_CFG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_giro, config=_GRAPH_CFG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_estancia, config=_GRAPH_CFG), xs=12)
+            ], className="mb-4 g-3"),
+            dbc.Row([
+                dbc.Col(dcc.Graph(figure=fig_giro, config=_GRAPH_CFG), xs=12)
             ], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=3),
@@ -518,8 +520,10 @@ def render_gestion(year_key: str):
             ], className="mb-4", justify="center"),
             html.H5("Indicadores de Calidad e Infecciones", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=_GRAPH_CFG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=_GRAPH_CFG), xs=12)
+            ], className="mb-4 g-3"),
+            dbc.Row([
+                dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG), xs=12)
             ], className="mb-3 g-3"),
             html.H5("G\u00e9rmenes Aislados y Eventos Adversos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
@@ -686,8 +690,10 @@ def render_mortalidad(year_key: str):
                 dbc.Col(xs=12, md=2)
             ], className="mb-3", justify="center"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG), xs=12)
+            ], className="mb-4 g-3"),
+            dbc.Row([
+                dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG), xs=12)
             ], className="g-3")
         ])
     except Exception as e:
@@ -1014,8 +1020,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_ie, config=_GRAPH_CFG), xs=12)], className="mb-4"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=_GRAPH_CFG), xs=12)], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_morb, config=_GRAPH_CFG), xs=12, lg=8),
-                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG), xs=12, lg=4)
+                dbc.Col(dcc.Graph(figure=fig_morb, config=_GRAPH_CFG), xs=12)
+            ], className="mb-4 g-3"),
+            dbc.Row([
+                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG), xs=12)
             ], className="mb-3 g-3")
         ])
     except Exception as e:
