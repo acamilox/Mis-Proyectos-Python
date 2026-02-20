@@ -225,7 +225,7 @@ def render_content(tab, selected_year):
     year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     year_key = year_candidate if year_candidate in PROCESSOR_BY_YEAR else DEFAULT_YEAR
     if tab == 'tab-resumen':
-        return render_resumen()
+        return render_resumen(year_key)
     elif tab == 'tab-gestion':
         return render_gestion(year_key)
     elif tab == 'tab-especialidades':
@@ -235,7 +235,7 @@ def render_content(tab, selected_year):
     return html.Div([html.H5("Selecciona una pesta\u00f1a", style={'color': '#1e293b'})])
 
 
-def render_resumen():
+def render_resumen(year_key: str):
     filtros = html.Div([
         html.Div([
             html.Span("Per\u00edodo de an\u00e1lisis", style={
@@ -262,8 +262,10 @@ def render_resumen():
                 dcc.Dropdown(
                     id='filtro-anio',
                     options=[{'label': anio, 'value': anio} for anio in AVAILABLE_YEARS],
-                    value=DEFAULT_YEAR,
+                    value=year_key,
                     clearable=False,
+                    persistence=True,
+                    persistence_type='session',
                     style={'fontSize': '13px'}
                 ),
                 dcc.Dropdown(
@@ -333,9 +335,6 @@ def render_gestion(year_key: str):
             marker=dict(size=7, color='#06b6d4'),
             fill='tozeroy',
             fillcolor='rgba(6, 182, 212, 0.18)',
-            text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
-            textposition='top center',
-            textfont=dict(color='#f1f5f9', size=10),
             hovertemplate='<b>%{x}</b><br>Promedio VM: %{y:.1f}<extra></extra>'
         ))
         fig_vm.update_layout(
@@ -343,6 +342,7 @@ def render_gestion(year_key: str):
             transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=350, margin=dict(l=50, r=30, t=50, b=50),
+            hovermode='x unified',
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
@@ -421,6 +421,15 @@ def render_gestion(year_key: str):
         # Eventos adversos
         if not data_year['eventos_adversos'].empty:
             df_eventos = data_year['eventos_adversos'].sort_values('Cantidad', ascending=False)
+            if len(df_eventos) > 12:
+                df_eventos_top = df_eventos.head(12).copy()
+                otros_eventos = int(df_eventos.iloc[12:]['Cantidad'].sum())
+                if otros_eventos > 0:
+                    df_eventos_top = pd.concat(
+                        [df_eventos_top, pd.DataFrame([{'Evento': 'Otros', 'Cantidad': otros_eventos}])],
+                        ignore_index=True
+                    )
+                df_eventos = df_eventos_top
             total_eventos = max(float(df_eventos['Cantidad'].sum()), 1.0)
             df_eventos['Acumulado %'] = (df_eventos['Cantidad'].cumsum() / total_eventos) * 100
             colors_eventos = [
@@ -454,8 +463,9 @@ def render_gestion(year_key: str):
                 title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=550, margin=dict(l=50, r=30, t=50, b=280),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 8}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                height=550, margin=dict(l=50, r=30, t=50, b=220),
+                hovermode='x unified',
+                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -35, 'automargin': True, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'title': 'Cantidad', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis2={
                     'overlaying': 'y',
@@ -579,6 +589,7 @@ def render_especialidades(year_key: str):
             transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=380, margin=dict(l=50, r=30, t=50, b=60),
+            hovermode='x unified',
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'title': 'Pacientes', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             legend=dict(
@@ -611,6 +622,7 @@ def render_especialidades(year_key: str):
             barmode='stack',
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=380, margin=dict(l=50, r=30, t=50, b=60),
+            hovermode='x unified',
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={
                 'title': '% del total mensual',
@@ -771,6 +783,14 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
+            if len(eps_df) > 12:
+                otros_eps = int(eps_df.iloc[12:]['Cantidad'].sum())
+                eps_df = eps_df.head(12).copy()
+                if otros_eps > 0:
+                    eps_df = pd.concat(
+                        [eps_df, pd.DataFrame([{'EPS': 'OTRAS EPS', 'Cantidad': otros_eps}])],
+                        ignore_index=True
+                    )
             fig_eps = px.treemap(
                 eps_df,
                 path=['EPS'],
@@ -793,24 +813,39 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
             )
         else:
             fig_eps = go.Figure()
+            fig_eps.update_layout(
+                title={'text': 'Distribución por EPS', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                plot_bgcolor='#1e293b',
+                paper_bgcolor='#1e293b',
+                height=520,
+                margin=dict(l=20, r=20, t=60, b=20),
+                xaxis={'visible': False},
+                yaxis={'visible': False},
+                showlegend=False
+            )
+            fig_eps.add_annotation(
+                text="<b>Sin datos de EPS</b>",
+                x=0.5, y=0.5, xref='paper', yref='paper',
+                showarrow=False,
+                font=dict(size=14, color='#e2e8f0', family='Roboto')
+            )
 
         # Ocupacional
         datos_ocup = processor.safe_get_row('% OCUPACIONAL', meses_filtrados)
         fig_ocup = go.Figure()
         fig_ocup.add_trace(go.Scatter(
             x=meses_filtrados, y=datos_ocup.values,
-            mode='lines+markers+text',
+            mode='lines+markers',
             line=dict(color='#10b981', width=2),
             marker=dict(size=8, color='#10b981'),
-            text=[f'{v:.1f}' if pd.notna(v) else '' for v in datos_ocup.values],
-            textposition='top center',
-            textfont=dict(color='#f1f5f9', size=10)
+            hovertemplate='<b>%{x}</b><br>Ocupación: %{y:.1f}%<extra></extra>'
         ))
         fig_ocup.update_layout(
             title={'text': '% Ocupacional Mensual', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=350, margin=dict(l=50, r=30, t=50, b=50),
+            hovermode='x unified',
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
@@ -836,8 +871,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
             transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=380, margin=dict(l=50, r=30, t=50, b=55),
+            hovermode='x unified',
             legend=dict(orientation="h", y=-0.12, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.75)', font={'color': '#f1f5f9', 'size': 11}, bordercolor='rgba(148, 163, 184, 0.25)', borderwidth=1),
-            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'automargin': True, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
 
@@ -870,9 +906,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 title={'text': f'Ranking de Morbilidad (Top diagnósticos, Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=380, margin=dict(l=50, r=220, t=50, b=40),
+                height=380, margin=dict(l=130, r=220, t=50, b=40),
                 xaxis={'tickfont': {'color': '#e2e8f0', 'size': 10}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'categoryorder': 'total ascending'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'categoryorder': 'total ascending', 'automargin': True},
                 legend=dict(
                     title={'text': 'Diagnóstico', 'font': {'color': '#f1f5f9', 'size': 11}},
                     orientation='v',
@@ -933,6 +969,38 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         else:
             fig_morb = go.Figure()
             fig_morb_gen = go.Figure()
+            fig_morb.update_layout(
+                title={'text': 'Ranking de Morbilidad', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                plot_bgcolor='#1e293b',
+                paper_bgcolor='#1e293b',
+                height=380,
+                margin=dict(l=50, r=30, t=50, b=40),
+                xaxis={'visible': False},
+                yaxis={'visible': False},
+                showlegend=False
+            )
+            fig_morb.add_annotation(
+                text="<b>Sin datos de morbilidad</b>",
+                x=0.5, y=0.5, xref='paper', yref='paper',
+                showarrow=False,
+                font=dict(size=14, color='#e2e8f0', family='Roboto')
+            )
+            fig_morb_gen.update_layout(
+                title={'text': 'Distribución por Sexo', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                plot_bgcolor='#1e293b',
+                paper_bgcolor='#1e293b',
+                height=380,
+                margin=dict(l=20, r=20, t=50, b=20),
+                xaxis={'visible': False},
+                yaxis={'visible': False},
+                showlegend=False
+            )
+            fig_morb_gen.add_annotation(
+                text="<b>Sin datos de sexo por morbilidad</b>",
+                x=0.5, y=0.5, xref='paper', yref='paper',
+                showarrow=False,
+                font=dict(size=14, color='#e2e8f0', family='Roboto')
+            )
 
         return meses_filtrados, html.Div([
             dbc.Row([
