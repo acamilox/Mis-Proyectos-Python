@@ -450,12 +450,11 @@ def render_gestion():
                 xaxis={'tickfont': {'color': '#e2e8f0', 'size': 8}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={'title': 'Cantidad', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis2={
-                    'title': 'Acumulado %',
                     'overlaying': 'y',
                     'side': 'right',
                     'range': [0, 110],
                     'tickfont': {'color': '#fbbf24'},
-                    'titlefont': {'color': '#fbbf24'},
+                    'title': {'text': 'Acumulado %', 'font': {'color': '#fbbf24'}},
                     'showgrid': False
                 },
                 legend=dict(
@@ -811,12 +810,12 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         fig_ie = go.Figure()
         fig_ie.add_trace(go.Bar(
             name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1',
-            text=datos_ing.values, texttemplate='%{y:.0f}', textposition='auto', textfont=dict(color='white', size=9),
+            opacity=0.88,
             hovertemplate='<b>%{x}</b><br>Ingresos: %{y:.0f}<extra></extra>'
         ))
         fig_ie.add_trace(go.Scatter(
             name='Egresos', x=meses_filtrados, y=datos_eg.values, mode='lines+markers+text',
-            line=dict(color='#22d3ee', width=2.5), marker=dict(size=7, color='#22d3ee'),
+            line=dict(color='#22d3ee', width=3), marker=dict(size=8, color='#22d3ee'),
             text=[f'{v:.0f}' if pd.notna(v) else '' for v in datos_eg.values], textposition='top center',
             textfont=dict(color='#f1f5f9', size=10),
             hovertemplate='<b>%{x}</b><br>Egresos: %{y:.0f}<extra></extra>'
@@ -825,8 +824,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
             title={'text': 'Ingresos (Barras) vs Egresos (Línea)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=380, margin=dict(l=50, r=30, t=50, b=70),
-            legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1),
+            height=380, margin=dict(l=50, r=30, t=50, b=55),
+            legend=dict(orientation="h", y=-0.12, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.75)', font={'color': '#f1f5f9', 'size': 11}, bordercolor='rgba(148, 163, 184, 0.25)', borderwidth=1),
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
