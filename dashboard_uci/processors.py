@@ -322,13 +322,15 @@ class DataProcessor:
         return labels, values
 
 
-def create_export_data(data: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
+def create_export_data(data: Dict[str, pd.DataFrame], meses: Optional[List[str]] = None) -> Dict[str, pd.DataFrame]:
     """Genera datos organizados para exportación"""
     from .config import MESES, MESES_COMPLETOS
     processor = DataProcessor(data)
+    meses_export = [m for m in (meses or MESES) if m in MESES]
+    if not meses_export:
+        meses_export = MESES
 
     datos = {}
-    suma_col = processor.get_suma_column()
 
     # 1. Resumen General
     resumen = []
@@ -343,11 +345,14 @@ def create_export_data(data: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]
 
     for row_name, label in indicadores:
         fila: Dict[str, Any] = {'Indicador': label}
-        row_data = processor.safe_get_row(row_name, MESES)
-        for i, mes in enumerate(MESES):
+        row_data = processor.safe_get_row(row_name, meses_export)
+        for i, mes in enumerate(meses_export):
             fila[MESES_COMPLETOS.get(mes, mes)] = row_data.iloc[i] if isinstance(row_data, pd.Series) else 0
-        total = processor.safe_get_value(row_name, suma_col)
-        fila['Total'] = total if not pd.isna(total) else 0
+        if isinstance(row_data, pd.Series):
+            total_periodo = pd.to_numeric(row_data, errors='coerce').fillna(0).sum()
+        else:
+            total_periodo = 0
+        fila['Total'] = total_periodo
         resumen.append(fila)
 
     datos['Resumen General'] = pd.DataFrame(resumen)

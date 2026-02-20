@@ -148,6 +148,7 @@ _debug_log(
 
 app.layout = html.Div([
     dcc.Store(id='selected-year-store', data=DEFAULT_YEAR),
+    dcc.Store(id='selected-months-store', data=MESES),
     # Header
     html.Div([
         html.Div([
@@ -704,7 +705,8 @@ def render_mortalidad(year_key: str):
 # Callback para Resumen
 @app.callback(
     [Output('filtro-mes-inicio', 'value'),
-     Output('resumen-content', 'children')],
+     Output('resumen-content', 'children'),
+     Output('selected-months-store', 'data')],
     [Input('btn-todos-meses', 'n_clicks'),
      Input('btn-aplicar-filtros', 'n_clicks'),
      Input('filtro-anio', 'value')],
@@ -1025,10 +1027,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG), xs=12)
             ], className="mb-3 g-3")
-        ])
+        ]), meses_filtrados
     except Exception as e:
         logger.error(f"Error en actualizar_resumen: {e}")
-        return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#dc2626'})])
+        return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#dc2626'})]), dash.no_update
 
 
 @app.callback(
@@ -1046,12 +1048,14 @@ def sync_selected_year(anio_seleccionado):
     Output("download-excel", "data"),
     Input("btn-export-excel", "n_clicks"),
     State('selected-year-store', 'data'),
+    State('selected-months-store', 'data'),
     prevent_initial_call=True
 )
-def export_excel(_n_clicks, selected_year):
+def export_excel(_n_clicks, selected_year, selected_months):
     year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     year_key = year_candidate if year_candidate in DATA_BY_YEAR else DEFAULT_YEAR
-    datos = create_export_data(DATA_BY_YEAR[year_key])
+    meses_export = selected_months if isinstance(selected_months, list) and selected_months else MESES
+    datos = create_export_data(DATA_BY_YEAR[year_key], meses_export)
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         for sheet_name, df in datos.items():
@@ -1063,12 +1067,14 @@ def export_excel(_n_clicks, selected_year):
     Output("download-csv", "data"),
     Input("btn-export-csv", "n_clicks"),
     State('selected-year-store', 'data'),
+    State('selected-months-store', 'data'),
     prevent_initial_call=True
 )
-def export_csv(_n_clicks, selected_year):
+def export_csv(_n_clicks, selected_year, selected_months):
     year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     year_key = year_candidate if year_candidate in DATA_BY_YEAR else DEFAULT_YEAR
-    datos = create_export_data(DATA_BY_YEAR[year_key])
+    meses_export = selected_months if isinstance(selected_months, list) and selected_months else MESES
+    datos = create_export_data(DATA_BY_YEAR[year_key], meses_export)
     if 'Resumen General' in datos:
         return dcc.send_data_frame(datos['Resumen General'].to_csv, "dashboard_uci_resumen.csv")  # type: ignore[attr-defined]
     return dash.no_update
