@@ -331,11 +331,14 @@ def render_gestion(year_key: str):
         fig_vm = go.Figure()
         fig_vm.add_trace(go.Scatter(
             x=MESES, y=datos_vm_mensual,
-            mode='lines+markers',
+            mode='lines+markers+text',
             line=dict(color='#06b6d4', width=3),
             marker=dict(size=7, color='#06b6d4'),
             fill='tozeroy',
             fillcolor='rgba(6, 182, 212, 0.18)',
+            text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
+            textposition='top center',
+            textfont=dict(color='#f1f5f9', size=10),
             hovertemplate='<b>%{x}</b><br>Promedio VM: %{y:.1f}<extra></extra>'
         ))
         fig_vm.update_layout(
