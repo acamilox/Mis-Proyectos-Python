@@ -26,7 +26,8 @@ from dashboard_uci import (
     create_export_data,
     MESES,
     MESES_COMPLETOS,
-    GRAPH_CONFIG
+    GRAPH_CONFIG,
+    EPS_LIST
 )
 # Tipo para config de Plotly (dcc.Graph acepta dict pero el type checker espera Config)
 _GRAPH_CFG: Any = GRAPH_CONFIG
@@ -709,8 +710,8 @@ def render_mortalidad(year_key: str):
      Output('selected-months-store', 'data')],
     [Input('btn-todos-meses', 'n_clicks'),
      Input('btn-aplicar-filtros', 'n_clicks'),
-     Input('filtro-anio', 'value')],
-    [State('filtro-mes-inicio', 'value')]
+     Input('filtro-anio', 'value'),
+     Input('filtro-mes-inicio', 'value')]
 )
 def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_seleccionados):
     ctx = dash.callback_context
@@ -786,8 +787,19 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         kpi_estancia = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", f"D\u00edas - {rango_texto}", "#10b981")
         kpi_giro = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#8b5cf6")
 
-        # EPS
-        eps_labels, eps_values = processor.get_eps_data()
+        # EPS (filtrado por meses seleccionados)
+        eps_data = []
+        for eps in EPS_LIST:
+            eps_row = processor.safe_get_row(eps, meses_filtrados, silent=True)
+            if isinstance(eps_row, pd.Series):
+                eps_total = float(pd.to_numeric(eps_row, errors='coerce').fillna(0).sum())
+            else:
+                eps_total = 0.0
+            if eps_total > 0:
+                eps_data.append((eps.strip(), eps_total))
+        eps_data.sort(key=lambda item: item[1], reverse=True)
+        eps_labels = [item[0] for item in eps_data]
+        eps_values = [item[1] for item in eps_data]
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
