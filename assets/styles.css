@@ -28,8 +28,6 @@ body {
     z-index: 100;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
-    z-index: 100;
-}
 
 /* KPI Cards - Estilo Editor */
 .kpi-card {
@@ -627,16 +625,6 @@ body {
     }
 }
 */
-
-/* Aplicar animación a contenido de tabs */
-.tab-content > div {
-    /* animation: fadeInUp 0.3s ease-out; */
-}
-
-/* Efecto glow para elementos activos */
-.nav-tabs .nav-link.active {
-    /* animation: pulse-glow 2s ease-in-out infinite; */
-}
 
 /*
 @keyframes pulse-glow {
