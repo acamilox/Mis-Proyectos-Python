@@ -728,8 +728,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         },
     )
     # endregion
+    meses_output_value = dash.no_update
     if triggered_id == 'btn-todos-meses':
         meses_seleccionados = MESES
+        meses_output_value = MESES
     try:
         year_key = str(anio_seleccionado) if anio_seleccionado is not None else DEFAULT_YEAR
         if year_key not in PROCESSOR_BY_YEAR:
@@ -1047,7 +1049,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
 
-        return meses_filtrados, html.Div([
+        return meses_output_value, html.Div([
             dbc.Row([
                 dbc.Col(kpi_ingresos, xs=6, sm=6, md=True),
                 dbc.Col(kpi_ocup, xs=6, sm=6, md=True),
