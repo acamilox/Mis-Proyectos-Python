@@ -8,7 +8,6 @@ import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-import plotly.express as px
 import pandas as pd
 import json
 from io import BytesIO
@@ -803,7 +802,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
-            # Agrupar categorías pequeñas para evitar celdas ilegibles en treemap
+            # Agrupar categorías pequeñas para mejorar legibilidad en donut
             if len(eps_df) > 9:
                 otros_eps = int(eps_df.iloc[9:]['Cantidad'].sum())
                 eps_df = eps_df.head(9).copy()
@@ -825,28 +824,52 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 return shortened if len(shortened) <= 18 else f"{shortened[:17]}…"
 
             eps_df['EPS_DISPLAY'] = eps_df['EPS'].apply(_short_eps_label)
-            fig_eps = px.treemap(
-                eps_df,
-                path=['EPS_DISPLAY'],
-                values='Cantidad',
-                color='Cantidad',
-                color_continuous_scale='Blues'
+            total_eps = int(sum(eps_values))
+            colors_eps = ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe',
+                          '#10b981', '#8b5cf6', '#f59e0b', '#64748b']
+            fig_eps = go.Figure(data=[go.Pie(
+                labels=eps_df['EPS_DISPLAY'],
+                values=eps_df['Cantidad'],
+                customdata=eps_df[['EPS']],
+                hole=0.58,
+                sort=False,
+                marker=dict(
+                    colors=colors_eps[:len(eps_df)],
+                    line=dict(color='#0f172a', width=2)
+                ),
+                textinfo='percent',
+                textposition='inside',
+                textfont=dict(size=11, color='white', family='Roboto'),
+                hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>'
+            )])
+            fig_eps.add_annotation(
+                text=f"<b>Total</b><br>{total_eps:,}".replace(',', '.'),
+                x=0.5, y=0.5,
+                font=dict(size=14, color='#f1f5f9', family='Roboto'),
+                showarrow=False
             )
             fig_eps.update_traces(
-                customdata=eps_df[['EPS']],
-                texttemplate='<b>%{label}</b><br>%{value}',
-                textfont=dict(size=12),
-                hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{value}<extra></extra>',
-                marker=dict(line=dict(color='#0f172a', width=2))
+                texttemplate='%{percent}'
             )
             fig_eps.update_layout(
-                title={'text': f'Distribuci\u00f3n por EPS - Treemap (Total: {int(sum(eps_values)):,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': f'Distribuci\u00f3n por EPS - Donut (Total: {total_eps:,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 font={'color': '#f1f5f9'},
-                height=520, margin=dict(l=20, r=20, t=60, b=20),
-                uniformtext=dict(minsize=11, mode='hide'),
-                coloraxis_showscale=False
+                height=520, margin=dict(l=20, r=210, t=60, b=20),
+                uniformtext=dict(minsize=10, mode='hide'),
+                showlegend=True,
+                legend=dict(
+                    orientation='v',
+                    yanchor='middle',
+                    y=0.5,
+                    xanchor='left',
+                    x=1.02,
+                    bgcolor='rgba(30, 41, 59, 0.82)',
+                    bordercolor='rgba(148, 163, 184, 0.3)',
+                    borderwidth=1,
+                    font=dict(color='#f1f5f9', size=10)
+                )
             )
         else:
             fig_eps = go.Figure()
