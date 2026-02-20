@@ -803,24 +803,40 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
-            if len(eps_df) > 12:
-                otros_eps = int(eps_df.iloc[12:]['Cantidad'].sum())
-                eps_df = eps_df.head(12).copy()
+            # Agrupar categorías pequeñas para evitar celdas ilegibles en treemap
+            if len(eps_df) > 9:
+                otros_eps = int(eps_df.iloc[9:]['Cantidad'].sum())
+                eps_df = eps_df.head(9).copy()
                 if otros_eps > 0:
                     eps_df = pd.concat(
                         [eps_df, pd.DataFrame([{'EPS': 'OTRAS EPS', 'Cantidad': otros_eps}])],
                         ignore_index=True
                     )
+
+            def _short_eps_label(name: str) -> str:
+                normalized = str(name).strip().upper()
+                label_map = {
+                    'ADMINISTRADORA DE RECURSOS SGSS': 'ADRES',
+                    'FIDUSUARIA LA PREVISORA': 'FIDUPREVISORA',
+                    'NUEVA  EPS': 'NUEVA EPS',
+                    'CAPITAL SALUD': 'CAPITAL SALUD',
+                }
+                shortened = label_map.get(normalized, normalized)
+                return shortened if len(shortened) <= 18 else f"{shortened[:17]}…"
+
+            eps_df['EPS_DISPLAY'] = eps_df['EPS'].apply(_short_eps_label)
             fig_eps = px.treemap(
                 eps_df,
-                path=['EPS'],
+                path=['EPS_DISPLAY'],
                 values='Cantidad',
                 color='Cantidad',
                 color_continuous_scale='Blues'
             )
             fig_eps.update_traces(
+                customdata=eps_df[['EPS']],
                 texttemplate='<b>%{label}</b><br>%{value}',
-                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<extra></extra>',
+                textfont=dict(size=12),
+                hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{value}<extra></extra>',
                 marker=dict(line=dict(color='#0f172a', width=2))
             )
             fig_eps.update_layout(
@@ -829,6 +845,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 font={'color': '#f1f5f9'},
                 height=520, margin=dict(l=20, r=20, t=60, b=20),
+                uniformtext=dict(minsize=11, mode='hide'),
                 coloraxis_showscale=False
             )
         else:
@@ -942,7 +959,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 bargap=0.25
             )
 
-            # Morbilidad por Sexo - Barra 100%
+            # Morbilidad por Sexo - Barras normales
             total_hombres = df_morb['Hombre'].sum()
             total_mujeres = df_morb['Mujer'].sum()
             total_sexo = total_hombres + total_mujeres
@@ -951,35 +968,33 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
             pct_m = (float(total_mujeres) / total_sexo_safe) * 100
             fig_morb_gen = go.Figure()
             fig_morb_gen.add_trace(go.Bar(
-                y=['Distribución por sexo'],
-                x=[pct_h],
+                x=['Hombres'],
+                y=[total_hombres],
                 name='Hombres',
-                orientation='h',
                 marker_color='#3b82f6',
                 text=[f'{int(total_hombres)} ({pct_h:.1f}%)'],
                 textposition='inside',
-                insidetextanchor='middle',
-                hovertemplate='Hombres: %{x:.1f}%<extra></extra>'
+                customdata=[[pct_h]],
+                hovertemplate='Hombres: %{y:.0f} (%{customdata[0]:.1f}%)<extra></extra>'
             ))
             fig_morb_gen.add_trace(go.Bar(
-                y=['Distribución por sexo'],
-                x=[pct_m],
+                x=['Mujeres'],
+                y=[total_mujeres],
                 name='Mujeres',
-                orientation='h',
                 marker_color='#ec4899',
                 text=[f'{int(total_mujeres)} ({pct_m:.1f}%)'],
                 textposition='inside',
-                insidetextanchor='middle',
-                hovertemplate='Mujeres: %{x:.1f}%<extra></extra>'
+                customdata=[[pct_m]],
+                hovertemplate='Mujeres: %{y:.0f} (%{customdata[0]:.1f}%)<extra></extra>'
             ))
             fig_morb_gen.update_layout(
                 title={'text': f'Distribuci\u00f3n por Sexo (Total: {int(total_sexo)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
-                barmode='stack',
+                barmode='group',
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=20, r=20, t=50, b=20),
-                xaxis={'range': [0, 100], 'ticksuffix': '%', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#cbd5e1'}},
+                xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 legend=dict(
                     orientation="h", y=-0.2, x=0.5, xanchor="center",
                     bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
