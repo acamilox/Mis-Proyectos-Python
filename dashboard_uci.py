@@ -811,9 +811,6 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                         [eps_df, pd.DataFrame([{'EPS': 'OTRAS EPS', 'Cantidad': otros_eps}])],
                         ignore_index=True
                     )
-            # Orden ascendente para que el donut inicie con el menor porcentaje.
-            eps_df = eps_df.sort_values('Cantidad', ascending=True).reset_index(drop=True)
-
             def _short_eps_label(name: str) -> str:
                 normalized = str(name).strip().upper()
                 label_map = {
