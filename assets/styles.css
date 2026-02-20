@@ -15,6 +15,8 @@ body {
     min-height: 100vh;
     margin: 0;
     padding: 0;
+    /* Evita saltos de scroll cuando se refresca contenido dinámico */
+    overflow-anchor: none;
 }
 
 /* Header - Diseño Premium */
@@ -165,6 +167,22 @@ body {
 #filtro-mes-inicio {
     position: relative;
     z-index: 20;
+}
+/* Mantener altura estable del filtro de meses para evitar "saltos" */
+#filtro-mes-inicio .Select-control {
+    height: 42px !important;
+    overflow: hidden !important;
+}
+#filtro-mes-inicio .Select-multi-value-wrapper {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    scrollbar-width: thin;
+}
+#filtro-mes-inicio .Select-multi-value-wrapper::-webkit-scrollbar {
+    height: 6px;
 }
 .Select-option { 
     background: transparent !important; 
