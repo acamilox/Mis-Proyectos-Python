@@ -8,6 +8,7 @@ import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+import plotly.express as px
 import pandas as pd
 import json
 from io import BytesIO
@@ -308,7 +309,7 @@ def render_gestion():
         kpi5 = chart_factory.create_kpi_card("Promedio D\u00edas VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilaci\u00f3n Mec\u00e1nica", "#06b6d4")
 
         datos_estancia = PROCESSOR.safe_get_row('PROMEDIO ESTANCIA', MESES)
-        fig_estancia = chart_factory.create_bar_chart(datos_estancia, 'Estancia Promedio (D\u00edas)', color='#6366f1', decimals=1)
+        fig_estancia = chart_factory.create_line_chart(datos_estancia, 'Estancia Promedio (D\u00edas)', color='#6366f1', decimals=1)
         datos_giro = PROCESSOR.safe_get_row('GIRO CAMA', MESES)
         fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro de Cama', color='#3b82f6', decimals=2)
 
@@ -317,18 +318,23 @@ def render_gestion():
         if not datos_vm_mensual or len(datos_vm_mensual) != len(MESES):
             datos_vm_mensual = [round(kpis['promedio_dias_vm'], 2) for _ in MESES]
         fig_vm = go.Figure()
-        fig_vm.add_trace(go.Bar(
+        fig_vm.add_trace(go.Scatter(
             x=MESES, y=datos_vm_mensual,
-            marker_color='#64748b',
+            mode='lines+markers',
+            line=dict(color='#06b6d4', width=3),
+            marker=dict(size=7, color='#06b6d4'),
+            fill='tozeroy',
+            fillcolor='rgba(6, 182, 212, 0.18)',
             text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
-            textposition='auto',
-            textfont=dict(color='white', size=11)
+            textposition='top center',
+            textfont=dict(color='#f1f5f9', size=10),
+            hovertemplate='<b>%{x}</b><br>Promedio VM: %{y:.1f}<extra></extra>'
         ))
         fig_vm.update_layout(
-            title={'text': 'Promedio de D\u00edas de VM', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            title={'text': 'Promedio de D\u00edas de VM (Tendencia)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=350, bargap=0.3, margin=dict(l=50, r=30, t=50, b=50),
+            height=350, margin=dict(l=50, r=30, t=50, b=50),
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
@@ -337,7 +343,7 @@ def render_gestion():
             PROCESSOR.safe_get_row('TASA DE BACTERIEMIA ASOC.  A C. CENTRAL', MESES),
             'Tasa de ITS AC', color='#ef4444', decimals=1
         )
-        fig_nav = chart_factory.create_bar_chart(
+        fig_nav = chart_factory.create_line_chart(
             PROCESSOR.safe_get_row('TASA NEUMON\u00cdA ASOCIADA A VENTILADOR', MESES),
             'Tasa NAV', color='#ef4444', decimals=1
         )
@@ -407,27 +413,56 @@ def render_gestion():
         # Eventos adversos
         if not DATA['eventos_adversos'].empty:
             df_eventos = DATA['eventos_adversos'].sort_values('Cantidad', ascending=False)
+            total_eventos = max(float(df_eventos['Cantidad'].sum()), 1.0)
+            df_eventos['Acumulado %'] = (df_eventos['Cantidad'].cumsum() / total_eventos) * 100
             colors_eventos = [
                 '#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899',
                 '#f97316', '#14b8a6', '#a855f7', '#0ea5e9', '#84cc16', '#e11d48', '#22c55e',
                 '#3b82f6', '#eab308', '#d946ef', '#0891b2', '#f43f5e', '#4ade80', '#818cf8',
                 '#fb923c', '#2dd4bf', '#c084fc', '#38bdf8', '#a3e635', '#fb7185', '#34d399'
             ]
-            fig_eventos = go.Figure(data=[go.Bar(
+            fig_eventos = go.Figure()
+            fig_eventos.add_trace(go.Bar(
                 x=df_eventos['Evento'],
                 y=df_eventos['Cantidad'],
+                name='Cantidad',
                 marker_color=[colors_eventos[i % len(colors_eventos)] for i in range(len(df_eventos))],
                 text=df_eventos['Cantidad'],
                 textposition='auto',
-                textfont=dict(color='#f1f5f9', size=11)
-            )])
+                textfont=dict(color='#f1f5f9', size=11),
+                hovertemplate='<b>%{x}</b><br>Eventos: %{y}<extra></extra>'
+            ))
+            fig_eventos.add_trace(go.Scatter(
+                x=df_eventos['Evento'],
+                y=df_eventos['Acumulado %'],
+                name='Acumulado %',
+                mode='lines+markers',
+                yaxis='y2',
+                line=dict(color='#fbbf24', width=2.5),
+                marker=dict(size=6, color='#fbbf24'),
+                hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>'
+            ))
             fig_eventos.update_layout(
-                title={'text': 'Eventos Adversos por Categor\u00eda', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=550, margin=dict(l=50, r=30, t=50, b=280),
                 xaxis={'tickfont': {'color': '#e2e8f0', 'size': 8}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
+                yaxis={'title': 'Cantidad', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis2={
+                    'title': 'Acumulado %',
+                    'overlaying': 'y',
+                    'side': 'right',
+                    'range': [0, 110],
+                    'tickfont': {'color': '#fbbf24'},
+                    'titlefont': {'color': '#fbbf24'},
+                    'showgrid': False
+                },
+                legend=dict(
+                    orientation="h", y=-0.18, x=0.5, xanchor="center",
+                    bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                    bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+                )
             )
         else:
             fig_eventos = go.Figure()
@@ -496,21 +531,101 @@ def render_especialidades():
         kpi3 = chart_factory.create_kpi_card("Neurocirug\u00eda", f"{int(total_neuro)}", f"{PROCESSOR.formatear_porcentaje(total_neuro/total*100, False)}%", "#16a085")
         kpi4 = chart_factory.create_kpi_card("Neurolog\u00eda", f"{int(total_neurologia)}", f"{PROCESSOR.formatear_porcentaje(total_neurologia/total*100, False)}%", "#9b59b6")
 
-        fig_medicina = chart_factory.create_bar_chart(PROCESSOR.safe_get_row('MEDICINA INTERNA', MESES), 'Medicina Interna', color='#3498db', decimals=0)
-        fig_cirugia = chart_factory.create_bar_chart(PROCESSOR.safe_get_row('CIRUGIA GENERAL', MESES), 'Cirug\u00eda General', color='#27ae60', decimals=0)
-        fig_neuro = chart_factory.create_bar_chart(PROCESSOR.safe_get_row('NEUROCIRUGIA', MESES), 'Neurocirug\u00eda', color='#16a085', decimals=0)
-        fig_neurologia = chart_factory.create_bar_chart(PROCESSOR.safe_get_row('NEUROLOGIA', MESES), 'Neurolog\u00eda', color='#9b59b6', decimals=0)
+        series_medicina = pd.to_numeric(PROCESSOR.safe_get_row('MEDICINA INTERNA', MESES), errors='coerce').fillna(0)
+        series_cirugia = pd.to_numeric(PROCESSOR.safe_get_row('CIRUGIA GENERAL', MESES), errors='coerce').fillna(0)
+        series_neuro = pd.to_numeric(PROCESSOR.safe_get_row('NEUROCIRUGIA', MESES), errors='coerce').fillna(0)
+        series_neurologia = pd.to_numeric(PROCESSOR.safe_get_row('NEUROLOGIA', MESES), errors='coerce').fillna(0)
+        df_especialidades = pd.DataFrame({
+            'Mes': MESES,
+            'Medicina Interna': series_medicina.values,
+            'Cirugía General': series_cirugia.values,
+            'Neurocirugía': series_neuro.values,
+            'Neurología': series_neurologia.values,
+        })
+        df_especialidades['Total'] = (
+            df_especialidades['Medicina Interna']
+            + df_especialidades['Cirugía General']
+            + df_especialidades['Neurocirugía']
+            + df_especialidades['Neurología']
+        ).replace(0, 1)
+
+        fig_especialidades_area = go.Figure()
+        fig_especialidades_area.add_trace(go.Scatter(
+            x=df_especialidades['Mes'], y=df_especialidades['Medicina Interna'],
+            name='Medicina Interna', mode='lines', stackgroup='one', line=dict(width=0.8, color='#3498db')
+        ))
+        fig_especialidades_area.add_trace(go.Scatter(
+            x=df_especialidades['Mes'], y=df_especialidades['Cirugía General'],
+            name='Cirugía General', mode='lines', stackgroup='one', line=dict(width=0.8, color='#27ae60')
+        ))
+        fig_especialidades_area.add_trace(go.Scatter(
+            x=df_especialidades['Mes'], y=df_especialidades['Neurocirugía'],
+            name='Neurocirugía', mode='lines', stackgroup='one', line=dict(width=0.8, color='#16a085')
+        ))
+        fig_especialidades_area.add_trace(go.Scatter(
+            x=df_especialidades['Mes'], y=df_especialidades['Neurología'],
+            name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#9b59b6')
+        ))
+        fig_especialidades_area.update_layout(
+            title={'text': 'Volumen Mensual por Especialidad (Área Apilada)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            transition={'duration': 0},
+            plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+            height=380, margin=dict(l=50, r=30, t=50, b=60),
+            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            yaxis={'title': 'Pacientes', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            legend=dict(
+                orientation="h", y=-0.18, x=0.5, xanchor="center",
+                bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+            )
+        )
+
+        fig_especialidades_mix = go.Figure()
+        fig_especialidades_mix.add_trace(go.Bar(
+            x=MESES, y=(df_especialidades['Medicina Interna'] / df_especialidades['Total']) * 100,
+            name='Medicina Interna', marker_color='#3498db'
+        ))
+        fig_especialidades_mix.add_trace(go.Bar(
+            x=MESES, y=(df_especialidades['Cirugía General'] / df_especialidades['Total']) * 100,
+            name='Cirugía General', marker_color='#27ae60'
+        ))
+        fig_especialidades_mix.add_trace(go.Bar(
+            x=MESES, y=(df_especialidades['Neurocirugía'] / df_especialidades['Total']) * 100,
+            name='Neurocirugía', marker_color='#16a085'
+        ))
+        fig_especialidades_mix.add_trace(go.Bar(
+            x=MESES, y=(df_especialidades['Neurología'] / df_especialidades['Total']) * 100,
+            name='Neurología', marker_color='#9b59b6'
+        ))
+        fig_especialidades_mix.update_layout(
+            title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            transition={'duration': 0},
+            barmode='stack',
+            plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+            height=380, margin=dict(l=50, r=30, t=50, b=60),
+            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            yaxis={
+                'title': '% del total mensual',
+                'tickfont': {'color': '#94a3b8'},
+                'ticksuffix': '%',
+                'range': [0, 100],
+                'gridcolor': 'rgba(148, 163, 184, 0.1)'
+            },
+            legend=dict(
+                orientation="h", y=-0.18, x=0.5, xanchor="center",
+                bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+            )
+        )
 
         return html.Div([
             html.H5("Principales Especialidades", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '12px'}),
             dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_medicina, config=_GRAPH_CFG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_cirugia, config=_GRAPH_CFG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_especialidades_area, config=_GRAPH_CFG), xs=12)
             ], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_neuro, config=_GRAPH_CFG), xs=12, md=6),
-                dbc.Col(dcc.Graph(figure=fig_neurologia, config=_GRAPH_CFG), xs=12, md=6)
+                dbc.Col(dcc.Graph(figure=fig_especialidades_mix, config=_GRAPH_CFG), xs=12)
             ], className="g-3")
         ])
     except Exception as e:
@@ -646,21 +761,25 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
-            colors_eps = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6']
-            fig_eps = go.Figure(data=[go.Bar(
-                x=eps_df['EPS'], y=eps_df['Cantidad'],
-                marker_color=[colors_eps[i % len(colors_eps)] for i in range(len(eps_df))],
-                text=eps_df['Cantidad'].astype(int),
-                textposition='auto',
-                textfont=dict(color='#f1f5f9', size=11)
-            )])
+            fig_eps = px.treemap(
+                eps_df,
+                path=['EPS'],
+                values='Cantidad',
+                color='Cantidad',
+                color_continuous_scale='Blues'
+            )
+            fig_eps.update_traces(
+                texttemplate='<b>%{label}</b><br>%{value}',
+                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<extra></extra>',
+                marker=dict(line=dict(color='#0f172a', width=2))
+            )
             fig_eps.update_layout(
-                title={'text': f'Distribuci\u00f3n por EPS (Total: {int(sum(eps_values)):,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': f'Distribuci\u00f3n por EPS - Treemap (Total: {int(sum(eps_values)):,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=520, margin=dict(l=50, r=30, t=50, b=200),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
+                font={'color': '#f1f5f9'},
+                height=520, margin=dict(l=20, r=20, t=60, b=20),
+                coloraxis_showscale=False
             )
         else:
             fig_eps = go.Figure()
@@ -690,12 +809,22 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         datos_ing = processor.safe_get_row('NUMERO DE INGRESOS DEL MES', meses_filtrados)
         datos_eg = processor.safe_get_row('N\u00daMERO DE EGRESOS DEL MES', meses_filtrados)
         fig_ie = go.Figure()
-        fig_ie.add_trace(go.Bar(name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1', text=datos_ing.values, texttemplate='%{y:.0f}', textposition='auto', textfont=dict(color='white', size=9)))
-        fig_ie.add_trace(go.Bar(name='Egresos', x=meses_filtrados, y=datos_eg.values, marker_color='#3b82f6', text=datos_eg.values, texttemplate='%{y:.0f}', textposition='auto', textfont=dict(color='white', size=9)))
+        fig_ie.add_trace(go.Bar(
+            name='Ingresos', x=meses_filtrados, y=datos_ing.values, marker_color='#6366f1',
+            text=datos_ing.values, texttemplate='%{y:.0f}', textposition='auto', textfont=dict(color='white', size=9),
+            hovertemplate='<b>%{x}</b><br>Ingresos: %{y:.0f}<extra></extra>'
+        ))
+        fig_ie.add_trace(go.Scatter(
+            name='Egresos', x=meses_filtrados, y=datos_eg.values, mode='lines+markers+text',
+            line=dict(color='#22d3ee', width=2.5), marker=dict(size=7, color='#22d3ee'),
+            text=[f'{v:.0f}' if pd.notna(v) else '' for v in datos_eg.values], textposition='top center',
+            textfont=dict(color='#f1f5f9', size=10),
+            hovertemplate='<b>%{x}</b><br>Egresos: %{y:.0f}<extra></extra>'
+        ))
         fig_ie.update_layout(
-            title={'text': 'Ingresos vs. Egresos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            title={'text': 'Ingresos (Barras) vs Egresos (Línea)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
-            barmode='group', plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+            plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=380, margin=dict(l=50, r=30, t=50, b=70),
             legend=dict(orientation="h", y=-0.15, x=0.5, xanchor="center", bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12}, bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1),
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
@@ -705,45 +834,73 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         # Morbilidad
         if not data_actual['morbilidad'].empty:
             df_morb = data_actual['morbilidad'].sort_values('Total', ascending=False)
-            total_morb = df_morb['Total'].sum()
+            total_morb = float(df_morb['Total'].sum())
+            df_morb_top = df_morb.head(8).copy()
+            if len(df_morb) > 8:
+                otros_total = float(df_morb.iloc[8:]['Total'].sum())
+                if otros_total > 0:
+                    df_morb_top.loc['OTROS'] = {'Hombre': 0, 'Mujer': 0, 'Total': otros_total}
             colors_morb = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
             fig_morb = go.Figure(data=[go.Bar(
-                x=df_morb.index, y=df_morb['Total'],
-                marker_color=colors_morb[:len(df_morb)],
-                text=df_morb['Total'], textposition='auto',
+                y=df_morb_top.index, x=df_morb_top['Total'],
+                orientation='h',
+                marker_color=colors_morb[:len(df_morb_top)],
+                text=df_morb_top['Total'], textposition='auto',
                 textfont=dict(color='#f1f5f9', size=11, family='Roboto')
             )])
             fig_morb.update_layout(
-                title={'text': f'Morbilidad por Diagn\u00f3stico (Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': f'Ranking de Morbilidad (Top diagnósticos, Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=380, margin=dict(l=50, r=30, t=50, b=100),
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -45, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                height=380, margin=dict(l=50, r=30, t=50, b=40),
+                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 10}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)', 'categoryorder': 'total ascending'},
                 bargap=0.25
             )
 
-            # Morbilidad por Sexo - Torta
+            # Morbilidad por Sexo - Barra 100%
             total_hombres = df_morb['Hombre'].sum()
             total_mujeres = df_morb['Mujer'].sum()
             total_sexo = total_hombres + total_mujeres
-            fig_morb_gen = go.Figure(data=[go.Pie(
-                labels=['Hombres', 'Mujeres'],
-                values=[total_hombres, total_mujeres],
-                hole=0,
-                marker=dict(colors=['#3b82f6', '#ec4899'], line=dict(color='#0f172a', width=2)),
-                textinfo='label+percent+value',
+            total_sexo_safe = max(float(total_sexo), 1.0)
+            pct_h = (float(total_hombres) / total_sexo_safe) * 100
+            pct_m = (float(total_mujeres) / total_sexo_safe) * 100
+            fig_morb_gen = go.Figure()
+            fig_morb_gen.add_trace(go.Bar(
+                y=['Distribución por sexo'],
+                x=[pct_h],
+                name='Hombres',
+                orientation='h',
+                marker_color='#3b82f6',
+                text=[f'{int(total_hombres)} ({pct_h:.1f}%)'],
                 textposition='inside',
-                textfont=dict(size=14, color='white', family='Roboto'),
-                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-                direction='clockwise', sort=False, pull=[0.02, 0.02]
-            )])
+                insidetextanchor='middle',
+                hovertemplate='Hombres: %{x:.1f}%<extra></extra>'
+            ))
+            fig_morb_gen.add_trace(go.Bar(
+                y=['Distribución por sexo'],
+                x=[pct_m],
+                name='Mujeres',
+                orientation='h',
+                marker_color='#ec4899',
+                text=[f'{int(total_mujeres)} ({pct_m:.1f}%)'],
+                textposition='inside',
+                insidetextanchor='middle',
+                hovertemplate='Mujeres: %{x:.1f}%<extra></extra>'
+            ))
             fig_morb_gen.update_layout(
                 title={'text': f'Distribuci\u00f3n por Sexo (Total: {int(total_sexo)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
+                barmode='stack',
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=20, r=20, t=50, b=20),
-                showlegend=False
+                xaxis={'range': [0, 100], 'ticksuffix': '%', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#cbd5e1'}},
+                legend=dict(
+                    orientation="h", y=-0.2, x=0.5, xanchor="center",
+                    bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                    bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+                )
             )
         else:
             fig_morb = go.Figure()
