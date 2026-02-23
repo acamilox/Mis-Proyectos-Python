@@ -1002,7 +1002,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 hovertemplate='Mujeres: %{y:.0f} (%{customdata[0]:.1f}%)<extra></extra>'
             ))
             fig_morb_gen.update_layout(
-                title={'text': f'Distribuci\u00f3n por Sexo (Total: {int(total_sexo)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': f'Morbilidad por Sexo (Total: {int(total_sexo)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 barmode='group',
                 bargap=0.4,
