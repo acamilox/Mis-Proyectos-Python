@@ -1036,7 +1036,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
             fig_morb_gen.update_layout(
-                title={'text': 'Distribución por Sexo', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': 'Morbilidad por Sexo', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 plot_bgcolor='#1e293b',
                 paper_bgcolor='#1e293b',
                 height=380,
