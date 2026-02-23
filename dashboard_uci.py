@@ -712,8 +712,8 @@ def render_mortalidad(year_key: str):
      Output('selected-months-store', 'data')],
     [Input('btn-todos-meses', 'n_clicks'),
      Input('btn-aplicar-filtros', 'n_clicks'),
-     Input('filtro-anio', 'value'),
-     Input('filtro-mes-inicio', 'value')]
+     Input('filtro-anio', 'value')],
+    [State('filtro-mes-inicio', 'value')]
 )
 def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_seleccionados):
     ctx = dash.callback_context
