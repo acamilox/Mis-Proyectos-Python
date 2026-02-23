@@ -983,10 +983,11 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 x=['Hombres'],
                 y=[total_hombres],
                 name='Hombres',
-                width=0.55,
+                width=0.4,
                 marker_color='#3b82f6',
                 text=[f'{int(total_hombres)} ({pct_h:.1f}%)'],
                 textposition='inside',
+                textfont=dict(color='#ffffff', size=12),
                 customdata=[[pct_h]],
                 hovertemplate='Hombres: %{y:.0f} (%{customdata[0]:.1f}%)<extra></extra>'
             ))
@@ -994,10 +995,11 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 x=['Mujeres'],
                 y=[total_mujeres],
                 name='Mujeres',
-                width=0.55,
+                width=0.4,
                 marker_color='#ec4899',
                 text=[f'{int(total_mujeres)} ({pct_m:.1f}%)'],
                 textposition='inside',
+                textfont=dict(color='#ffffff', size=12),
                 customdata=[[pct_m]],
                 hovertemplate='Mujeres: %{y:.0f} (%{customdata[0]:.1f}%)<extra></extra>'
             ))
@@ -1005,7 +1007,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 title={'text': f'Morbilidad por Sexo (Total: {int(total_sexo)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 barmode='group',
-                bargap=0.4,
+                bargap=0.55,
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=20, r=20, t=50, b=20),
                 xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
