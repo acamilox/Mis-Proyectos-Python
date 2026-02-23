@@ -165,11 +165,13 @@ body {
 #filtro-mes-inicio {
     position: relative;
     z-index: 20;
+    min-width: 0;
 }
 /* Mantener altura estable del filtro de meses para evitar "saltos" */
 #filtro-mes-inicio .Select-control {
     height: 42px !important;
     overflow: hidden !important;
+    width: 100% !important;
 }
 #filtro-mes-inicio .Select-multi-value-wrapper {
     display: flex !important;
@@ -181,6 +183,14 @@ body {
 }
 #filtro-mes-inicio .Select-multi-value-wrapper::-webkit-scrollbar {
     height: 6px;
+}
+
+/* Evita que el selector de meses invada el bloque de botones */
+.filtros-actions {
+    white-space: nowrap;
+    flex-shrink: 0;
+    z-index: 40;
+    position: relative;
 }
 .Select-option { 
     background: transparent !important; 

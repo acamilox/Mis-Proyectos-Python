@@ -254,7 +254,7 @@ def render_resumen(year_key: str):
                 html.Div("", style={'height': '12px'})
             ], style={
                 'display': 'grid',
-                'gridTemplateColumns': '120px minmax(420px, 1fr) auto',
+                'gridTemplateColumns': '100px minmax(0, 1fr) auto',
                 'alignItems': 'end',
                 'columnGap': '12px',
                 'marginBottom': '6px'
@@ -281,10 +281,10 @@ def render_resumen(year_key: str):
                     dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm"),
                     dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
                               style={'marginLeft': '8px'})
-                ], style={'display': 'flex', 'alignItems': 'center'})
+                ], className='filtros-actions', style={'display': 'flex', 'alignItems': 'center'})
             ], style={
                 'display': 'grid',
-                'gridTemplateColumns': '120px minmax(420px, 1fr) auto',
+                'gridTemplateColumns': '100px minmax(0, 1fr) auto',
                 'alignItems': 'center',
                 'columnGap': '12px'
             })
