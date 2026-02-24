@@ -332,23 +332,23 @@ def render_gestion(year_key: str):
         fig_vm.add_trace(go.Scatter(
             x=MESES, y=datos_vm_mensual,
             mode='lines+markers+text',
-            line=dict(color='#06b6d4', width=3),
-            marker=dict(size=7, color='#06b6d4'),
+            line=dict(color='#06b6d4', width=3.2),
+            marker=dict(size=8, color='#06b6d4'),
             fill='tozeroy',
             fillcolor='rgba(6, 182, 212, 0.18)',
             text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
             textposition='top center',
-            textfont=dict(color='#f1f5f9', size=10),
+            textfont=dict(color='#f1f5f9', size=12),
             hovertemplate='<b>%{x}</b><br>Promedio VM: %{y:.1f}<extra></extra>'
         ))
         fig_vm.update_layout(
             title={'text': 'Promedio de D\u00edas de VM (Tendencia)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=350, margin=dict(l=50, r=30, t=50, b=50),
+            height=470, margin=dict(l=50, r=30, t=50, b=60),
             hovermode='x unified',
-            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-            yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
+            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 12}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            yaxis={'tickfont': {'color': '#94a3b8', 'size': 12}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
 
         fig_bacteriemia = chart_factory.create_line_chart(
@@ -467,9 +467,15 @@ def render_gestion(year_key: str):
                 title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=550, margin=dict(l=50, r=30, t=50, b=245),
+                height=640, margin=dict(l=55, r=40, t=55, b=300),
                 hovermode='x unified',
-                xaxis={'tickfont': {'color': '#e2e8f0', 'size': 9}, 'tickangle': -35, 'automargin': True, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                xaxis={
+                    'tickfont': {'color': '#e2e8f0', 'size': 10},
+                    'tickangle': -42,
+                    'ticklabelstandoff': 10,
+                    'automargin': True,
+                    'gridcolor': 'rgba(148, 163, 184, 0.1)'
+                },
                 yaxis={'title': 'Cantidad', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis2={
                     'overlaying': 'y',
@@ -480,10 +486,11 @@ def render_gestion(year_key: str):
                     'showgrid': False
                 },
                 legend=dict(
-                    orientation="h", y=-0.24, x=0.5, xanchor="center",
+                    orientation="h", y=-0.34, x=0.5, xanchor="center",
                     bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
                     bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
-                )
+                ),
+                bargap=0.2
             )
         else:
             fig_eventos = go.Figure()
@@ -491,8 +498,8 @@ def render_gestion(year_key: str):
                 title={'text': 'Eventos Adversos por Categoría', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b',
                 paper_bgcolor='#1e293b',
-                height=550,
-                margin=dict(l=50, r=30, t=50, b=80),
+                height=640,
+                margin=dict(l=55, r=40, t=55, b=120),
                 xaxis={'visible': False},
                 yaxis={'visible': False},
                 showlegend=False
@@ -518,9 +525,9 @@ def render_gestion(year_key: str):
                 dbc.Col(dcc.Graph(figure=fig_giro, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
             ], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(xs=12, md=3),
-                dbc.Col(dcc.Graph(figure=fig_vm, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, md=6),
-                dbc.Col(xs=12, md=3)
+                dbc.Col(xs=12, md=1),
+                dbc.Col(dcc.Graph(figure=fig_vm, config=_GRAPH_CFG, style={'height': '470px'}), xs=12, md=10),
+                dbc.Col(xs=12, md=1)
             ], className="mb-4", justify="center"),
             html.H5("Indicadores de Calidad e Infecciones", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
@@ -535,7 +542,7 @@ def render_gestion(year_key: str):
                 dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG, style={'height': '520px'}), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
             ], className="mb-4", justify="center"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '550px'}), xs=12)])
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12)])
         ])
     except Exception as e:
         logger.error(f"Error en render_gestion: {e}")
