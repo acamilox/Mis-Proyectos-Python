@@ -328,16 +328,21 @@ def render_gestion(year_key: str):
         datos_vm_mensual = kpis.get('promedio_dias_vm_mensual', [])
         if not datos_vm_mensual or len(datos_vm_mensual) != len(MESES):
             datos_vm_mensual = [round(kpis['promedio_dias_vm'], 2) for _ in MESES]
+        vm_text_positions = ['top center'] * len(MESES)
+        if vm_text_positions:
+            vm_text_positions[0] = 'top right'
+            vm_text_positions[-1] = 'top left'
         fig_vm = go.Figure()
         fig_vm.add_trace(go.Scatter(
             x=MESES, y=datos_vm_mensual,
             mode='lines+markers+text',
             line=dict(color='#06b6d4', width=3.2),
             marker=dict(size=8, color='#06b6d4'),
+            cliponaxis=False,
             fill='tozeroy',
             fillcolor='rgba(6, 182, 212, 0.18)',
             text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
-            textposition='top center',
+            textposition=vm_text_positions,
             textfont=dict(color='#f1f5f9', size=12),
             hovertemplate='<b>%{x}</b><br>Promedio VM: %{y:.1f}<extra></extra>'
         ))
@@ -347,7 +352,11 @@ def render_gestion(year_key: str):
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
             height=470, margin=dict(l=50, r=30, t=50, b=60),
             hovermode='x unified',
-            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 12}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+            xaxis={
+                'tickfont': {'color': '#cbd5e1', 'size': 12},
+                'gridcolor': 'rgba(148, 163, 184, 0.1)',
+                'range': [-0.35, len(MESES) - 0.65]
+            },
             yaxis={'tickfont': {'color': '#94a3b8', 'size': 12}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
 
@@ -486,7 +495,7 @@ def render_gestion(year_key: str):
                     'showgrid': False
                 },
                 legend=dict(
-                    orientation="h", y=-0.34, x=0.5, xanchor="center",
+                    orientation="h", y=-0.30, x=0.5, xanchor="center",
                     bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
                     bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
                 ),
@@ -542,7 +551,7 @@ def render_gestion(year_key: str):
                 dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG, style={'height': '520px'}), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
             ], className="mb-4", justify="center"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12)])
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12)], className="mb-5 g-3")
         ])
     except Exception as e:
         logger.error(f"Error en render_gestion: {e}")
