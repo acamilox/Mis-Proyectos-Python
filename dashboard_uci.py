@@ -1062,14 +1062,14 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
                 dbc.Col(kpi_estancia, xs=6, sm=6, md=True),
                 dbc.Col(kpi_giro, xs=6, sm=6, md=True)
             ], className="mb-4 g-3"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocup, config=_GRAPH_CFG), xs=12)], className="mb-4"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ie, config=_GRAPH_CFG), xs=12)], className="mb-4"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=_GRAPH_CFG), xs=12)], className="mb-4 g-3"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocup, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)], className="mb-4"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ie, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)], className="mb-4"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=_GRAPH_CFG, style={'height': '520px'}), xs=12)], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_morb, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_morb, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
             ], className="mb-3 g-3")
         ]), meses_filtrados
     except Exception as e:
