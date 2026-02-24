@@ -276,7 +276,7 @@ body {
 
 /* Scrollbar - Definido en sección de efectos */
 
-/* Graph containers - Altura fija para evitar crecimiento infinito */
+/* Graph containers */
 .js-plotly-plot {
     border-radius: 12px;
     overflow: hidden;
@@ -285,19 +285,11 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.js-plotly-plot .plotly {
-    height: 100% !important;
-}
-
-.js-plotly-plot .main-svg {
-    height: 100% !important;
-}
-
-/* Contenedor de gráficos con altura fija */
+/* Evita que contenedores de Dash impongan alturas no deseadas */
 .dash-graph {
-    height: auto !important;
+    height: auto;
     min-height: 0 !important;
-    max-height: none !important;
+    max-height: none;
 }
 
 .js-plotly-plot:hover {
