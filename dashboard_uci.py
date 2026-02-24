@@ -512,30 +512,30 @@ def render_gestion(year_key: str):
                 dbc.Col(kpi5, xs=12, md=True)
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_estancia, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_estancia, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_giro, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_giro, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
             ], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=3),
-                dbc.Col(dcc.Graph(figure=fig_vm, config=_GRAPH_CFG), xs=12, md=6),
+                dbc.Col(dcc.Graph(figure=fig_vm, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, md=6),
                 dbc.Col(xs=12, md=3)
             ], className="mb-4", justify="center"),
             html.H5("Indicadores de Calidad e Infecciones", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
             ], className="mb-3 g-3"),
             html.H5("G\u00e9rmenes Aislados y Eventos Adversos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG), xs=12, md=8),
+                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG, style={'height': '520px'}), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
             ], className="mb-4", justify="center"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG), xs=12)])
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '550px'}), xs=12)])
         ])
     except Exception as e:
         logger.error(f"Error en render_gestion: {e}")
@@ -650,10 +650,10 @@ def render_especialidades(year_key: str):
             html.H5("Principales Especialidades", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '12px'}),
             dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_especialidades_area, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_especialidades_area, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
             ], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_especialidades_mix, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_especialidades_mix, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
             ], className="g-3")
         ])
     except Exception as e:
@@ -690,14 +690,14 @@ def render_mortalidad(year_key: str):
             dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=6), dbc.Col(kpi_mediana, xs=12, md=6)], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_mort, config=_GRAPH_CFG), xs=12, md=8),
+                dbc.Col(dcc.Graph(figure=fig_mort, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
             ], className="mb-3", justify="center"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG, style={'height': '400px'}), xs=12)
             ], className="g-3")
         ])
     except Exception as e:
