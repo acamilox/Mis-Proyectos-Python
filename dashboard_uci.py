@@ -1001,7 +1001,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 hovertemplate='<b>%{label}</b><br>Total: %{value:.0f}<br>Participación: %{percentRoot:.1%}<extra></extra>'
             )])
             fig_morb.update_layout(
-                title={'text': f'Morbilidad por Diagnóstico (Top, Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': f'Morbilidad por Grupo Diagnóstico (Top, Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=20, r=20, t=50, b=20),
