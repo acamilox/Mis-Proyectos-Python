@@ -151,6 +151,7 @@ _debug_log(
 
 app.layout = html.Div([
     dcc.Store(id='selected-year-store', data=DEFAULT_YEAR),
+    dcc.Store(id='pending-year-store', data=DEFAULT_YEAR),
     dcc.Store(id='selected-months-store', data=MESES),
     # Header
     html.Div([
@@ -223,13 +224,16 @@ app.layout = html.Div([
 
 @app.callback(
     Output('tab-content', 'children'),
-    [Input('tabs', 'active_tab'), Input('selected-year-store', 'data')]
+    [Input('tabs', 'active_tab'), Input('selected-year-store', 'data'), Input('pending-year-store', 'data')]
 )
-def render_content(tab, selected_year):
+def render_content(tab, selected_year, pending_year):
     year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     year_key = year_candidate if year_candidate in PROCESSOR_BY_YEAR else DEFAULT_YEAR
+    pending_key = str(pending_year) if pending_year is not None else year_key
+    if pending_key not in PROCESSOR_BY_YEAR:
+        pending_key = year_key
     if tab == 'tab-resumen':
-        return render_resumen(year_key)
+        return render_resumen(pending_key)
     elif tab == 'tab-gestion':
         return render_gestion(year_key)
     elif tab == 'tab-especialidades':
@@ -732,7 +736,8 @@ def render_mortalidad(year_key: str):
 @app.callback(
     [Output('filtro-mes-inicio', 'value'),
      Output('resumen-content', 'children'),
-     Output('selected-months-store', 'data')],
+     Output('selected-months-store', 'data'),
+     Output('selected-year-store', 'data')],
     [Input('btn-todos-meses', 'n_clicks'),
      Input('btn-aplicar-filtros', 'n_clicks'),
      Input('tabs', 'active_tab')],
@@ -742,7 +747,7 @@ def render_mortalidad(year_key: str):
 def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, meses_seleccionados):
     # Solo procesar cuando estamos en Resumen (evita actualizar componente inexistente)
     if active_tab != 'tab-resumen':
-        return dash.no_update, dash.no_update, dash.no_update
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
@@ -1087,6 +1092,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
 
+        year_store_output = dash.no_update
+        if triggered_id in ('btn-aplicar-filtros', 'btn-todos-meses'):
+            year_store_output = year_key
+
         return meses_output_value, html.Div([
             dbc.Row([
                 dbc.Col(kpi_ingresos, xs=6, sm=6, md=True),
@@ -1104,20 +1113,29 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
             ], className="mb-3 g-3")
-        ]), meses_filtrados
+        ]), meses_filtrados, year_store_output
     except Exception as e:
         logger.error(f"Error en actualizar_resumen: {e}")
-        return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#dc2626'})]), dash.no_update
+        return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#dc2626'})]), dash.no_update, dash.no_update
 
 
 @app.callback(
-    Output('selected-year-store', 'data'),
-    Input('filtro-anio', 'value'),
+    Output('pending-year-store', 'data'),
+    [Input('filtro-anio', 'value'), Input('tabs', 'active_tab')],
+    [State('selected-year-store', 'data')],
     prevent_initial_call=True
 )
-def sync_selected_year(anio_seleccionado):
-    year_key = str(anio_seleccionado) if anio_seleccionado is not None else DEFAULT_YEAR
-    return year_key if year_key in PROCESSOR_BY_YEAR else DEFAULT_YEAR
+def sync_pending_year(anio_seleccionado, active_tab, selected_year):
+    """Dropdown: guarda selección (filtro-anio) sin aplicar. Al entrar a Resumen, muestra año aplicado."""
+    ctx = dash.callback_context
+    triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
+    if triggered_id == 'tabs' and active_tab == 'tab-resumen':
+        year_key = str(selected_year) if selected_year is not None else DEFAULT_YEAR
+        return year_key if year_key in PROCESSOR_BY_YEAR else DEFAULT_YEAR
+    if triggered_id == 'filtro-anio':
+        year_key = str(anio_seleccionado) if anio_seleccionado is not None else DEFAULT_YEAR
+        return year_key if year_key in PROCESSOR_BY_YEAR else DEFAULT_YEAR
+    return dash.no_update
 
 
 # Callbacks de exportacion
