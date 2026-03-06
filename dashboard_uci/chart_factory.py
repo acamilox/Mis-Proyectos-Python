@@ -544,7 +544,7 @@ class ChartFactory:
                 }),
                 html.Span(" vs anterior", style={
                     'fontSize': '11px',
-                    'color': '#64748b',
+                    'color': '#94a3b8',
                     'marginLeft': '4px'
                 })
             ], style={
@@ -566,7 +566,7 @@ class ChartFactory:
                 })
             ], style={'position': 'relative'}),
             html.H6(self._capitalizar(title), style={
-                'color': '#475569',
+                'color': '#94a3b8',
                 'fontSize': '12px',
                 'marginBottom': '8px',
                 'fontWeight': '600',
@@ -574,14 +574,14 @@ class ChartFactory:
                 'letterSpacing': '0.3px'
             }),
             html.H2(value, style={
-                'color': '#0f172a',
+                'color': '#f1f5f9',
                 'fontWeight': '700',
                 'marginBottom': '4px',
                 'fontSize': '28px',
                 'lineHeight': '1'
             }),
             html.P(self._capitalizar(subtitle), style={
-                'color': '#64748b',
+                'color': '#94a3b8',
                 'fontSize': '12px',
                 'margin': '0',
                 'fontWeight': '500'
@@ -599,8 +599,8 @@ class ChartFactory:
             style={
                 'borderLeft': f'4px solid {accent_color}',
                 'borderRadius': '8px',
-                'boxShadow': '0 2px 8px rgba(15, 23, 42, 0.15)',
-                'background': 'linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%)',
+                'boxShadow': '0 1px 3px rgba(0,0,0,0.2)',
+                'background': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
                 'height': '100%',
                 'position': 'relative'
             }

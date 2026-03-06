@@ -29,10 +29,10 @@ body {
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* KPI Cards - Fondo claro que armoniza con el azul/slate del app */
+/* KPI Cards - Mismo fondo que el aplicativo */
 .kpi-card {
-    background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
     border-radius: 8px !important;
     position: relative;
     overflow: hidden;
@@ -50,8 +50,8 @@ body {
 }
 
 .kpi-card:hover {
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2) !important;
-    border-color: rgba(59, 130, 246, 0.4) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(148, 163, 184, 0.35) !important;
 }
 
 .kpi-card:hover::before {
@@ -389,7 +389,7 @@ body {
     .kpi-card h2 {
         font-size: 24px !important;
         font-weight: 700 !important;
-        color: #0f172a !important;
+        color: #f1f5f9 !important;
     }
     
     .kpi-card h6 {
@@ -397,13 +397,13 @@ body {
         margin-bottom: 6px !important;
         min-height: auto !important;
         font-weight: 600 !important;
-        color: #475569 !important;
+        color: #94a3b8 !important;
     }
     
     .kpi-card p {
         font-size: 12px !important;
         min-height: auto !important;
-        color: #64748b !important;
+        color: #94a3b8 !important;
     }
     
     /* Tabs móvil */
