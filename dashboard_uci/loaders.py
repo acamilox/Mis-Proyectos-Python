@@ -242,12 +242,19 @@ class DataLoader:
             wb = load_workbook(self.excel_path)
             ws = wb['EVENTOS ADVERSOS']
             
+            # Encabezado de columna E en el Excel (Fila 1) - no es un evento real
+            excluir_encabezado = 'tipo de evento o incidente adverso'
             todos_eventos = []
             for i in range(1, 200):
                 cell = ws.cell(i, 5)
                 if cell.value:
                     evento = str(cell.value).strip()
-                    if evento.upper() not in MESES_SHEET_ENERO and evento and evento.upper() != 'NAN':
+                    evento_upper = evento.upper()
+                    evento_norm = evento.strip().lower()
+                    if (evento_upper not in MESES_SHEET_ENERO
+                            and evento
+                            and evento_upper != 'NAN'
+                            and evento_norm != excluir_encabezado):
                         todos_eventos.append(self._normalizar_evento(evento))
             
             self.df_eventos_adversos = pd.Series(todos_eventos).value_counts().reset_index()
