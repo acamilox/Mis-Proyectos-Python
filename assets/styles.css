@@ -29,11 +29,11 @@ body {
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* KPI Cards - Estilo Editor */
+/* KPI Cards - Fondo claro que armoniza con el azul/slate del app */
 .kpi-card {
-    background: #2b2d30 !important;
-    border: 1px solid #393b40 !important;
-    border-radius: 4px !important;
+    background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    border-radius: 8px !important;
     position: relative;
     overflow: hidden;
 }
@@ -45,14 +45,13 @@ body {
     left: 0;
     right: 0;
     height: 2px;
-    background: #cc7832; /* Color Naranja PyCharm */
-    opacity: 0.7;
+    background: linear-gradient(90deg, #1e3a5f, #3b82f6);
+    opacity: 0.9;
 }
 
 .kpi-card:hover {
-    box-shadow: 0 8px 30px rgba(55, 118, 171, 0.2) !important;
-    border-color: rgba(55, 118, 171, 0.3) !important;
-    /* transform: translateY(-3px); */
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.4) !important;
 }
 
 .kpi-card:hover::before {
@@ -390,7 +389,7 @@ body {
     .kpi-card h2 {
         font-size: 24px !important;
         font-weight: 700 !important;
-        color: #f8fafc !important;
+        color: #0f172a !important;
     }
     
     .kpi-card h6 {
@@ -398,7 +397,7 @@ body {
         margin-bottom: 6px !important;
         min-height: auto !important;
         font-weight: 600 !important;
-        color: #94a3b8 !important;
+        color: #475569 !important;
     }
     
     .kpi-card p {

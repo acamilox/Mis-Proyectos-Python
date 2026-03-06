@@ -566,25 +566,25 @@ class ChartFactory:
                 })
             ], style={'position': 'relative'}),
             html.H6(self._capitalizar(title), style={
-                'color': self.colors['muted'], 
-                'fontSize': '12px', 
-                'marginBottom': '8px', 
-                'fontWeight': '500', 
-                'textTransform': 'uppercase', 
+                'color': '#475569',
+                'fontSize': '12px',
+                'marginBottom': '8px',
+                'fontWeight': '600',
+                'textTransform': 'uppercase',
                 'letterSpacing': '0.3px'
             }),
             html.H2(value, style={
-                'color': self.colors['text_primary'], 
-                'fontWeight': '700', 
-                'marginBottom': '4px', 
-                'fontSize': '28px', 
+                'color': '#0f172a',
+                'fontWeight': '700',
+                'marginBottom': '4px',
+                'fontSize': '28px',
                 'lineHeight': '1'
             }),
             html.P(self._capitalizar(subtitle), style={
-                'color': '#64748b', 
-                'fontSize': '12px', 
-                'margin': '0', 
-                'fontWeight': '400'
+                'color': '#64748b',
+                'fontSize': '12px',
+                'margin': '0',
+                'fontWeight': '500'
             })
         ]
         
@@ -598,9 +598,9 @@ class ChartFactory:
             className="kpi-card h-100",
             style={
                 'borderLeft': f'4px solid {accent_color}',
-                'borderRadius': '8px', 
-                'boxShadow': '0 1px 3px rgba(0,0,0,0.2)',
-                'background': 'rgba(30, 41, 59, 0.8)',
+                'borderRadius': '8px',
+                'boxShadow': '0 2px 8px rgba(15, 23, 42, 0.15)',
+                'background': 'linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%)',
                 'height': '100%',
                 'position': 'relative'
             }
