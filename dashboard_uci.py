@@ -128,6 +128,9 @@ if not PROCESSOR_BY_YEAR:
 AVAILABLE_YEARS = sorted(PROCESSOR_BY_YEAR.keys())
 DEFAULT_YEAR = "2025" if "2025" in PROCESSOR_BY_YEAR else AVAILABLE_YEARS[0]
 
+# Opción especial para "Todos los meses" en el filtro
+VALOR_TODOS_MESES = '__TODOS__'
+
 # Variables por compatibilidad con otras pestañas (default 2026)
 DATA = DATA_BY_YEAR[DEFAULT_YEAR]
 PROCESSOR = PROCESSOR_BY_YEAR[DEFAULT_YEAR]
@@ -271,16 +274,20 @@ def render_resumen(year_key: str):
                 ),
                 dcc.Dropdown(
                     id='filtro-mes-inicio',
-                    options=[{'label': MESES_COMPLETOS[mes], 'value': mes} for mes in MESES],
-                    value=MESES,
+                    options=(
+                        [{'label': MESES_COMPLETOS[mes], 'value': mes} for mes in MESES]
+                        + [{'label': 'Todos los meses', 'value': VALOR_TODOS_MESES}]
+                    ),
+                    value=[VALOR_TODOS_MESES],
                     multi=True,
-                    placeholder="Seleccionar meses...",
+                    placeholder="Seleccionar uno, varios o todos los meses",
                     style={'fontSize': '13px'}
                 ),
                 html.Div([
-                    dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm"),
+                    dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
+                              title="Actualizar con año y meses seleccionados"),
                     dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
-                              style={'marginLeft': '8px'})
+                              style={'marginLeft': '8px'}, title="Seleccionar todos los meses")
                 ], className='filtros-actions', style={'display': 'flex', 'alignItems': 'center'})
             ], style={
                 'display': 'grid',
@@ -721,17 +728,22 @@ def render_mortalidad(year_key: str):
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
-# Callback para Resumen
+# Callback para Resumen - Solo se aplica al pulsar Aplicar o Todos
 @app.callback(
     [Output('filtro-mes-inicio', 'value'),
      Output('resumen-content', 'children'),
      Output('selected-months-store', 'data')],
     [Input('btn-todos-meses', 'n_clicks'),
      Input('btn-aplicar-filtros', 'n_clicks'),
-     Input('filtro-anio', 'value')],
-    [State('filtro-mes-inicio', 'value')]
+     Input('tabs', 'active_tab')],
+    [State('filtro-anio', 'value'),
+     State('filtro-mes-inicio', 'value')]
 )
-def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_seleccionados):
+def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, meses_seleccionados):
+    # Solo procesar cuando estamos en Resumen (evita actualizar componente inexistente)
+    if active_tab != 'tab-resumen':
+        return dash.no_update, dash.no_update, dash.no_update
+
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
     # region agent log
@@ -749,8 +761,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
     # endregion
     meses_output_value = dash.no_update
     if triggered_id == 'btn-todos-meses':
-        meses_seleccionados = MESES
-        meses_output_value = MESES
+        meses_seleccionados = [VALOR_TODOS_MESES]
+        meses_output_value = [VALOR_TODOS_MESES]
     try:
         year_key = str(anio_seleccionado) if anio_seleccionado is not None else DEFAULT_YEAR
         if year_key not in PROCESSOR_BY_YEAR:
@@ -773,7 +785,12 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, anio_seleccionado, meses_selecc
         # endregion
 
         if meses_seleccionados and isinstance(meses_seleccionados, list) and len(meses_seleccionados) > 0:
-            meses_filtrados = [m for m in meses_seleccionados if m in MESES]
+            if VALOR_TODOS_MESES in meses_seleccionados:
+                meses_filtrados = MESES
+            else:
+                meses_filtrados = [m for m in meses_seleccionados if m in MESES]
+                if not meses_filtrados:
+                    meses_filtrados = MESES
         else:
             meses_filtrados = MESES
 
