@@ -513,9 +513,9 @@ def render_gestion(year_key: str):
                 },
                 legend=dict(
                     orientation="h", y=-0.42, x=0.5, xanchor="center", yanchor="top",
-                    bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                    bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12},
                     bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1,
-                    itemsizing='constant', itemwidth=30
+                    itemsizing='constant', itemwidth=50
                 ),
                 bargap=0.2
             )
