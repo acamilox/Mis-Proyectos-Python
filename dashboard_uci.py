@@ -493,12 +493,12 @@ def render_gestion(year_key: str):
                 title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=640, margin=dict(l=55, r=40, t=55, b=340),
+                height=680, margin=dict(l=55, r=40, t=55, b=420),
                 hovermode='x unified',
                 xaxis={
                     'tickfont': {'color': '#e2e8f0', 'size': 10},
-                    'tickangle': -42,
-                    'ticklabelstandoff': 12,
+                    'tickangle': -38,
+                    'ticklabelstandoff': 18,
                     'automargin': True,
                     'gridcolor': 'rgba(148, 163, 184, 0.1)'
                 },
@@ -512,7 +512,7 @@ def render_gestion(year_key: str):
                     'showgrid': False
                 },
                 legend=dict(
-                    orientation="h", y=-0.42, x=0.5, xanchor="center", yanchor="top",
+                    orientation="h", y=-0.58, x=0.5, xanchor="center", yanchor="top",
                     bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12},
                     bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1,
                     itemsizing='constant', itemwidth=50
