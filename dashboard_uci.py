@@ -462,6 +462,8 @@ def render_gestion(year_key: str):
                 df_eventos = df_eventos_top
             total_eventos = max(float(df_eventos['Cantidad'].sum()), 1.0)
             df_eventos['Acumulado %'] = (df_eventos['Cantidad'].cumsum() / total_eventos) * 100
+            # Orden invertido: mayor cantidad arriba (primera fila de barras horizontales)
+            df_eventos = df_eventos.iloc[::-1].reset_index(drop=True)
             colors_eventos = [
                 '#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899',
                 '#f97316', '#14b8a6', '#a855f7', '#0ea5e9', '#84cc16', '#e11d48', '#22c55e',
@@ -470,54 +472,57 @@ def render_gestion(year_key: str):
             ]
             fig_eventos = go.Figure()
             fig_eventos.add_trace(go.Bar(
-                x=df_eventos['Evento'],
-                y=df_eventos['Cantidad'],
+                y=df_eventos['Evento'],
+                x=df_eventos['Cantidad'],
                 name='Cantidad',
+                orientation='h',
                 marker_color=[colors_eventos[i % len(colors_eventos)] for i in range(len(df_eventos))],
                 text=df_eventos['Cantidad'],
                 textposition='auto',
                 textfont=dict(color='#f1f5f9', size=11),
-                hovertemplate='<b>%{x}</b><br>Eventos: %{y}<extra></extra>'
+                hovertemplate='<b>%{y}</b><br>Eventos: %{x}<extra></extra>'
             ))
             fig_eventos.add_trace(go.Scatter(
-                x=df_eventos['Evento'],
-                y=df_eventos['Acumulado %'],
+                y=df_eventos['Evento'],
+                x=df_eventos['Acumulado %'],
                 name='Acumulado %',
                 mode='lines+markers',
-                yaxis='y2',
+                xaxis='x2',
                 line=dict(color='#fbbf24', width=2.5),
                 marker=dict(size=6, color='#fbbf24'),
-                hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>'
+                hovertemplate='<b>%{y}</b><br>Acumulado: %{x:.1f}%<extra></extra>'
             ))
             fig_eventos.update_layout(
                 title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=720, margin=dict(l=55, r=40, t=55, b=400),
-                hovermode='x unified',
+                height=560, margin=dict(l=220, r=70, t=80, b=60),
+                hovermode='y unified',
                 xaxis={
-                    'tickfont': {'color': '#e2e8f0', 'size': 9},
-                    'tickangle': -90,
-                    'ticklabelstandoff': 8,
-                    'automargin': True,
+                    'title': 'Cantidad',
+                    'tickfont': {'color': '#94a3b8'},
                     'gridcolor': 'rgba(148, 163, 184, 0.1)'
                 },
-                yaxis={'title': 'Cantidad', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis2={
-                    'overlaying': 'y',
-                    'side': 'right',
+                xaxis2={
+                    'overlaying': 'x',
+                    'side': 'top',
                     'range': [0, 110],
-                    'tickfont': {'color': '#fbbf24'},
                     'title': {'text': 'Acumulado %', 'font': {'color': '#fbbf24'}},
+                    'tickfont': {'color': '#fbbf24'},
                     'showgrid': False
                 },
+                yaxis={
+                    'tickfont': {'color': '#e2e8f0', 'size': 11},
+                    'gridcolor': 'rgba(148, 163, 184, 0.1)',
+                    'dtick': 1
+                },
                 legend=dict(
-                    orientation="h", y=-0.52, x=0.5, xanchor="center", yanchor="top",
+                    orientation="h", y=1.02, x=0.5, xanchor="center", yanchor="bottom",
                     bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12},
                     bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1,
                     itemsizing='constant', itemwidth=50
                 ),
-                bargap=0.2
+                bargap=0.55
             )
         else:
             fig_eventos = go.Figure()
@@ -1028,7 +1033,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 x=['Hombres'],
                 y=[total_hombres],
                 name='Hombres',
-                width=0.4,
+                width=0.25,
                 marker_color='#3b82f6',
                 text=[f'{int(total_hombres)} ({pct_h:.1f}%)'],
                 textposition='inside',
@@ -1040,7 +1045,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 x=['Mujeres'],
                 y=[total_mujeres],
                 name='Mujeres',
-                width=0.4,
+                width=0.25,
                 marker_color='#ec4899',
                 text=[f'{int(total_mujeres)} ({pct_m:.1f}%)'],
                 textposition='inside',
@@ -1052,7 +1057,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 title={'text': f'Morbilidad por Sexo (Total: {int(total_sexo)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 barmode='group',
-                bargap=0.55,
+                bargap=0.7,
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=20, r=20, t=50, b=20),
                 xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
