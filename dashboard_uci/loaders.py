@@ -101,8 +101,12 @@ class DataLoader:
     
     def _normalize_diagnostico(self, diag: str) -> str:
         """Normaliza nombres de diagnósticos"""
+        if not diag or diag in [m.upper().replace(' ', '') for m in MESES_SHEET_ENERO]:
+            return ''
         if 'CARVIO' in diag or 'CARDIO' in diag:
             return 'CARDIOVASCULAR'
+        if diag in ('HOMBRE', 'MUJER', 'TOTAL', ''):
+            return ''
         return diag
     
     def _load_germenes(self) -> None:
@@ -269,8 +273,14 @@ class DataLoader:
         """Normaliza nombres de eventos adversos"""
         e_lower = e.lower().strip()
         
-        # Mapeo de eventos
+        # Mapeo de eventos (más específicos primero)
         eventos_map = {
+            'Ruptura accidental balón traqueostomía': ['ruptura', 'balón', 'traqueostom'],
+            'Desplazamiento tubo tórax': ['desplazamiento', 'tubo'],
+            'LPP talón y sacra': ['lpp', 'talon', 'sacra'],
+            'LPP occipital y LECASH': ['lpp', 'occipital', 'lecash'],
+            'LPP glúteo y LECASH': ['lpp', 'gluteo', 'lecash'],
+            'LPP occipital categoría II': ['lpp', 'occipital', 'categor'],
             'Autoextubación': ['autoextubación', 'autoextubacion'],
             'Autoretiro CVC': ['autoretiro', 'cvc'],
             'Autoretiro PICC': ['autoretiro', 'picc'],
@@ -279,17 +289,17 @@ class DataLoader:
             'Desplazamiento CVC': ['desplazamiento', 'cvc', 'venoso central'],
             'Desplazamiento catéter hemodiálisis': ['desplazamiento', 'hemodialisis', 'hemodiálisis'],
             'Desplazamiento línea arterial': ['desplazamiento', 'arterial'],
-            'Desplazamiento tubo tórax': ['desplazamiento', 'torax', 'tórax'],
             'Desplazamiento nefrostomía': ['desplazamiento', 'nefrostomia'],
             'Desplazamiento derivación biliar': ['desplazamiento', 'biliar'],
             'Desplazamiento catéter paracentesis': ['desplazamiento', 'parecentesis', 'paracentesis'],
             'LPP por dispositivo médico': ['lpp', 'lesion', 'presion', 'dispositivo', 'medico', 'collar'],
             'LPP región sacra': ['lpp', 'lesion', 'presion', 'sacra', 'sacro'],
-            'LPP talón': ['lpp', 'lesion', 'presion', 'talon', 'talón'],
-            'LPP occipital': ['lpp', 'lesion', 'presion', 'occipital'],
-            'LPP glúteo': ['lpp', 'lesion', 'presion', 'gluteo', 'glúteo'],
+            'LPP talón': ['lpp', 'talon', 'talón'],
+            'LPP occipital': ['lpp', 'occipital'],
+            'LPP glúteo': ['lpp', 'gluteo', 'glúteo'],
             'LECASH': ['lecash'],
             'Lesión MARSI': ['marsi'],
+            'Error prescripción': ['error', 'prescripci'],
             'Error medicamento (contraste)': ['error', 'medicamento', 'contraste'],
             'Error en retiro CVC': ['error', 'retiro', 'cvc'],
             'Retraso administración medicamento': ['retraso', 'medicamento', 'administración'],
