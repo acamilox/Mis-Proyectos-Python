@@ -77,6 +77,7 @@ def _empty_data() -> dict[str, pd.DataFrame]:
         'germenes': pd.DataFrame(),
         'fallecidos': pd.DataFrame(),
         'eventos_adversos': pd.DataFrame(),
+        'eventos_adversos_detalle': pd.DataFrame(),
         'gram_sot': pd.DataFrame()
     }
 
@@ -570,6 +571,53 @@ def render_gestion(year_key: str):
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
 
+        # Distribución de pacientes con eventos adversos (1, 2, 3+ eventos)
+        df_det = data_year.get('eventos_adversos_detalle', pd.DataFrame())
+        if not df_det.empty and 'Nombre' in df_det.columns and 'Evento' in df_det.columns:
+            eventos_por_pac = df_det.groupby('Nombre').size()
+            uno = int((eventos_por_pac == 1).sum())
+            dos = int((eventos_por_pac == 2).sum())
+            tres_mas = int((eventos_por_pac >= 3).sum())
+            dist_labels = ['1 evento', '2 eventos', '3+ eventos']
+            dist_vals = [uno, dos, tres_mas]
+            if sum(dist_vals) > 0:
+                fig_dist_pac = go.Figure(data=[go.Bar(
+                    x=dist_labels, y=dist_vals,
+                    marker_color=['#6366f1', '#8b5cf6', '#a855f7'],
+                    text=dist_vals, textposition='auto',
+                    textfont=dict(color='#f1f5f9', size=12),
+                    hovertemplate='<b>%{x}</b><br>Pacientes: %{y}<extra></extra>'
+                )])
+                fig_dist_pac.update_layout(
+                    title={'text': 'Distribución de Pacientes con Eventos Adversos', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                    plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                    height=320, margin=dict(l=50, r=30, t=50, b=50),
+                    xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    showlegend=False
+                )
+            else:
+                fig_dist_pac = None
+        else:
+            fig_dist_pac = None
+
+        # Distribución por especialidad de pacientes con eventos adversos
+        if not df_det.empty and 'Especialidad' in df_det.columns:
+            esp_counts = df_det['Especialidad'].value_counts()
+            esp_labels = [str(x).strip() or 'Sin especificar' for x in esp_counts.index.tolist()]
+            esp_values = esp_counts.tolist()
+            if esp_values:
+                fig_esp_ea = chart_factory.create_donut_chart(
+                    esp_labels, [float(v) for v in esp_values],
+                    'Distribución por Especialidad (Pacientes con Eventos Adversos)',
+                    auto_sort=True
+                )
+                fig_esp_ea.update_layout(height=380)
+            else:
+                fig_esp_ea = None
+        else:
+            fig_esp_ea = None
+
         return html.Div([
             html.H5("Indicadores de Gesti\u00f3n", style={'color': '#f1f5f9', 'fontWeight': '600'}, className="mb-3"),
             dbc.Row([
@@ -601,8 +649,14 @@ def render_gestion(year_key: str):
                 dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG, style={'height': '520px'}), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
             ], className="mb-4", justify="center"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12)], className="mb-5 g-3")
-        ])
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12)], className="mb-4 g-3"),
+        ] + ([dbc.Row(
+            [dbc.Col(dcc.Graph(figure=fig_dist_pac, config=_GRAPH_CFG, style={'height': '320px'}), xs=12, md=6),
+             dbc.Col(dcc.Graph(figure=fig_esp_ea, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=6)]
+            if fig_dist_pac and fig_esp_ea
+            else [dbc.Col(dcc.Graph(figure=(fig_dist_pac or fig_esp_ea), config=_GRAPH_CFG, style={'height': '380px'}), xs=12)],
+            className="mb-5 g-3"
+        )] if (fig_dist_pac or fig_esp_ea) else []))
     except Exception as e:
         logger.error(f"Error en render_gestion: {e}")
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
@@ -1002,7 +1056,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
         kpi_ocup = chart_factory.create_kpi_card("% Ocupaci\u00f3n Promedio", processor.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#3b82f6")
         kpi_mort = chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis['mortalidad']), f"Total {rango_texto}", "#ef4444")
         kpi_estancia = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", f"D\u00edas - {rango_texto}", "#10b981")
-        kpi_giro = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#8b5cf6")
+        kpi_giro = chart_factory.create_kpi_card("Giro cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#8b5cf6")
 
         # EPS (filtrado por meses seleccionados)
         eps_data = []

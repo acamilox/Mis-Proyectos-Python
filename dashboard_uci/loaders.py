@@ -28,6 +28,7 @@ class DataLoader:
         self.df_germenes = pd.DataFrame()
         self.df_fallecidos = pd.DataFrame()
         self.df_eventos_adversos = pd.DataFrame()
+        self.df_eventos_detalle = pd.DataFrame()
         self.df_gram_sot = pd.DataFrame()
     
     def load_all(self) -> Dict[str, pd.DataFrame]:
@@ -45,6 +46,7 @@ class DataLoader:
             'germenes': self.df_germenes,
             'fallecidos': self.df_fallecidos,
             'eventos_adversos': self.df_eventos_adversos,
+            'eventos_adversos_detalle': self.df_eventos_detalle,
             'gram_sot': self.df_gram_sot
         }
     
@@ -241,33 +243,57 @@ class DataLoader:
             return None
     
     def _load_eventos_adversos(self) -> None:
-        """Carga datos de eventos adversos"""
+        """Carga datos de eventos adversos (agregado y detalle con paciente/especialidad)"""
         try:
             wb = load_workbook(self.excel_path)
             ws = wb['EVENTOS ADVERSOS']
-            
-            # Encabezado de columna E en el Excel (Fila 1) - no es un evento real
             excluir_encabezado = 'tipo de evento o incidente adverso'
             todos_eventos = []
+            filas_detalle = []
+            mes_actual = None
             for i in range(1, 200):
-                cell = ws.cell(i, 5)
-                if cell.value:
-                    evento = str(cell.value).strip()
-                    evento_upper = evento.upper()
-                    evento_norm = evento.strip().lower()
-                    if (evento_upper not in MESES_SHEET_ENERO
-                            and evento
-                            and evento_upper != 'NAN'
-                            and evento_norm != excluir_encabezado):
-                        todos_eventos.append(self._normalizar_evento(evento))
-            
+                col1 = ws.cell(i, 1).value
+                col5 = ws.cell(i, 5).value
+                col6 = ws.cell(i, 6).value
+                col7 = ws.cell(i, 7).value
+                # Detectar separador de mes (ENERO, FEBRERO, etc.)
+                if col1:
+                    nombre_raw = str(col1).strip().lower()
+                    for k, v in MESES_MAP_GRAM.items():
+                        if nombre_raw == k or nombre_raw.startswith(k[:3]):
+                            mes_actual = v
+                            break
+                    if mes_actual and nombre_raw.upper() in [m.upper() for m in MESES_SHEET_ENERO]:
+                        continue
+                # Fila de dato: tiene nombre (col1), edad numérica (col2) y evento (col5)
+                edad_val = ws.cell(i, 2).value
+                is_data_row = (col1 and str(col1).strip()
+                    and pd.notna(edad_val) and isinstance(edad_val, (int, float))
+                    and col5 and str(col5).strip().lower() != excluir_encabezado)
+                if is_data_row and col5:
+                    evento_norm = self._normalizar_evento(str(col5).strip())
+                    evento_upper = str(col5).strip().upper()
+                    if evento_upper != 'NAN':
+                        todos_eventos.append(evento_norm)
+                        especialidad = str(col7).strip() if col7 and pd.notna(col7) else 'Sin especificar'
+                        eps = str(col6).strip() if col6 and pd.notna(col6) else 'Sin especificar'
+                        nombre = str(col1).strip()
+                        filas_detalle.append({
+                            'Nombre': nombre,
+                            'Evento': evento_norm,
+                            'Especialidad': especialidad,
+                            'EPS': eps,
+                            'Mes': mes_actual or 'N/A'
+                        })
             self.df_eventos_adversos = pd.Series(todos_eventos).value_counts().reset_index()
             self.df_eventos_adversos.columns = ['Evento', 'Cantidad']
-            
-            logger.info(f"Datos EVENTOS ADVERSOS cargados: {len(todos_eventos)} eventos")
+            self.df_eventos_detalle = pd.DataFrame(filas_detalle) if filas_detalle else pd.DataFrame(
+                columns=['Nombre', 'Evento', 'Especialidad', 'EPS', 'Mes'])
+            logger.info(f"Datos EVENTOS ADVERSOS cargados: {len(todos_eventos)} eventos, {len(filas_detalle)} filas detalle")
         except Exception as e:
             logger.error(f"Error cargando EVENTOS ADVERSOS: {e}")
             self.df_eventos_adversos = pd.DataFrame()
+            self.df_eventos_detalle = pd.DataFrame()
     
     def _normalizar_evento(self, e: str) -> str:
         """Normaliza nombres de eventos adversos"""
