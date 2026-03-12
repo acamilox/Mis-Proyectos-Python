@@ -1018,13 +1018,15 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 header_style = {
                     'backgroundColor': 'rgba(15,23,42,0.98)',
                     'color': '#e5e7eb',
-                    'fontSize': '12px',
-                    'fontWeight': '600',
+                    'fontSize': '11px',
+                    'fontWeight': '700',
                     'borderBottom': '1px solid rgba(148,163,184,0.5)',
                     'borderRight': '1px solid rgba(55,65,81,0.7)',
                     'textAlign': 'center',
-                    'padding': '4px 8px',
-                    'whiteSpace': 'nowrap'
+                    'padding': '6px 10px',
+                    'whiteSpace': 'normal',
+                    'textTransform': 'uppercase',
+                    'letterSpacing': '0.04em'
                 }
 
                 body_style = {
@@ -1035,7 +1037,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     'fontSize': '12px',
                     'color': '#e5e7eb',
                     'textAlign': 'center',
-                    'padding': '4px 8px',
+                    'padding': '5px 10px',
                     'whiteSpace': 'nowrap'
                 }
 
@@ -1052,8 +1054,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             html.Th("Total fallecidos", style=header_style),
                             html.Th("% Mortalidad UCI", style=header_style),
                             html.Th("Eventos adversos", style=header_style),
-                            html.Th("Gérmenes aislados", style=header_style),
-                            html.Th("Casos morbilidad", style=header_style),
+                            html.Th("Gérmenes aislados", style=dict(header_style, minWidth='110px')),
+                            html.Th("Casos morbilidad", style=dict(header_style, minWidth='115px')),
                         ])),
                         html.Tbody([
                             html.Tr([
