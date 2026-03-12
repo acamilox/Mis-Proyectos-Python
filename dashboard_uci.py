@@ -976,9 +976,21 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 compare_rows = []
                 for y in available_years:
                     proc_y = PROCESSOR_BY_YEAR[y]
+                    data_y = DATA_BY_YEAR.get(y, DATA)
                     k_resumen = proc_y.get_kpis_resumen(meses_filtrados)
                     k_gestion = proc_y.get_kpis_gestion()
                     k_mort = proc_y.get_kpis_mortalidad()
+
+                    # Totales de otros módulos
+                    df_eventos_y = data_y.get('eventos_adversos') or pd.DataFrame()
+                    total_eventos_y = int(df_eventos_y['Cantidad'].sum()) if not df_eventos_y.empty else 0
+
+                    df_germenes_y = data_y.get('germenes') or pd.DataFrame()
+                    total_germenes_y = int(df_germenes_y['Cantidad'].sum()) if not df_germenes_y.empty else 0
+
+                    df_morb_y = data_y.get('morbilidad') or pd.DataFrame()
+                    total_diag_y = int(df_morb_y['Total'].sum()) if not df_morb_y.empty else 0
+
                     compare_rows.append({
                         "year": y,
                         "ingresos": int(k_resumen.get("total_ingresos", 0) or 0),
@@ -989,6 +1001,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         "total_dias": float(k_gestion.get("total_dias_estancia", 0) or 0),
                         "fallecidos": int(k_mort.get("total_fallecidos", 0) or 0),
                         "mort_ucI": float(k_mort.get("mortalidad_general", 0) or 0),
+                        "total_eventos": total_eventos_y,
+                        "total_germenes": total_germenes_y,
+                        "total_diag": total_diag_y,
                     })
 
                 header_style = {
@@ -1019,6 +1034,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             html.Th("Total días estancia", style=header_style),
                             html.Th("Total fallecidos", style=header_style),
                             html.Th("% Mortalidad UCI", style=header_style),
+                            html.Th("Eventos adversos", style=header_style),
+                            html.Th("Gérmenes aislados", style=header_style),
+                            html.Th("Casos morbilidad", style=header_style),
                         ])),
                         html.Tbody([
                             html.Tr([
@@ -1031,6 +1049,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                                 html.Td(f"{row['total_dias']:.0f}", style=body_style),
                                 html.Td(f"{row['fallecidos']}", style=body_style),
                                 html.Td(f"{row['mort_ucI']:.1f}%", style=body_style),
+                                html.Td(f"{row['total_eventos']}", style=body_style),
+                                html.Td(f"{row['total_germenes']}", style=body_style),
+                                html.Td(f"{row['total_diag']}", style=body_style),
                             ]) for row in compare_rows
                         ])
                     ],
