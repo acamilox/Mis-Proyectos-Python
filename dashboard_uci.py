@@ -1168,6 +1168,16 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             year_store_output = year_key
 
         return meses_output_value, html.Div([
+            html.Div(
+                compare_block,
+                style={
+                    'background': 'rgba(15, 23, 42, 0.9)',
+                    'border': '1px solid rgba(148, 163, 184, 0.25)',
+                    'borderRadius': '8px',
+                    'padding': '10px 12px',
+                    'marginBottom': '14px'
+                }
+            ) if compare_block else html.Div(),
             dbc.Row([
                 dbc.Col(kpi_ingresos, xs=6, sm=6, md=True),
                 dbc.Col(kpi_ocup, xs=6, sm=6, md=True),
@@ -1183,8 +1193,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             ], className="mb-4 g-3"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
-            ], className="mb-2 g-3"),
-            html.Div(compare_block)
+            ], className="mb-2 g-3")
         ]), meses_filtrados, year_store_output
     except Exception as e:
         logger.error(f"Error en actualizar_resumen: {e}")
