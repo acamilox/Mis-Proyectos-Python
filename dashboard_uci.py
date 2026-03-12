@@ -292,7 +292,11 @@ def render_resumen(year_key: str):
                     value=MESES,
                     multi=True,
                     placeholder="Seleccionar uno o varios meses",
-                    style={'fontSize': '13px'}
+                    style={
+                        'fontSize': '13px',
+                        'marginRight': '16px',
+                        'minWidth': '260px'
+                    }
                 ),
                 html.Div([
                     dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
