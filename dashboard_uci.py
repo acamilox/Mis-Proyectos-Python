@@ -328,7 +328,10 @@ def render_resumen(year_key: str):
                 'justifyContent': 'center',
                 'alignItems': 'center',
                 'gap': '16px',
-                'marginTop': '12px'
+                'marginTop': '12px',
+                'maxWidth': '360px',
+                'marginLeft': 'auto',
+                'marginRight': 'auto'
             })
         ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'})
     ], style={
