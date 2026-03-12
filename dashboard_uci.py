@@ -227,12 +227,22 @@ app.layout = html.Div([
     [Input('tabs', 'active_tab'), Input('selected-year-store', 'data')]
 )
 def render_content(tab, selected_year):
-    """Renderiza el contenido de cada pesta\u00f1a usando SIEMPRE el a\u00f1o ya aplicado."""
+    """
+    Renderiza el contenido de cada pesta\u00f1a.
+    - En Resumen, NO se vuelve a construir el layout cuando solo cambia el a\u00f1o aplicado,
+      para no resetear los filtros de meses.
+    """
+    ctx = dash.callback_context
+    triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
+
+    # Si estamos en Resumen y el cambio viene solo del a\u00f1o aplicado, mantenemos el layout actual
+    if tab == 'tab-resumen' and triggered_id == 'selected-year-store':
+        return dash.no_update
+
     year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     year_key = year_candidate if year_candidate in PROCESSOR_BY_YEAR else DEFAULT_YEAR
 
     if tab == 'tab-resumen':
-        # En Resumen los filtros (incluido el a\u00f1o) solo se aplican cuando se pulsa \"Aplicar\"
         return render_resumen(year_key)
     elif tab == 'tab-gestion':
         return render_gestion(year_key)
