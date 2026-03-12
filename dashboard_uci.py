@@ -272,12 +272,12 @@ def render_resumen(year_key: str):
                 html.Div("", style={'height': '12px'})
             ], style={
                 'display': 'grid',
-                'gridTemplateColumns': '100px minmax(0, 1fr) auto',
+                'gridTemplateColumns': '100px minmax(0, 1fr)',
                 'alignItems': 'end',
                 'columnGap': '12px',
                 'marginBottom': '6px'
             }),
-            # Fila 2: año, meses y acciones en una sola línea
+            # Fila 2: año y meses
             html.Div([
                 dcc.Dropdown(
                     id='filtro-anio',
@@ -296,9 +296,17 @@ def render_resumen(year_key: str):
                     placeholder="Seleccionar uno o varios meses",
                     style={
                         'fontSize': '13px',
-                        'minWidth': '200px'
+                        'minWidth': '260px'
                     }
                 ),
+            ], style={
+                'display': 'grid',
+                'gridTemplateColumns': '100px minmax(0, 1fr)',
+                'alignItems': 'center',
+                'columnGap': '16px'
+            }),
+            # Fila 3: botones y checkbox, debajo y a la derecha
+            html.Div([
                 html.Div([
                     dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
                                title="Actualizar con año y meses seleccionados"),
@@ -316,15 +324,13 @@ def render_resumen(year_key: str):
                     'alignItems': 'center',
                     'justifyContent': 'flex-end',
                     'gap': '12px',
-                    'flexWrap': 'nowrap',
-                    'position': 'relative',
-                    'zIndex': 5
+                    'flexWrap': 'wrap'
                 })
             ], style={
-                'display': 'grid',
-                'gridTemplateColumns': '100px minmax(0, 1fr) 320px',
+                'display': 'flex',
+                'justifyContent': 'flex-end',
                 'alignItems': 'center',
-                'columnGap': '16px'
+                'marginTop': '10px'
             })
         ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'})
     ], style={
