@@ -873,7 +873,7 @@ def render_mortalidad(year_key: str):
                 hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{x:.0f}<br>Porcentaje: %{customdata[1]:.1f}%<extra></extra>'
             )])
             fig_eps_mort.update_layout(
-                title={'text': f'Distribución por EPS (año {year_key})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': f'Distribución de fallecidos por EPS (año {year_key})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 font={'color': '#f1f5f9'},
@@ -890,7 +890,7 @@ def render_mortalidad(year_key: str):
         else:
             fig_eps_mort = go.Figure()
             fig_eps_mort.update_layout(
-                title={'text': 'Distribución por EPS', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': 'Distribución de fallecidos por EPS', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b',
                 paper_bgcolor='#1e293b',
                 height=380,
@@ -923,14 +923,14 @@ def render_mortalidad(year_key: str):
             fig_espec_mort = chart_factory.create_donut_chart(
                 labels=espec_labels,
                 values=espec_values,
-                title=f'Distribución por Especialidad (año {year_key})',
+                title=f'Distribución de fallecidos por Especialidad (año {year_key})',
                 colors=['#3498db', '#e74c3c', '#9b59b6', '#f39c12'],
                 auto_sort=True
             )
         else:
             fig_espec_mort = go.Figure()
             fig_espec_mort.update_layout(
-                title={'text': 'Distribución por Especialidad', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': 'Distribución de fallecidos por Especialidad', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 plot_bgcolor='#1e293b',
                 paper_bgcolor='#1e293b',
                 height=380,
@@ -961,7 +961,7 @@ def render_mortalidad(year_key: str):
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG, style={'height': '400px'}), xs=12)
             ], className="g-3"),
-            html.H5("Distribución por EPS y Especialidad", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '18px', 'marginBottom': '12px', 'textAlign': 'center'}),
+            html.H5("Distribución de fallecidos por EPS y Especialidad", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '18px', 'marginBottom': '12px', 'textAlign': 'center'}),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_eps_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=7),
                 dbc.Col(dcc.Graph(figure=fig_espec_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=5),
