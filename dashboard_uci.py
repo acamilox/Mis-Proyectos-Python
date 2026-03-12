@@ -299,10 +299,20 @@ def render_resumen(year_key: str):
                               title="Actualizar con año y meses seleccionados"),
                     dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
                               style={'marginLeft': '8px'}, title="Seleccionar todos los meses")
-                ], className='filtros-actions', style={'display': 'flex', 'alignItems': 'center'})
+                ], className='filtros-actions', style={'display': 'flex', 'alignItems': 'center', 'gap': '8px'}),
+                html.Div(
+                    dcc.Checklist(
+                        id='comparar-anios',
+                        options=[{'label': 'Comparar 2025 vs 2026', 'value': 'compare'}],
+                        value=[],
+                        inputStyle={'marginRight': '6px'},
+                        labelStyle={'color': '#e5e7eb', 'fontSize': '12px', 'fontWeight': '500'}
+                    ),
+                    style={'justifySelf': 'flex-end'}
+                ),
             ], style={
                 'display': 'grid',
-                'gridTemplateColumns': '100px minmax(0, 1fr) auto',
+                'gridTemplateColumns': '100px minmax(0, 1fr) auto auto',
                 'alignItems': 'center',
                 'columnGap': '12px'
             })
@@ -755,9 +765,10 @@ def render_mortalidad(year_key: str):
      Input('btn-aplicar-filtros', 'n_clicks'),
      Input('tabs', 'active_tab')],
     [State('filtro-anio', 'value'),
-     State('filtro-mes-inicio', 'value')]
+     State('filtro-mes-inicio', 'value'),
+     State('comparar-anios', 'value')]
 )
-def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, meses_seleccionados):
+def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, meses_seleccionados, comparar_anios):
     # Solo procesar cuando estamos en Resumen (evita actualizar componente inexistente)
     if active_tab != 'tab-resumen':
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
@@ -942,6 +953,55 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
 
+        # Bloque opcional de comparación entre años (tabla simple)
+        compare_enabled = isinstance(comparar_anios, list) and 'compare' in comparar_anios
+        compare_block = []
+        if compare_enabled:
+            available_years = sorted(PROCESSOR_BY_YEAR.keys())
+            if len(available_years) >= 2:
+                compare_rows = []
+                for y in available_years:
+                    proc_y = PROCESSOR_BY_YEAR[y]
+                    k_comp = proc_y.get_kpis_resumen(meses_filtrados)
+                    compare_rows.append({
+                        "year": y,
+                        "ingresos": int(k_comp.get("total_ingresos", 0) or 0),
+                        "ocupacion": float(k_comp.get("promedio_ocupacional", 0) or 0),
+                        "mortalidad": float(k_comp.get("mortalidad", 0) or 0),
+                        "estancia": float(k_comp.get("promedio_estancia", 0) or 0),
+                    })
+
+                compare_table = dbc.Table(
+                    [
+                        html.Thead(html.Tr([
+                            html.Th("Año"),
+                            html.Th("Total ingresos"),
+                            html.Th("% Ocupación"),
+                            html.Th("% Mortalidad"),
+                            html.Th("Estancia prom. (días)"),
+                        ])),
+                        html.Tbody([
+                            html.Tr([
+                                html.Td(row["year"]),
+                                html.Td(f"{row['ingresos']:,}".replace(",", ".")),
+                                html.Td(f"{row['ocupacion']:.1f}%"),
+                                html.Td(f"{row['mortalidad']:.1f}%"),
+                                html.Td(f"{row['estancia']:.2f}"),
+                            ]) for row in compare_rows
+                        ])
+                    ],
+                    bordered=True,
+                    hover=True,
+                    size="sm",
+                    style={'marginTop': '4px', 'marginBottom': '0'}
+                )
+                compare_block = [
+                    html.H6("Comparación por año (meses seleccionados)", style={
+                        'color': '#e5e7eb', 'fontWeight': '600', 'marginTop': '8px', 'fontSize': '13px'
+                    }),
+                    compare_table
+                ]
+
         # Ocupacional
         datos_ocup = processor.safe_get_row('% OCUPACIONAL', meses_filtrados)
         fig_ocup = go.Figure()
@@ -1123,7 +1183,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             ], className="mb-4 g-3"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
-            ], className="mb-3 g-3")
+            ], className="mb-2 g-3"),
+            html.Div(compare_block)
         ]), meses_filtrados, year_store_output
     except Exception as e:
         logger.error(f"Error en actualizar_resumen: {e}")
