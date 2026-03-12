@@ -180,6 +180,8 @@ class DataProcessor:
 
     def get_kpis_resumen(self, meses: Optional[List[str]] = None) -> Dict[str, Any]:
         """Calcula KPIs para el módulo de Resumen"""
+        from .config import MESES_COMPLETOS
+
         if meses is None:
             meses = self.meses
 
@@ -193,8 +195,16 @@ class DataProcessor:
         datos_egresos = self.safe_get_row('NÚMERO DE EGRESOS DEL MES', meses)
         total_egresos = datos_egresos.sum() if isinstance(datos_egresos, pd.Series) else datos_egresos
 
+        # Fallecidos: preferir hoja MORTALIDAD (fuente detallada) cuando exista, para coherencia con pestaña Mortalidad
         datos_fallecidos = self.safe_get_row('FALLECIDOS', meses)
-        total_fallecidos = datos_fallecidos.sum() if isinstance(datos_fallecidos, pd.Series) else datos_fallecidos
+        total_fallecidos_estadistica = datos_fallecidos.sum() if isinstance(datos_fallecidos, pd.Series) else datos_fallecidos
+        if not self.df_fallecidos.empty and 'Mes' in self.df_fallecidos.columns:
+            meses_nombres = [MESES_COMPLETOS.get(m, m) for m in meses]
+            total_fallecidos = len(self.df_fallecidos[self.df_fallecidos['Mes'].isin(meses_nombres)])
+        elif not self.df_fallecidos.empty:
+            total_fallecidos = len(self.df_fallecidos)
+        else:
+            total_fallecidos = total_fallecidos_estadistica
 
         datos_estancia = self.safe_get_row('PROMEDIO ESTANCIA', meses)
         promedio_estancia = datos_estancia[datos_estancia > 0].mean() if len(datos_estancia[datos_estancia > 0]) > 0 else 0
@@ -221,9 +231,13 @@ class DataProcessor:
         """Calcula KPIs para el módulo de Mortalidad"""
         suma_col = self.get_suma_column()
 
-        total_fallecidos = self.safe_get_value('FALLECIDOS', suma_col)
-        if pd.isna(total_fallecidos):
-            total_fallecidos = len(self.df_fallecidos) if not self.df_fallecidos.empty else 0
+        # Preferir hoja MORTALIDAD (lista real de pacientes) sobre ESTADISTICA para coherencia
+        if not self.df_fallecidos.empty:
+            total_fallecidos = len(self.df_fallecidos)
+        else:
+            total_fallecidos = self.safe_get_value('FALLECIDOS', suma_col)
+            if pd.isna(total_fallecidos):
+                total_fallecidos = 0
 
         fallecidos_covid = self.safe_get_value('FALLECIDOS COVID-19', suma_col)
         total_egresos = self.safe_get_value('NÚMERO DE EGRESOS DEL MES', suma_col)
