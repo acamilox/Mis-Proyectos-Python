@@ -418,11 +418,11 @@ def render_gestion(year_key: str):
                 showarrow=False
             )
             fig_germenes.update_layout(
-                title={'text': 'G\u00e9rmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': 'G\u00e9rmenes Aislados (IAAS)', 'font': {'size': 13, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=440,
-                margin=dict(l=40, r=40, t=60, b=120),
+                autosize=True, height=400,
+                margin=dict(l=24, r=24, t=50, b=100),
                 legend=dict(
                     orientation='h',
                     yanchor='top',
@@ -499,10 +499,10 @@ def render_gestion(year_key: str):
                 hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>'
             ))
             fig_eventos.update_layout(
-                title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=640, margin=dict(l=55, r=40, t=55, b=300),
+                autosize=True, height=560, margin=dict(l=48, r=28, t=50, b=180),
                 hovermode='x unified',
                 xaxis={
                     'tickfont': {'color': '#e2e8f0', 'size': 10},
@@ -689,10 +689,10 @@ def render_especialidades(year_key: str):
             name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#f39c12')
         ))
         fig_especialidades_area.update_layout(
-            title={'text': 'Volumen Mensual por Especialidad (Área Apilada)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            title={'text': 'Volumen Mensual por Especialidad (Área Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=380, margin=dict(l=50, r=30, t=50, b=60),
+            autosize=True, height=360, margin=dict(l=48, r=24, t=50, b=55),
             hovermode='x unified',
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={'title': 'Pacientes', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
@@ -721,11 +721,11 @@ def render_especialidades(year_key: str):
             name='Neurología', marker_color='#f39c12'
         ))
         fig_especialidades_mix.update_layout(
-            title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+            title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
             barmode='stack',
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=380, margin=dict(l=50, r=30, t=50, b=60),
+            autosize=True, height=360, margin=dict(l=48, r=24, t=50, b=55),
             hovermode='x unified',
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={
@@ -845,17 +845,17 @@ def render_mortalidad(year_key: str):
                 hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{x:.0f}<br>Porcentaje: %{customdata[1]:.1f}%<extra></extra>'
             )])
             fig_eps_mort.update_layout(
-                title={'text': f'Distribución de fallecidos por EPS (año {year_key})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': f'Distribución de fallecidos por EPS (año {year_key})', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 font={'color': '#f1f5f9'},
-                height=380, margin=dict(l=155, r=55, t=60, b=30),
+                autosize=True, height=360, margin=dict(l=120, r=28, t=50, b=32),
                 showlegend=False,
                 xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={
-                    'tickfont': {'color': '#cbd5e1'},
+                    'tickfont': {'color': '#cbd5e1', 'size': 10},
                     'automargin': True,
-                    'ticklabelstandoff': 10,
+                    'ticklabelstandoff': 8,
                     'categoryorder': 'total ascending'
                 }
             )
@@ -1112,17 +1112,17 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{x:.0f}<br>Porcentaje: %{customdata[1]:.1f}%<extra></extra>'
             )])
             fig_eps.update_layout(
-                title={'text': f'Distribuci\u00f3n por EPS - Barras (Total: {total_eps:,})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={'text': f'Distribuci\u00f3n por EPS - Barras (Total: {total_eps:,})', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 font={'color': '#f1f5f9'},
-                height=520, margin=dict(l=155, r=55, t=60, b=30),
+                autosize=True, height=480, margin=dict(l=120, r=28, t=50, b=32),
                 showlegend=False,
                 xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
                 yaxis={
-                    'tickfont': {'color': '#cbd5e1'},
+                    'tickfont': {'color': '#cbd5e1', 'size': 10},
                     'automargin': True,
-                    'ticklabelstandoff': 10,
+                    'ticklabelstandoff': 8,
                     'categoryorder': 'total ascending'
                 }
             )

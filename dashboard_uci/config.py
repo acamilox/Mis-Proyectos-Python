@@ -92,9 +92,11 @@ MESES_MAP_GRAM = {
 GRAPH_CONFIG = {
     'staticPlot': True,
     'displayModeBar': False,
-    # Permite que las gráficas se ajusten mejor al ancho disponible (responsive)
     'responsive': True,
 }
+
+# Layout mobile-friendly (márgenes compactos, mejor para pantallas pequeñas)
+LAYOUT_MARGINS = dict(l=42, r=24, t=48, b=48)
 
 # EPS soportadas
 EPS_LIST = [

@@ -465,13 +465,26 @@ body {
         margin-bottom: 12px;
     }
     
-    /* Gráficas - altura adaptable */
+    /* Gráficas - mejor visualización en móvil */
     .dash-graph {
-        min-height: 280px !important;
+        min-height: 260px !important;
+        width: 100% !important;
+        overflow: hidden;
     }
     
     .js-plotly-plot {
-        min-height: 260px;
+        min-height: 240px;
+        width: 100% !important;
+    }
+    
+    /* Reducir padding de las cards de gráficos en móvil */
+    .graph-card {
+        padding: 12px !important;
+    }
+    
+    /* Asegurar que títulos y leyendas de Plotly no se corten */
+    .plotly .main-svg {
+        overflow: visible;
     }
     
     .dashboard-footer {

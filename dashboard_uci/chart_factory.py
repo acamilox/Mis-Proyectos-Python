@@ -11,7 +11,7 @@ from typing import List, Optional, Dict, Any
 from dash import html
 import dash_bootstrap_components as dbc
 
-from .config import COLORS, MESES, GRAPH_CONFIG, CHART_COLORS
+from .config import COLORS, MESES, GRAPH_CONFIG, CHART_COLORS, LAYOUT_MARGINS
 
 
 class ChartFactory:
@@ -69,7 +69,7 @@ class ChartFactory:
             paper_bgcolor=self.colors['bg_secondary'],
             title={
                 'text': title,
-                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'Roboto'}, 
+                'font': {'size': 13, 'color': self.colors['text_primary'], 'family': 'Roboto'}, 
                 'x': 0.5, 
                 'xanchor': 'center'
             },
@@ -78,7 +78,7 @@ class ChartFactory:
                 'showline': True, 
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
                 'color': '#bcbec4', 
-                'tickfont': {'size': 11, 'color': '#bcbec4', 'family': 'Roboto'}, 
+                'tickfont': {'size': 10, 'color': '#bcbec4', 'family': 'Roboto'}, 
                 'title': ''
             },
             yaxis={
@@ -87,12 +87,13 @@ class ChartFactory:
                 'linecolor': 'rgba(148, 163, 184, 0.2)', 
                 'color': '#70727a', 
                 'tickformat': 'd', 
-                'tickfont': {'size': 11, 'color': '#70727a', 'family': 'Roboto'}, 
+                'tickfont': {'size': 10, 'color': '#70727a', 'family': 'Roboto'}, 
                 'title': ''
             },
-            margin=dict(l=50, r=30, t=50, b=50),
-            height=350,
-            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#bcbec4', font_family='Roboto'),
+            margin=LAYOUT_MARGINS,
+            autosize=True,
+            height=320,
+            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=12, font_color='#bcbec4', font_family='Roboto'),
             bargap=0.3
         )
         
@@ -150,7 +151,7 @@ class ChartFactory:
         fig.update_layout(
             title={
                 'text': title, 
-                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'Roboto'}, 
+                'font': {'size': 13, 'color': self.colors['text_primary'], 'family': 'Roboto'}, 
                 'x': 0.5, 
                 'xanchor': 'center'
             },
@@ -167,9 +168,10 @@ class ChartFactory:
                 'title': ''
             },
             yaxis=yaxis_config,
-            margin=dict(l=50, r=30, t=50, b=50),
-            height=350,
-            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#bcbec4', font_family='Roboto')
+            margin=LAYOUT_MARGINS,
+            autosize=True,
+            height=320,
+            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=12, font_color='#bcbec4', font_family='Roboto')
         )
         
         return fig
@@ -256,8 +258,9 @@ class ChartFactory:
                 'tickfont': {'size': 11, 'color': '#bcbec4', 'family': 'Roboto'}, 
                 'title': ''
             },
-            margin=dict(l=50, r=30, t=50, b=70),
-            height=380,
+            margin=dict(l=42, r=24, t=48, b=70),
+            autosize=True,
+            height=360,
             legend=dict(
                 orientation="h", 
                 yanchor="top", 
@@ -342,7 +345,7 @@ class ChartFactory:
         fig.update_layout(
             title={
                 'text': title, 
-                'font': {'size': 14, 'color': self.colors['text_primary'], 'family': 'Roboto'}, 
+                'font': {'size': 13, 'color': self.colors['text_primary'], 'family': 'Roboto'}, 
                 'x': 0.5, 
                 'xanchor': 'center'
             },
@@ -351,19 +354,20 @@ class ChartFactory:
             paper_bgcolor=self.colors['bg_secondary'],
             showlegend=True,
             legend=dict(
-                orientation='v',
-                yanchor='middle',
-                y=0.5,
-                xanchor='left',
-                x=1.02,
+                orientation='h',
+                yanchor='top',
+                y=-0.08,
+                xanchor='center',
+                x=0.5,
                 bgcolor='rgba(30, 41, 59, 0.8)',
                 bordercolor='rgba(148, 163, 184, 0.2)',
                 borderwidth=1,
-                font=dict(color=self.colors['text_primary'], size=10, family='Roboto'),
+                font=dict(color=self.colors['text_primary'], size=9, family='Roboto'),
                 itemsizing='constant'
             ),
-            margin=dict(l=20, r=150, t=50, b=30),
-            height=380,
+            margin=dict(l=16, r=24, t=48, b=80),
+            autosize=True,
+            height=360,
             hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_size=13, font_color='#bcbec4', font_family='Roboto')
         )
         
@@ -488,9 +492,10 @@ class ChartFactory:
                 bordercolor='rgba(148, 163, 184, 0.2)', 
                 borderwidth=1
             ),
-            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_color='#bcbec4', font_size=14, font_family='Roboto'),
-            margin=dict(l=70, r=70, t=50, b=60),
-            height=400,
+            hoverlabel=dict(bgcolor=self.colors['bg_primary'], font_color='#bcbec4', font_size=12, font_family='Roboto'),
+            margin=dict(l=55, r=55, t=48, b=55),
+            autosize=True,
+            height=380,
             bargap=0.15,
             annotations=annotations
         )
