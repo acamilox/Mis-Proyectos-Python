@@ -261,6 +261,7 @@ def render_resumen(year_key: str):
             })
         ], style={'marginBottom': '12px'}),
         html.Div([
+            # Fila 1: etiquetas y dropdowns
             html.Div([
                 html.Div("Año", style={
                     'color': '#94a3b8', 'fontSize': '12px', 'fontWeight': '600', 'lineHeight': '1'
@@ -271,7 +272,7 @@ def render_resumen(year_key: str):
                 html.Div("", style={'height': '12px'})
             ], style={
                 'display': 'grid',
-                'gridTemplateColumns': '100px minmax(0, 1fr) auto',
+                'gridTemplateColumns': '100px minmax(0, 1fr)',
                 'alignItems': 'end',
                 'columnGap': '12px',
                 'marginBottom': '6px'
@@ -294,36 +295,40 @@ def render_resumen(year_key: str):
                     placeholder="Seleccionar uno o varios meses",
                     style={
                         'fontSize': '13px',
-                        'marginRight': '16px',
                         'minWidth': '260px'
                     }
                 ),
+            ], style={
+                'display': 'grid',
+                'gridTemplateColumns': '100px minmax(0, 1fr)',
+                'alignItems': 'center',
+                'columnGap': '16px'
+            }),
+            # Fila 2: botones y checkbox, separados visualmente
+            html.Div([
                 html.Div([
                     dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
-                              title="Actualizar con año y meses seleccionados"),
+                               title="Actualizar con año y meses seleccionados"),
                     dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
-                              style={'marginLeft': '8px'}, title="Seleccionar todos los meses")
+                               style={'marginLeft': '8px'}, title="Seleccionar todos los meses")
                 ], className='filtros-actions', style={
                     'display': 'flex',
                     'alignItems': 'center',
-                    'gap': '8px',
-                    'marginLeft': '12px'
+                    'gap': '8px'
                 }),
-                html.Div(
-                    dcc.Checklist(
-                        id='comparar-anios',
-                        options=[{'label': 'Comparar 2025 vs 2026', 'value': 'compare'}],
-                        value=[],
-                        inputStyle={'marginRight': '6px'},
-                        labelStyle={'color': '#e5e7eb', 'fontSize': '12px', 'fontWeight': '500'}
-                    ),
-                    style={'justifySelf': 'flex-end'}
+                dcc.Checklist(
+                    id='comparar-anios',
+                    options=[{'label': 'Comparar 2025 vs 2026', 'value': 'compare'}],
+                    value=[],
+                    inputStyle={'marginRight': '6px'},
+                    labelStyle={'color': '#e5e7eb', 'fontSize': '12px', 'fontWeight': '500'}
                 ),
             ], style={
-                'display': 'grid',
-                'gridTemplateColumns': '100px minmax(0, 1fr) auto auto',
+                'display': 'flex',
+                'justifyContent': 'flex-end',
                 'alignItems': 'center',
-                'columnGap': '16px'
+                'gap': '16px',
+                'marginTop': '10px'
             })
         ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'})
     ], style={
