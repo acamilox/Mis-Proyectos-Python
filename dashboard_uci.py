@@ -316,7 +316,9 @@ def render_resumen(year_key: str):
                     'alignItems': 'center',
                     'justifyContent': 'flex-end',
                     'gap': '12px',
-                    'flexWrap': 'nowrap'
+                    'flexWrap': 'nowrap',
+                    'position': 'relative',
+                    'zIndex': 5
                 })
             ], style={
                 'display': 'grid',
