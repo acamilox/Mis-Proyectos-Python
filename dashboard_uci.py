@@ -358,11 +358,14 @@ def render_gestion(year_key: str):
         )
         # endregion
         kpis = processor.get_kpis_gestion()
-        kpi1 = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "D\u00edas", "#6366f1")
-        kpi2 = chart_factory.create_kpi_card("Giro cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3b82f6")
-        kpi3 = chart_factory.create_kpi_card("Total D\u00edas Estancia", f"{int(kpis['total_dias_estancia'])}", "Ene - Dic", "#10b981")
-        kpi4 = chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#8b5cf6")
-        kpi5 = chart_factory.create_kpi_card("Promedio D\u00edas VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilaci\u00f3n Mec\u00e1nica", "#06b6d4")
+        kpi_items_g = [
+            (float(kpis['total_dias_estancia'] or 0), chart_factory.create_kpi_card("Total D\u00edas Estancia", f"{int(kpis['total_dias_estancia'])}", "Ene - Dic", "#10b981")),
+            (float(kpis['capacidad_uci'] or 0), chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#8b5cf6")),
+            (float(kpis['promedio_dias_vm'] or 0), chart_factory.create_kpi_card("Promedio D\u00edas VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilaci\u00f3n Mec\u00e1nica", "#06b6d4")),
+            (float(kpis['promedio_estancia'] or 0), chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "D\u00edas", "#6366f1")),
+            (float(kpis['giro_cama'] or 0), chart_factory.create_kpi_card("Giro cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3b82f6")),
+        ]
+        kpi_cards_g = [c for _, c in sorted(kpi_items_g, key=lambda x: x[0], reverse=True)]
 
         datos_estancia = processor.safe_get_row('PROMEDIO ESTANCIA', MESES)
         fig_estancia = chart_factory.create_line_chart(datos_estancia, 'Estancia Promedio (D\u00edas)', color='#6366f1', decimals=1)
@@ -621,9 +624,7 @@ def render_gestion(year_key: str):
         return html.Div([
             html.H5("Indicadores de Gesti\u00f3n", style={'color': '#f1f5f9', 'fontWeight': '600'}, className="mb-3"),
             dbc.Row([
-                dbc.Col(kpi1, xs=12, md=True), dbc.Col(kpi2, xs=12, md=True),
-                dbc.Col(kpi3, xs=12, md=True), dbc.Col(kpi4, xs=12, md=True),
-                dbc.Col(kpi5, xs=12, md=True)
+                *[dbc.Col(k, xs=12, md=True) for k in kpi_cards_g]
             ], className="mb-4 g-3"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_estancia, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
@@ -672,10 +673,13 @@ def render_especialidades(year_key: str):
         total_neurologia = processor.safe_get_value('NEUROLOGIA', suma_col)
         total = max(total_medicina + total_cirugia + total_neuro + total_neurologia, 1)
 
-        kpi1 = chart_factory.create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{processor.formatear_porcentaje(total_medicina/total*100, False)}%", "#3498db")
-        kpi2 = chart_factory.create_kpi_card("Cirug\u00eda General", f"{int(total_cirugia)}", f"{processor.formatear_porcentaje(total_cirugia/total*100, False)}%", "#27ae60")
-        kpi3 = chart_factory.create_kpi_card("Neurocirug\u00eda", f"{int(total_neuro)}", f"{processor.formatear_porcentaje(total_neuro/total*100, False)}%", "#16a085")
-        kpi4 = chart_factory.create_kpi_card("Neurolog\u00eda", f"{int(total_neurologia)}", f"{processor.formatear_porcentaje(total_neurologia/total*100, False)}%", "#9b59b6")
+        kpi_items_esp = [
+            (float(total_medicina), chart_factory.create_kpi_card("Medicina Interna", f"{int(total_medicina)}", f"{processor.formatear_porcentaje(total_medicina/total*100, False)}%", "#3498db")),
+            (float(total_cirugia), chart_factory.create_kpi_card("Cirug\u00eda General", f"{int(total_cirugia)}", f"{processor.formatear_porcentaje(total_cirugia/total*100, False)}%", "#e74c3c")),
+            (float(total_neuro), chart_factory.create_kpi_card("Neurocirug\u00eda", f"{int(total_neuro)}", f"{processor.formatear_porcentaje(total_neuro/total*100, False)}%", "#9b59b6")),
+            (float(total_neurologia), chart_factory.create_kpi_card("Neurolog\u00eda", f"{int(total_neurologia)}", f"{processor.formatear_porcentaje(total_neurologia/total*100, False)}%", "#f39c12")),
+        ]
+        kpi_cards_esp = [c for _, c in sorted(kpi_items_esp, key=lambda x: x[0], reverse=True)]
 
         series_medicina = pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', MESES), errors='coerce').fillna(0)
         series_cirugia = pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', MESES), errors='coerce').fillna(0)
@@ -702,15 +706,15 @@ def render_especialidades(year_key: str):
         ))
         fig_especialidades_area.add_trace(go.Scatter(
             x=df_especialidades['Mes'], y=df_especialidades['Cirugía General'],
-            name='Cirugía General', mode='lines', stackgroup='one', line=dict(width=0.8, color='#27ae60')
+            name='Cirugía General', mode='lines', stackgroup='one', line=dict(width=0.8, color='#e74c3c')
         ))
         fig_especialidades_area.add_trace(go.Scatter(
             x=df_especialidades['Mes'], y=df_especialidades['Neurocirugía'],
-            name='Neurocirugía', mode='lines', stackgroup='one', line=dict(width=0.8, color='#16a085')
+            name='Neurocirugía', mode='lines', stackgroup='one', line=dict(width=0.8, color='#9b59b6')
         ))
         fig_especialidades_area.add_trace(go.Scatter(
             x=df_especialidades['Mes'], y=df_especialidades['Neurología'],
-            name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#9b59b6')
+            name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#f39c12')
         ))
         fig_especialidades_area.update_layout(
             title={'text': 'Volumen Mensual por Especialidad (Área Apilada)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
@@ -734,15 +738,15 @@ def render_especialidades(year_key: str):
         ))
         fig_especialidades_mix.add_trace(go.Bar(
             x=MESES, y=(df_especialidades['Cirugía General'] / df_especialidades['Total']) * 100,
-            name='Cirugía General', marker_color='#27ae60'
+            name='Cirugía General', marker_color='#e74c3c'
         ))
         fig_especialidades_mix.add_trace(go.Bar(
             x=MESES, y=(df_especialidades['Neurocirugía'] / df_especialidades['Total']) * 100,
-            name='Neurocirugía', marker_color='#16a085'
+            name='Neurocirugía', marker_color='#9b59b6'
         ))
         fig_especialidades_mix.add_trace(go.Bar(
             x=MESES, y=(df_especialidades['Neurología'] / df_especialidades['Total']) * 100,
-            name='Neurología', marker_color='#9b59b6'
+            name='Neurología', marker_color='#f39c12'
         ))
         fig_especialidades_mix.update_layout(
             title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
@@ -768,7 +772,7 @@ def render_especialidades(year_key: str):
 
         return html.Div([
             html.H5("Principales Especialidades", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '12px'}),
-            dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
+            dbc.Row([dbc.Col(k, xs=12, md=3) for k in kpi_cards_esp], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_especialidades_area, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
             ], className="mb-3 g-3"),
@@ -786,12 +790,18 @@ def render_mortalidad(year_key: str):
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
         data_year = DATA_BY_YEAR.get(year_key, DATA)
         kpis_mort = processor.get_kpis_mortalidad()
-        kpi1 = chart_factory.create_kpi_card("Total Fallecidos", f"{int(kpis_mort['total_fallecidos'])}", "Ene - Dic", "#e74c3c")
-        kpi2 = chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis_mort['mortalidad_general']), "Ene - Dic", "#c0392b")
-        kpi3 = chart_factory.create_kpi_card("Fallecidos COVID-19", f"{int(kpis_mort['fallecidos_covid'])}", "Ene - Dic", "#34495e")
-        kpi4 = chart_factory.create_kpi_card("% Mortalidad Trauma", processor.formatear_porcentaje(kpis_mort['mortalidad_trauma']), "Promedio", "#f39c12")
-        kpi_prom_dias = chart_factory.create_kpi_card("Promedio D\u00edas Estancia", f"{kpis_mort['promedio_dias_estancia']:.1f}", "Fallecidos", "#9b59b6")
-        kpi_mediana = chart_factory.create_kpi_card("Mediana D\u00edas de Estancia", f"{kpis_mort['mediana_dias_estancia']:.1f}", "Fallecidos", "#3498db")
+        kpi_items_mort = [
+            (float(kpis_mort.get('total_fallecidos') or 0), chart_factory.create_kpi_card("Total Fallecidos", f"{int(kpis_mort['total_fallecidos'])}", "Ene - Dic", "#e74c3c")),
+            (float(kpis_mort.get('mortalidad_general') or 0), chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis_mort['mortalidad_general']), "Ene - Dic", "#c0392b")),
+            (float(kpis_mort.get('fallecidos_covid') or 0), chart_factory.create_kpi_card("Fallecidos COVID-19", f"{int(kpis_mort['fallecidos_covid'])}", "Ene - Dic", "#34495e")),
+            (float(kpis_mort.get('mortalidad_trauma') or 0), chart_factory.create_kpi_card("% Mortalidad Trauma", processor.formatear_porcentaje(kpis_mort['mortalidad_trauma']), "Promedio", "#f39c12")),
+        ]
+        kpi_cards_mort = [c for _, c in sorted(kpi_items_mort, key=lambda x: x[0], reverse=True)]
+        kpi_estancia_mort = [
+            (float(kpis_mort.get('promedio_dias_estancia') or 0), chart_factory.create_kpi_card("Promedio D\u00edas Estancia", f"{kpis_mort['promedio_dias_estancia']:.1f}", "Fallecidos", "#9b59b6")),
+            (float(kpis_mort.get('mediana_dias_estancia') or 0), chart_factory.create_kpi_card("Mediana D\u00edas de Estancia", f"{kpis_mort['mediana_dias_estancia']:.1f}", "Fallecidos", "#3498db")),
+        ]
+        kpi_cards_estancia_mort = [c for _, c in sorted(kpi_estancia_mort, key=lambda x: x[0], reverse=True)]
 
         fig_mort = chart_factory.create_line_chart(
             processor.safe_get_row('% DE MORTALIDAD GENERAL', MESES),
@@ -914,7 +924,7 @@ def render_mortalidad(year_key: str):
                 labels=espec_labels,
                 values=espec_values,
                 title=f'Distribución por Especialidad (año {year_key})',
-                colors=['#3498db', '#27ae60', '#16a085', '#9b59b6'],
+                colors=['#3498db', '#e74c3c', '#9b59b6', '#f39c12'],
                 auto_sort=True
             )
         else:
@@ -937,9 +947,9 @@ def render_mortalidad(year_key: str):
             )
 
         return html.Div([
-            dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
+            dbc.Row([dbc.Col(k, xs=12, md=3) for k in kpi_cards_mort], className="mb-3 g-3"),
             html.H6("D\u00edas de Estancia - Fallecidos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '10px', 'marginTop': '8px'}),
-            dbc.Row([dbc.Col(kpi_prom_dias, xs=12, md=6), dbc.Col(kpi_mediana, xs=12, md=6)], className="mb-3 g-3"),
+            dbc.Row([dbc.Col(k, xs=12, md=6) for k in kpi_cards_estancia_mort], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
                 dbc.Col(dcc.Graph(figure=fig_mort, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, md=8),
@@ -1052,11 +1062,14 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             },
         )
         # endregion
-        kpi_ingresos = chart_factory.create_kpi_card("Total Ingresos", f"{int(kpis['total_ingresos'])}", rango_texto, "#6366f1")
-        kpi_ocup = chart_factory.create_kpi_card("% Ocupaci\u00f3n Promedio", processor.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#3b82f6")
-        kpi_mort = chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis['mortalidad']), f"Total {rango_texto}", "#ef4444")
-        kpi_estancia = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", f"D\u00edas - {rango_texto}", "#10b981")
-        kpi_giro = chart_factory.create_kpi_card("Giro cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#8b5cf6")
+        kpi_items_r = [
+            (float(kpis.get('total_ingresos') or 0), chart_factory.create_kpi_card("Total Ingresos", f"{int(kpis['total_ingresos'])}", rango_texto, "#6366f1")),
+            (float(kpis.get('promedio_ocupacional') or 0), chart_factory.create_kpi_card("% Ocupaci\u00f3n Promedio", processor.formatear_porcentaje(kpis['promedio_ocupacional']), rango_texto, "#3b82f6")),
+            (float(kpis.get('mortalidad') or 0), chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis['mortalidad']), f"Total {rango_texto}", "#ef4444")),
+            (float(kpis.get('promedio_estancia') or 0), chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", f"D\u00edas - {rango_texto}", "#10b981")),
+            (float(kpis.get('giro_cama') or 0), chart_factory.create_kpi_card("Giro cama", f"{kpis['giro_cama']:.2f}", f"Promedio {rango_texto}", "#8b5cf6")),
+        ]
+        kpi_cards_r = [c for _, c in sorted(kpi_items_r, key=lambda x: x[0], reverse=True)]
 
         # EPS (filtrado por meses seleccionados)
         eps_data = []
@@ -1464,13 +1477,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     'overflow': 'hidden'
                 }
             ) if compare_block else html.Div(),
-            dbc.Row([
-                dbc.Col(kpi_ingresos, xs=6, sm=6, md=True),
-                dbc.Col(kpi_ocup, xs=6, sm=6, md=True),
-                dbc.Col(kpi_mort, xs=6, sm=6, md=True),
-                dbc.Col(kpi_estancia, xs=6, sm=6, md=True),
-                dbc.Col(kpi_giro, xs=6, sm=6, md=True)
-            ], className="mb-4 g-3"),
+            dbc.Row([dbc.Col(k, xs=6, sm=6, md=True) for k in kpi_cards_r], className="mb-4 g-3"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocup, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)], className="mb-4"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_ie, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)], className="mb-4"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=_GRAPH_CFG, style={'height': '520px'}), xs=12)], className="mb-4 g-3"),
