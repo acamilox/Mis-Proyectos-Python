@@ -982,14 +982,23 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     k_mort = proc_y.get_kpis_mortalidad()
 
                     # Totales de otros módulos
-                    df_eventos_y = data_y.get('eventos_adversos') or pd.DataFrame()
-                    total_eventos_y = int(df_eventos_y['Cantidad'].sum()) if not df_eventos_y.empty else 0
+                    df_eventos_y = data_y.get('eventos_adversos')
+                    if isinstance(df_eventos_y, pd.DataFrame) and not df_eventos_y.empty and 'Cantidad' in df_eventos_y.columns:
+                        total_eventos_y = int(pd.to_numeric(df_eventos_y['Cantidad'], errors='coerce').fillna(0).sum())
+                    else:
+                        total_eventos_y = 0
 
-                    df_germenes_y = data_y.get('germenes') or pd.DataFrame()
-                    total_germenes_y = int(df_germenes_y['Cantidad'].sum()) if not df_germenes_y.empty else 0
+                    df_germenes_y = data_y.get('germenes')
+                    if isinstance(df_germenes_y, pd.DataFrame) and not df_germenes_y.empty and 'Cantidad' in df_germenes_y.columns:
+                        total_germenes_y = int(pd.to_numeric(df_germenes_y['Cantidad'], errors='coerce').fillna(0).sum())
+                    else:
+                        total_germenes_y = 0
 
-                    df_morb_y = data_y.get('morbilidad') or pd.DataFrame()
-                    total_diag_y = int(df_morb_y['Total'].sum()) if not df_morb_y.empty else 0
+                    df_morb_y = data_y.get('morbilidad')
+                    if isinstance(df_morb_y, pd.DataFrame) and not df_morb_y.empty and 'Total' in df_morb_y.columns:
+                        total_diag_y = int(pd.to_numeric(df_morb_y['Total'], errors='coerce').fillna(0).sum())
+                    else:
+                        total_diag_y = 0
 
                     compare_rows.append({
                         "year": y,
