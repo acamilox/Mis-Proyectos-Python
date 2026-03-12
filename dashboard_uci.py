@@ -992,14 +992,15 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     })
 
                 header_style = {
-                    'backgroundColor': 'rgba(15,23,42,0.95)',
+                    'backgroundColor': 'rgba(15,23,42,0.98)',
                     'color': '#e5e7eb',
                     'fontSize': '12px',
                     'fontWeight': '600',
-                    'borderBottom': '1px solid rgba(148,163,184,0.4)'
+                    'borderBottom': '1px solid rgba(148,163,184,0.5)'
                 }
 
                 body_style = {
+                    'backgroundColor': 'rgba(15,23,42,0.98)',
                     'borderTop': 'none',
                     'borderBottom': '1px solid rgba(55,65,81,0.7)',
                     'fontSize': '12px',
