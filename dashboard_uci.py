@@ -299,7 +299,12 @@ def render_resumen(year_key: str):
                               title="Actualizar con año y meses seleccionados"),
                     dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
                               style={'marginLeft': '8px'}, title="Seleccionar todos los meses")
-                ], className='filtros-actions', style={'display': 'flex', 'alignItems': 'center', 'gap': '8px'}),
+                ], className='filtros-actions', style={
+                    'display': 'flex',
+                    'alignItems': 'center',
+                    'gap': '8px',
+                    'marginLeft': '12px'
+                }),
                 html.Div(
                     dcc.Checklist(
                         id='comparar-anios',
@@ -314,7 +319,7 @@ def render_resumen(year_key: str):
                 'display': 'grid',
                 'gridTemplateColumns': '100px minmax(0, 1fr) auto auto',
                 'alignItems': 'center',
-                'columnGap': '12px'
+                'columnGap': '16px'
             })
         ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'})
     ], style={
