@@ -224,16 +224,16 @@ app.layout = html.Div([
 
 @app.callback(
     Output('tab-content', 'children'),
-    [Input('tabs', 'active_tab'), Input('selected-year-store', 'data'), Input('pending-year-store', 'data')]
+    [Input('tabs', 'active_tab'), Input('selected-year-store', 'data')]
 )
-def render_content(tab, selected_year, pending_year):
+def render_content(tab, selected_year):
+    """Renderiza el contenido de cada pesta\u00f1a usando SIEMPRE el a\u00f1o ya aplicado."""
     year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     year_key = year_candidate if year_candidate in PROCESSOR_BY_YEAR else DEFAULT_YEAR
-    pending_key = str(pending_year) if pending_year is not None else year_key
-    if pending_key not in PROCESSOR_BY_YEAR:
-        pending_key = year_key
+
     if tab == 'tab-resumen':
-        return render_resumen(pending_key)
+        # En Resumen los filtros (incluido el a\u00f1o) solo se aplican cuando se pulsa \"Aplicar\"
+        return render_resumen(year_key)
     elif tab == 'tab-gestion':
         return render_gestion(year_key)
     elif tab == 'tab-especialidades':
