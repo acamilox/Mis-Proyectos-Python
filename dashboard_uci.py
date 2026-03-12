@@ -508,7 +508,7 @@ def render_gestion(year_key: str):
                 name='Cantidad',
                 marker_color=[colors_eventos[i % len(colors_eventos)] for i in range(len(df_eventos))],
                 text=df_eventos['Cantidad'],
-                textposition='auto',
+                textposition='inside',
                 textfont=dict(color='#f1f5f9', size=11),
                 hovertemplate='<b>%{x}</b><br>Eventos: %{y}<extra></extra>'
             ))
