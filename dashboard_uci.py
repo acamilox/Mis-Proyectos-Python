@@ -305,7 +305,7 @@ def render_resumen(year_key: str):
                 'alignItems': 'center',
                 'columnGap': '16px'
             }),
-            # Fila 3: botones y checkbox, debajo y a la derecha
+            # Fila 3: botones y checkbox, centrados debajo
             html.Div([
                 html.Div([
                     dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
@@ -322,15 +322,15 @@ def render_resumen(year_key: str):
                 ], style={
                     'display': 'flex',
                     'alignItems': 'center',
-                    'justifyContent': 'flex-end',
-                    'gap': '12px',
+                    'justifyContent': 'center',
+                    'gap': '16px',
                     'flexWrap': 'wrap'
                 })
             ], style={
                 'display': 'flex',
-                'justifyContent': 'flex-end',
+                'justifyContent': 'center',
                 'alignItems': 'center',
-                'marginTop': '10px'
+                'marginTop': '12px'
             })
         ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'})
     ], style={
