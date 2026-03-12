@@ -166,10 +166,9 @@ body {
     z-index: 20;
     min-width: 0;
 }
-/* Mantener altura estable del filtro de meses para evitar "saltos" */
+/* Selector de meses - altura estable en desktop */
 #filtro-mes-inicio .Select-control {
-    height: 42px !important;
-    overflow: hidden !important;
+    min-height: 42px !important;
     width: 100% !important;
 }
 #filtro-mes-inicio .Select-multi-value-wrapper {
@@ -182,6 +181,16 @@ body {
 }
 #filtro-mes-inicio .Select-multi-value-wrapper::-webkit-scrollbar {
     height: 6px;
+}
+
+/* Acciones (Aplicar, Todos, checkbox) - ocupan toda la fila */
+.filtros-acciones {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
 }
 
 /* Evita que el selector de meses invada el bloque de botones */
@@ -482,14 +491,28 @@ body {
         display: block;
     }
     
-    .filtros-inner > div[style*="gridTemplateColumns"] {
+    .filtros-inner {
         grid-template-columns: 1fr !important;
-        gap: 8px !important;
+        row-gap: 12px !important;
+        column-gap: 0 !important;
     }
     
     .filtros-section .Select {
         width: 100% !important;
         min-width: 0 !important;
+    }
+    
+    /* Meses: chips en varias filas en móvil */
+    #filtro-mes-inicio .Select-control {
+        min-height: 44px !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    #filtro-mes-inicio .Select-multi-value-wrapper {
+        flex-wrap: wrap !important;
+        overflow: visible !important;
+        gap: 6px;
+        padding: 4px 0;
     }
     
     .filtros-inner > div:last-child {

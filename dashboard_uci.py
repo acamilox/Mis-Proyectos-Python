@@ -260,26 +260,13 @@ def render_resumen(year_key: str):
             html.Span("Per\u00edodo de an\u00e1lisis", style={
                 'color': '#f1f5f9', 'fontWeight': '600', 'fontSize': '14px'
             })
-        ], style={'marginBottom': '12px'}),
+        ], style={'marginBottom': '12px'}, className="filtros-titulo"),
         html.Div([
-            # Fila 1: etiquetas
+            # Año: etiqueta + dropdown
             html.Div([
-                html.Div("Año", style={
-                    'color': '#94a3b8', 'fontSize': '12px', 'fontWeight': '600', 'lineHeight': '1'
+                html.Label("Año", className="filtro-label", style={
+                    'color': '#94a3b8', 'fontSize': '12px', 'fontWeight': '600', 'marginBottom': '6px', 'display': 'block'
                 }),
-                html.Div("Meses", style={
-                    'color': '#94a3b8', 'fontSize': '12px', 'fontWeight': '600', 'lineHeight': '1'
-                }),
-                html.Div("", style={'height': '12px'})
-            ], style={
-                'display': 'grid',
-                'gridTemplateColumns': '100px minmax(0, 1fr)',
-                'alignItems': 'end',
-                'columnGap': '12px',
-                'marginBottom': '6px'
-            }),
-            # Fila 2: año y meses
-            html.Div([
                 dcc.Dropdown(
                     id='filtro-anio',
                     options=[{'label': anio, 'value': anio} for anio in AVAILABLE_YEARS],
@@ -289,51 +276,36 @@ def render_resumen(year_key: str):
                     persistence_type='session',
                     style={'fontSize': '13px'}
                 ),
+            ], className="filtro-grupo"),
+            # Meses: etiqueta + dropdown
+            html.Div([
+                html.Label("Meses", className="filtro-label", style={
+                    'color': '#94a3b8', 'fontSize': '12px', 'fontWeight': '600', 'marginBottom': '6px', 'display': 'block'
+                }),
                 dcc.Dropdown(
                     id='filtro-mes-inicio',
                     options=[{'label': MESES_COMPLETOS[mes], 'value': mes} for mes in MESES],
                     value=MESES,
                     multi=True,
-                    placeholder="Seleccionar uno o varios meses",
-                    style={
-                        'fontSize': '13px',
-                        'minWidth': '260px'
-                    }
+                    placeholder="Seleccionar meses",
+                    style={'fontSize': '13px'}
                 ),
-            ], style={
-                'display': 'grid',
-                'gridTemplateColumns': '100px minmax(0, 1fr)',
-                'alignItems': 'center',
-                'columnGap': '16px'
-            }),
-            # Fila 3: botones y checkbox, centrados debajo
+            ], className="filtro-grupo"),
+            # Botones
             html.Div([
-                html.Div([
-                    dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
-                               title="Actualizar con año y meses seleccionados"),
-                    dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
-                               style={'marginLeft': '10px'}, title="Seleccionar todos los meses"),
-                    dcc.Checklist(
-                        id='comparar-anios',
-                        options=[{'label': 'Comparar 2025 vs 2026', 'value': 'compare'}],
-                        value=[],
-                        inputStyle={'marginRight': '6px'},
-                        labelStyle={'color': '#e5e7eb', 'fontSize': '12px', 'fontWeight': '500', 'marginLeft': '10px'}
-                    ),
-                ], style={
-                    'display': 'flex',
-                    'alignItems': 'center',
-                    'justifyContent': 'center',
-                    'gap': '16px',
-                    'flexWrap': 'wrap'
-                })
-            ], style={
-                'display': 'flex',
-                'justifyContent': 'center',
-                'alignItems': 'center',
-                'marginTop': '12px'
-            })
-        ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'}, className="filtros-inner")
+                dbc.Button("Aplicar", id='btn-aplicar-filtros', color="success", size="sm",
+                           title="Actualizar con año y meses seleccionados", className="filtro-btn"),
+                dbc.Button("Todos", id='btn-todos-meses', color="secondary", size="sm",
+                           title="Seleccionar todos los meses", className="filtro-btn"),
+                dcc.Checklist(
+                    id='comparar-anios',
+                    options=[{'label': 'Comparar 2025 vs 2026', 'value': 'compare'}],
+                    value=[],
+                    inputStyle={'marginRight': '6px'},
+                    labelStyle={'color': '#e5e7eb', 'fontSize': '12px', 'fontWeight': '500'}
+                ),
+            ], className="filtros-acciones")
+        ], style={'display': 'grid', 'gridTemplateColumns': '100px minmax(0, 1fr)', 'alignItems': 'start', 'columnGap': '16px', 'rowGap': '16px'}, className="filtros-inner")
     ], style={
         'background': 'rgba(30, 41, 59, 0.8)',
         'padding': '14px 20px',
