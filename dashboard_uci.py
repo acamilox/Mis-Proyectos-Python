@@ -462,8 +462,6 @@ def render_gestion(year_key: str):
                 df_eventos = df_eventos_top
             total_eventos = max(float(df_eventos['Cantidad'].sum()), 1.0)
             df_eventos['Acumulado %'] = (df_eventos['Cantidad'].cumsum() / total_eventos) * 100
-            # Orden invertido: mayor cantidad arriba (primera fila de barras horizontales)
-            df_eventos = df_eventos.iloc[::-1].reset_index(drop=True)
             colors_eventos = [
                 '#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899',
                 '#f97316', '#14b8a6', '#a855f7', '#0ea5e9', '#84cc16', '#e11d48', '#22c55e',
@@ -472,57 +470,53 @@ def render_gestion(year_key: str):
             ]
             fig_eventos = go.Figure()
             fig_eventos.add_trace(go.Bar(
-                y=df_eventos['Evento'],
-                x=df_eventos['Cantidad'],
+                x=df_eventos['Evento'],
+                y=df_eventos['Cantidad'],
                 name='Cantidad',
-                orientation='h',
                 marker_color=[colors_eventos[i % len(colors_eventos)] for i in range(len(df_eventos))],
                 text=df_eventos['Cantidad'],
                 textposition='auto',
                 textfont=dict(color='#f1f5f9', size=11),
-                hovertemplate='<b>%{y}</b><br>Eventos: %{x}<extra></extra>'
+                hovertemplate='<b>%{x}</b><br>Eventos: %{y}<extra></extra>'
             ))
             fig_eventos.add_trace(go.Scatter(
-                y=df_eventos['Evento'],
-                x=df_eventos['Acumulado %'],
+                x=df_eventos['Evento'],
+                y=df_eventos['Acumulado %'],
                 name='Acumulado %',
                 mode='lines+markers',
-                xaxis='x2',
+                yaxis='y2',
                 line=dict(color='#fbbf24', width=2.5),
                 marker=dict(size=6, color='#fbbf24'),
-                hovertemplate='<b>%{y}</b><br>Acumulado: %{x:.1f}%<extra></extra>'
+                hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>'
             ))
             fig_eventos.update_layout(
                 title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=560, margin=dict(l=220, r=70, t=80, b=60),
-                hovermode='y unified',
+                height=640, margin=dict(l=55, r=40, t=55, b=320),
+                hovermode='x unified',
                 xaxis={
-                    'title': 'Cantidad',
-                    'tickfont': {'color': '#94a3b8'},
+                    'tickfont': {'color': '#e2e8f0', 'size': 10},
+                    'tickangle': -42,
+                    'ticklabelstandoff': 10,
+                    'automargin': True,
                     'gridcolor': 'rgba(148, 163, 184, 0.1)'
                 },
-                xaxis2={
-                    'overlaying': 'x',
-                    'side': 'top',
+                yaxis={'title': 'Cantidad', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis2={
+                    'overlaying': 'y',
+                    'side': 'right',
                     'range': [0, 110],
-                    'title': {'text': 'Acumulado %', 'font': {'color': '#fbbf24'}},
                     'tickfont': {'color': '#fbbf24'},
+                    'title': {'text': 'Acumulado %', 'font': {'color': '#fbbf24'}},
                     'showgrid': False
                 },
-                yaxis={
-                    'tickfont': {'color': '#e2e8f0', 'size': 11},
-                    'gridcolor': 'rgba(148, 163, 184, 0.1)',
-                    'dtick': 1
-                },
                 legend=dict(
-                    orientation="h", y=1.02, x=0.5, xanchor="center", yanchor="bottom",
+                    orientation="h", y=-0.28, x=0.5, xanchor="center",
                     bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12},
-                    bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1,
-                    itemsizing='constant', itemwidth=50
+                    bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
                 ),
-                bargap=0.55
+                bargap=0.3
             )
         else:
             fig_eventos = go.Figure()
