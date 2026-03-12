@@ -545,7 +545,7 @@ def render_gestion(year_key: str):
                     'showgrid': False
                 },
                 legend=dict(
-                    orientation="h", y=-0.30, x=0.5, xanchor="center",
+                    orientation="h", y=-0.40, x=0.5, xanchor="center",
                     bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 12},
                     bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
                 ),
