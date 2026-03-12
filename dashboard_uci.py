@@ -278,13 +278,10 @@ def render_resumen(year_key: str):
                 ),
                 dcc.Dropdown(
                     id='filtro-mes-inicio',
-                    options=(
-                        [{'label': MESES_COMPLETOS[mes], 'value': mes} for mes in MESES]
-                        + [{'label': 'Todos los meses', 'value': VALOR_TODOS_MESES}]
-                    ),
-                    value=[VALOR_TODOS_MESES],
+                    options=[{'label': MESES_COMPLETOS[mes], 'value': mes} for mes in MESES],
+                    value=MESES,
                     multi=True,
-                    placeholder="Seleccionar uno, varios o todos los meses",
+                    placeholder="Seleccionar uno o varios meses",
                     style={'fontSize': '13px'}
                 ),
                 html.Div([
@@ -772,8 +769,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
     # endregion
     meses_output_value = dash.no_update
     if triggered_id == 'btn-todos-meses':
-        meses_seleccionados = [VALOR_TODOS_MESES]
-        meses_output_value = [VALOR_TODOS_MESES]
+        # Selecciona explícitamente todos los meses en el dropdown
+        meses_seleccionados = MESES.copy()
+        meses_output_value = MESES.copy()
     try:
         year_key = str(anio_seleccionado) if anio_seleccionado is not None else DEFAULT_YEAR
         if year_key not in PROCESSOR_BY_YEAR:
@@ -796,12 +794,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
         # endregion
 
         if meses_seleccionados and isinstance(meses_seleccionados, list) and len(meses_seleccionados) > 0:
-            if VALOR_TODOS_MESES in meses_seleccionados:
+            meses_filtrados = [m for m in meses_seleccionados if m in MESES]
+            if not meses_filtrados:
                 meses_filtrados = MESES
-            else:
-                meses_filtrados = [m for m in meses_seleccionados if m in MESES]
-                if not meses_filtrados:
-                    meses_filtrados = MESES
         else:
             meses_filtrados = MESES
 
