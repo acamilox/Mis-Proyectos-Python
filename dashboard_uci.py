@@ -854,25 +854,12 @@ def render_mortalidad(year_key: str):
             float(total_neurologia or 0),
         ]
         if any(v > 0 for v in espec_values):
-            fig_espec_mort = go.Figure(data=[go.Pie(
+            fig_espec_mort = chart_factory.create_donut_chart(
                 labels=espec_labels,
                 values=espec_values,
-                hole=0.45,
-                marker=dict(
-                    colors=['#3498db', '#27ae60', '#16a085', '#9b59b6'],
-                    line=dict(color='#0f172a', width=2)
-                ),
-                textinfo='label+percent',
-                textposition='inside',
-                textfont=dict(size=11, color='white', family='Roboto'),
-                hovertemplate='<b>%{label}</b><br>Pacientes: %{value}<br>Porcentaje: %{percent}<extra></extra>'
-            )])
-            fig_espec_mort.update_layout(
-                title={'text': f'Distribución por Especialidad (año {year_key})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
-                transition={'duration': 0},
-                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                height=380, margin=dict(l=40, r=40, t=60, b=60),
-                showlegend=False
+                title=f'Distribución por Especialidad (año {year_key})',
+                colors=['#3498db', '#27ae60', '#16a085', '#9b59b6'],
+                auto_sort=True
             )
         else:
             fig_espec_mort = go.Figure()
