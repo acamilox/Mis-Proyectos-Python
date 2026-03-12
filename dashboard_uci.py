@@ -325,10 +325,10 @@ def render_resumen(year_key: str):
                 ),
             ], style={
                 'display': 'flex',
-                'justifyContent': 'flex-end',
+                'justifyContent': 'center',
                 'alignItems': 'center',
                 'gap': '16px',
-                'marginTop': '10px'
+                'marginTop': '12px'
             })
         ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'})
     ], style={
