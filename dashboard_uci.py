@@ -356,7 +356,7 @@ def render_gestion(year_key: str):
         # endregion
         kpis = processor.get_kpis_gestion()
         kpi1 = chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "D\u00edas", "#6366f1")
-        kpi2 = chart_factory.create_kpi_card("Giro de Cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3b82f6")
+        kpi2 = chart_factory.create_kpi_card("Giro cama", f"{kpis['giro_cama']:.2f}", "Promedio", "#3b82f6")
         kpi3 = chart_factory.create_kpi_card("Total D\u00edas Estancia", f"{int(kpis['total_dias_estancia'])}", "Ene - Dic", "#10b981")
         kpi4 = chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#8b5cf6")
         kpi5 = chart_factory.create_kpi_card("Promedio D\u00edas VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilaci\u00f3n Mec\u00e1nica", "#06b6d4")
@@ -364,7 +364,7 @@ def render_gestion(year_key: str):
         datos_estancia = processor.safe_get_row('PROMEDIO ESTANCIA', MESES)
         fig_estancia = chart_factory.create_line_chart(datos_estancia, 'Estancia Promedio (D\u00edas)', color='#6366f1', decimals=1)
         datos_giro = processor.safe_get_row('GIRO CAMA', MESES)
-        fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro de Cama', color='#3b82f6', decimals=2)
+        fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro cama', color='#3b82f6', decimals=2)
 
         # Grafico de VM - datos mensuales
         datos_vm_mensual = kpis.get('promedio_dias_vm_mensual', [])
@@ -748,6 +748,151 @@ def render_mortalidad(year_key: str):
         )
         fig_piramide = chart_factory.create_pyramid_chart(data_year['fallecidos'])
 
+        # Distribución por EPS (año completo)
+        eps_labels, eps_values = processor.get_eps_data()
+        if eps_values:
+            eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
+            eps_df = eps_df.sort_values('Cantidad', ascending=False)
+
+            def _short_eps_label(name: str) -> str:
+                normalized = str(name).strip().upper()
+                label_map = {
+                    'ADMINISTRADORA DE RECURSOS SGSS': 'ADRES',
+                    'FIDUSUARIA LA PREVISORA': 'FIDUPREVISORA',
+                    'NUEVA  EPS': 'NUEVA EPS',
+                    'CAPITAL SALUD': 'CAPITAL SALUD',
+                }
+                shortened = label_map.get(normalized, normalized)
+                return shortened if len(shortened) <= 18 else f"{shortened[:17]}…"
+
+            eps_df['EPS_DISPLAY'] = eps_df['EPS'].apply(_short_eps_label)
+            total_eps = int(sum(eps_values))
+            eps_color_map = {
+                'FAMISANAR': '#2563eb',
+                'COMPENSAR': '#ef4444',
+                'SALUD TOTAL': '#10b981',
+                'NUEVA EPS': '#f59e0b',
+                'NUEVA  EPS': '#f59e0b',
+                'FIDUSUARIA LA PREVISORA': '#8b5cf6',
+                'CAPITAL SALUD': '#06b6d4',
+                'CAPITAL SALUD ': '#06b6d4',
+                'SANITAS': '#ec4899',
+                'SURA': '#84cc16',
+                'ALIANSALUD': '#f97316',
+                'EMCOSALUD': '#14b8a6',
+                'EMSSANAR': '#eab308',
+                'SOAT': '#64748b',
+                'PARTICULAR': '#22c55e',
+                'ADRES': '#7c3aed',
+                'ADMINISTRADORA DE RECURSOS SGSS': '#7c3aed',
+                'OTRA': '#94a3b8',
+                'OTRAS EPS': '#475569',
+            }
+            fallback_colors = ['#0ea5e9', '#f43f5e', '#a855f7', '#f97316', '#14b8a6', '#65a30d']
+            resolved_eps_colors = []
+            for i, original_name in enumerate(eps_df['EPS'].tolist()):
+                key = str(original_name).strip().upper()
+                resolved_eps_colors.append(eps_color_map.get(key, fallback_colors[i % len(fallback_colors)]))
+            eps_df['Color'] = resolved_eps_colors
+            eps_df['Porcentaje'] = (eps_df['Cantidad'] / max(total_eps, 1)) * 100
+            fig_eps_mort = go.Figure(data=[go.Bar(
+                y=eps_df['EPS_DISPLAY'],
+                x=eps_df['Cantidad'],
+                orientation='h',
+                marker=dict(color=eps_df['Color'], line=dict(color='#0f172a', width=1.5)),
+                customdata=eps_df[['EPS', 'Porcentaje']],
+                text=[f"{int(v)} ({p:.1f}%)" for v, p in zip(eps_df['Cantidad'], eps_df['Porcentaje'])],
+                textposition='auto',
+                textfont=dict(size=10, color='white', family='Roboto'),
+                hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{x:.0f}<br>Porcentaje: %{customdata[1]:.1f}%<extra></extra>'
+            )])
+            fig_eps_mort.update_layout(
+                title={'text': f'Distribución por EPS (año {year_key})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                transition={'duration': 0},
+                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                font={'color': '#f1f5f9'},
+                height=380, margin=dict(l=155, r=55, t=60, b=30),
+                showlegend=False,
+                xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={
+                    'tickfont': {'color': '#cbd5e1'},
+                    'automargin': True,
+                    'ticklabelstandoff': 10,
+                    'categoryorder': 'total ascending'
+                }
+            )
+        else:
+            fig_eps_mort = go.Figure()
+            fig_eps_mort.update_layout(
+                title={'text': 'Distribución por EPS', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                plot_bgcolor='#1e293b',
+                paper_bgcolor='#1e293b',
+                height=380,
+                margin=dict(l=20, r=20, t=60, b=20),
+                xaxis={'visible': False},
+                yaxis={'visible': False},
+                showlegend=False
+            )
+            fig_eps_mort.add_annotation(
+                text="<b>Sin datos de EPS</b>",
+                x=0.5, y=0.5, xref='paper', yref='paper',
+                showarrow=False,
+                font=dict(size=14, color='#e2e8f0', family='Roboto')
+            )
+
+        # Distribución por especialidad (totales anuales)
+        suma_col = processor.get_suma_column()
+        total_medicina = processor.safe_get_value('MEDICINA INTERNA', suma_col)
+        total_cirugia = processor.safe_get_value('CIRUGIA GENERAL', suma_col)
+        total_neuro = processor.safe_get_value('NEUROCIRUGIA', suma_col)
+        total_neurologia = processor.safe_get_value('NEUROLOGIA', suma_col)
+        espec_labels = ['Medicina Interna', 'Cirugía General', 'Neurocirugía', 'Neurología']
+        espec_values = [
+            float(total_medicina or 0),
+            float(total_cirugia or 0),
+            float(total_neuro or 0),
+            float(total_neurologia or 0),
+        ]
+        if any(v > 0 for v in espec_values):
+            fig_espec_mort = go.Figure(data=[go.Pie(
+                labels=espec_labels,
+                values=espec_values,
+                hole=0.45,
+                marker=dict(
+                    colors=['#3498db', '#27ae60', '#16a085', '#9b59b6'],
+                    line=dict(color='#0f172a', width=2)
+                ),
+                textinfo='label+percent',
+                textposition='inside',
+                textfont=dict(size=11, color='white', family='Roboto'),
+                hovertemplate='<b>%{label}</b><br>Pacientes: %{value}<br>Porcentaje: %{percent}<extra></extra>'
+            )])
+            fig_espec_mort.update_layout(
+                title={'text': f'Distribución por Especialidad (año {year_key})', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                transition={'duration': 0},
+                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                height=380, margin=dict(l=40, r=40, t=60, b=60),
+                showlegend=False
+            )
+        else:
+            fig_espec_mort = go.Figure()
+            fig_espec_mort.update_layout(
+                title={'text': 'Distribución por Especialidad', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                plot_bgcolor='#1e293b',
+                paper_bgcolor='#1e293b',
+                height=380,
+                margin=dict(l=20, r=20, t=60, b=20),
+                xaxis={'visible': False},
+                yaxis={'visible': False},
+                showlegend=False
+            )
+            fig_espec_mort.add_annotation(
+                text="<b>Sin datos por especialidad</b>",
+                x=0.5, y=0.5, xref='paper', yref='paper',
+                showarrow=False,
+                font=dict(size=14, color='#e2e8f0', family='Roboto')
+            )
+
         return html.Div([
             dbc.Row([dbc.Col(kpi1, xs=12, md=3), dbc.Col(kpi2, xs=12, md=3), dbc.Col(kpi3, xs=12, md=3), dbc.Col(kpi4, xs=12, md=3)], className="mb-3 g-3"),
             html.H6("D\u00edas de Estancia - Fallecidos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '10px', 'marginTop': '8px'}),
@@ -762,7 +907,12 @@ def render_mortalidad(year_key: str):
             ], className="mb-4 g-3"),
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG, style={'height': '400px'}), xs=12)
-            ], className="g-3")
+            ], className="g-3"),
+            html.H5("Distribución por EPS y Especialidad", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '18px', 'marginBottom': '12px', 'textAlign': 'center'}),
+            dbc.Row([
+                dbc.Col(dcc.Graph(figure=fig_eps_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=7),
+                dbc.Col(dcc.Graph(figure=fig_espec_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=5),
+            ], className="mb-4 g-3")
         ])
     except Exception as e:
         logger.error(f"Error en render_mortalidad: {e}")
