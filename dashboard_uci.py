@@ -325,13 +325,11 @@ def render_resumen(year_key: str):
                 ),
             ], style={
                 'display': 'flex',
-                'justifyContent': 'center',
+                'justifyContent': 'flex-end',
                 'alignItems': 'center',
-                'gap': '16px',
+                'gap': '18px',
                 'marginTop': '12px',
-                'maxWidth': '360px',
-                'marginLeft': 'auto',
-                'marginRight': 'auto'
+                'flexWrap': 'wrap'
             })
         ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'})
     ], style={
