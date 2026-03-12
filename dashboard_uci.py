@@ -976,38 +976,67 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 compare_rows = []
                 for y in available_years:
                     proc_y = PROCESSOR_BY_YEAR[y]
-                    k_comp = proc_y.get_kpis_resumen(meses_filtrados)
+                    k_resumen = proc_y.get_kpis_resumen(meses_filtrados)
+                    k_gestion = proc_y.get_kpis_gestion()
+                    k_mort = proc_y.get_kpis_mortalidad()
                     compare_rows.append({
                         "year": y,
-                        "ingresos": int(k_comp.get("total_ingresos", 0) or 0),
-                        "ocupacion": float(k_comp.get("promedio_ocupacional", 0) or 0),
-                        "mortalidad": float(k_comp.get("mortalidad", 0) or 0),
-                        "estancia": float(k_comp.get("promedio_estancia", 0) or 0),
+                        "ingresos": int(k_resumen.get("total_ingresos", 0) or 0),
+                        "ocupacion": float(k_resumen.get("promedio_ocupacional", 0) or 0),
+                        "mortalidad": float(k_resumen.get("mortalidad", 0) or 0),
+                        "estancia": float(k_resumen.get("promedio_estancia", 0) or 0),
+                        "giro_cama": float(k_gestion.get("giro_cama", 0) or 0),
+                        "total_dias": float(k_gestion.get("total_dias_estancia", 0) or 0),
+                        "fallecidos": int(k_mort.get("total_fallecidos", 0) or 0),
+                        "mort_ucI": float(k_mort.get("mortalidad_general", 0) or 0),
                     })
+
+                header_style = {
+                    'backgroundColor': 'rgba(15,23,42,0.95)',
+                    'color': '#e5e7eb',
+                    'fontSize': '12px',
+                    'fontWeight': '600',
+                    'borderBottom': '1px solid rgba(148,163,184,0.4)'
+                }
+
+                body_style = {
+                    'borderTop': 'none',
+                    'borderBottom': '1px solid rgba(55,65,81,0.7)',
+                    'fontSize': '12px',
+                    'color': '#e5e7eb'
+                }
 
                 compare_table = dbc.Table(
                     [
                         html.Thead(html.Tr([
-                            html.Th("Año"),
-                            html.Th("Total ingresos"),
-                            html.Th("% Ocupación"),
-                            html.Th("% Mortalidad"),
-                            html.Th("Estancia prom. (días)"),
+                            html.Th("Año", style=header_style),
+                            html.Th("Total ingresos", style=header_style),
+                            html.Th("% Ocupación", style=header_style),
+                            html.Th("% Mortalidad", style=header_style),
+                            html.Th("Estancia prom. (días)", style=header_style),
+                            html.Th("Giro cama prom.", style=header_style),
+                            html.Th("Total días estancia", style=header_style),
+                            html.Th("Total fallecidos", style=header_style),
+                            html.Th("% Mortalidad UCI", style=header_style),
                         ])),
                         html.Tbody([
                             html.Tr([
-                                html.Td(row["year"]),
-                                html.Td(f"{row['ingresos']:,}".replace(",", ".")),
-                                html.Td(f"{row['ocupacion']:.1f}%"),
-                                html.Td(f"{row['mortalidad']:.1f}%"),
-                                html.Td(f"{row['estancia']:.2f}"),
+                                html.Td(row["year"], style=body_style),
+                                html.Td(f"{row['ingresos']:,}".replace(",", "."), style=body_style),
+                                html.Td(f"{row['ocupacion']:.1f}%", style=body_style),
+                                html.Td(f"{row['mortalidad']:.1f}%", style=body_style),
+                                html.Td(f"{row['estancia']:.2f}", style=body_style),
+                                html.Td(f"{row['giro_cama']:.2f}", style=body_style),
+                                html.Td(f"{row['total_dias']:.0f}", style=body_style),
+                                html.Td(f"{row['fallecidos']}", style=body_style),
+                                html.Td(f"{row['mort_ucI']:.1f}%", style=body_style),
                             ]) for row in compare_rows
                         ])
                     ],
-                    bordered=True,
+                    bordered=False,
                     hover=True,
                     size="sm",
-                    style={'marginTop': '4px', 'marginBottom': '0'}
+                    style={'marginTop': '4px', 'marginBottom': '0', 'backgroundColor': 'transparent'}
                 )
                 compare_block = [
                     html.H6("Comparación por año (meses seleccionados)", style={
@@ -1186,10 +1215,11 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 compare_block,
                 style={
                     'background': 'rgba(15, 23, 42, 0.9)',
-                    'border': '1px solid rgba(148, 163, 184, 0.25)',
-                    'borderRadius': '8px',
-                    'padding': '10px 12px',
-                    'marginBottom': '14px'
+                    'border': '1px solid rgba(148, 163, 184, 0.35)',
+                    'borderRadius': '10px',
+                    'padding': '10px 14px 12px',
+                    'marginBottom': '16px',
+                    'boxShadow': '0 10px 25px rgba(15,23,42,0.8)'
                 }
             ) if compare_block else html.Div(),
             dbc.Row([
