@@ -333,7 +333,7 @@ def render_resumen(year_key: str):
                 'alignItems': 'center',
                 'marginTop': '12px'
             })
-        ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'})
+        ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '0'}, className="filtros-inner")
     ], style={
         'background': 'rgba(30, 41, 59, 0.8)',
         'padding': '14px 20px',
@@ -1296,7 +1296,12 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     html.H6("Comparación por año (meses seleccionados)", style={
                         'color': '#e5e7eb', 'fontWeight': '600', 'marginTop': '8px', 'fontSize': '13px'
                     }),
-                    compare_table
+                    html.Div(compare_table, style={
+                        'overflowX': 'auto',
+                        'WebkitOverflowScrolling': 'touch',
+                        'marginTop': '8px',
+                        'borderRadius': '8px'
+                    }, className="table-responsive-mobile")
                 ]
 
         # Ocupacional
