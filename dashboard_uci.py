@@ -1080,7 +1080,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         'marginBottom': '0',
                         'backgroundColor': 'transparent',
                         'width': '100%',
-                        'borderCollapse': 'collapse'
+                        'borderCollapse': 'collapse',
+                        'tableLayout': 'fixed'
                     }
                 )
                 compare_block = [
@@ -1262,9 +1263,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     'background': 'rgba(15, 23, 42, 0.9)',
                     'border': '1px solid rgba(148, 163, 184, 0.35)',
                     'borderRadius': '10px',
-                    'padding': '10px 14px 12px',
+                    'padding': '10px 6px 12px',
                     'marginBottom': '16px',
-                    'boxShadow': '0 10px 25px rgba(15,23,42,0.8)'
+                    'boxShadow': '0 10px 25px rgba(15,23,42,0.7)',
+                    'overflow': 'hidden'
                 }
             ) if compare_block else html.Div(),
             dbc.Row([
