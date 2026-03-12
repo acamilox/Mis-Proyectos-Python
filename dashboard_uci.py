@@ -296,7 +296,7 @@ def render_resumen(year_key: str):
                     placeholder="Seleccionar uno o varios meses",
                     style={
                         'fontSize': '13px',
-                        'minWidth': '260px'
+                        'minWidth': '200px'
                     }
                 ),
                 html.Div([
@@ -316,11 +316,11 @@ def render_resumen(year_key: str):
                     'alignItems': 'center',
                     'justifyContent': 'flex-end',
                     'gap': '12px',
-                    'flexWrap': 'wrap'
+                    'flexWrap': 'nowrap'
                 })
             ], style={
                 'display': 'grid',
-                'gridTemplateColumns': '100px minmax(0, 1fr) auto',
+                'gridTemplateColumns': '100px minmax(0, 1fr) 320px',
                 'alignItems': 'center',
                 'columnGap': '16px'
             })
