@@ -1020,15 +1020,23 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     'color': '#e5e7eb',
                     'fontSize': '12px',
                     'fontWeight': '600',
-                    'borderBottom': '1px solid rgba(148,163,184,0.5)'
+                    'borderBottom': '1px solid rgba(148,163,184,0.5)',
+                    'borderRight': '1px solid rgba(55,65,81,0.7)',
+                    'textAlign': 'center',
+                    'padding': '4px 8px',
+                    'whiteSpace': 'nowrap'
                 }
 
                 body_style = {
                     'backgroundColor': 'rgba(15,23,42,0.98)',
                     'borderTop': 'none',
                     'borderBottom': '1px solid rgba(55,65,81,0.7)',
+                    'borderRight': '1px solid rgba(55,65,81,0.7)',
                     'fontSize': '12px',
-                    'color': '#e5e7eb'
+                    'color': '#e5e7eb',
+                    'textAlign': 'center',
+                    'padding': '4px 8px',
+                    'whiteSpace': 'nowrap'
                 }
 
                 compare_table = dbc.Table(
@@ -1064,10 +1072,16 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             ]) for row in compare_rows
                         ])
                     ],
-                    bordered=False,
+                    bordered=True,
                     hover=True,
                     size="sm",
-                    style={'marginTop': '4px', 'marginBottom': '0', 'backgroundColor': 'transparent'}
+                    style={
+                        'marginTop': '4px',
+                        'marginBottom': '0',
+                        'backgroundColor': 'transparent',
+                        'width': '100%',
+                        'borderCollapse': 'collapse'
+                    }
                 )
                 compare_block = [
                     html.H6("Comparación por año (meses seleccionados)", style={
