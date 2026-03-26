@@ -227,6 +227,74 @@ body {
     color: #94a3b8 !important;
 }
 
+/* React-Select v3+ (Dash reciente) - asegurar legibilidad de selección */
+#filtro-anio .Select__control,
+#filtro-mes-inicio .Select__control {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+    border: 1px solid rgba(55, 118, 171, 0.2) !important;
+    border-radius: 8px !important;
+    min-height: 42px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+#filtro-anio .Select__control:hover,
+#filtro-mes-inicio .Select__control:hover {
+    border-color: rgba(55, 118, 171, 0.4) !important;
+    box-shadow: 0 4px 15px rgba(55, 118, 171, 0.15) !important;
+}
+
+#filtro-anio .Select__single-value,
+#filtro-mes-inicio .Select__single-value,
+#filtro-mes-inicio .Select__value-container,
+#filtro-mes-inicio .Select__input-container,
+#filtro-mes-inicio .Select__input-container input {
+    color: #f1f5f9 !important;
+}
+
+#filtro-anio .Select__placeholder,
+#filtro-mes-inicio .Select__placeholder {
+    color: #94a3b8 !important;
+}
+
+#filtro-anio .Select__menu,
+#filtro-mes-inicio .Select__menu {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+    border: 1px solid rgba(55, 118, 171, 0.2) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4) !important;
+    z-index: 1000 !important;
+}
+
+#filtro-anio .Select__option,
+#filtro-mes-inicio .Select__option {
+    color: #f1f5f9 !important;
+}
+#filtro-anio .Select__option--is-focused,
+#filtro-mes-inicio .Select__option--is-focused {
+    background: linear-gradient(90deg, rgba(55, 118, 171, 0.2) 0%, rgba(255, 212, 59, 0.1) 100%) !important;
+}
+#filtro-anio .Select__option--is-selected,
+#filtro-mes-inicio .Select__option--is-selected {
+    background: linear-gradient(90deg, rgba(55, 118, 171, 0.35) 0%, rgba(255, 212, 59, 0.2) 100%) !important;
+    color: #ffd43b !important;
+}
+
+#filtro-mes-inicio .Select__multi-value {
+    background: linear-gradient(135deg, rgba(55, 118, 171, 0.3) 0%, rgba(255, 212, 59, 0.15) 100%) !important;
+    border: 1px solid rgba(55, 118, 171, 0.3) !important;
+    border-radius: 6px !important;
+}
+#filtro-mes-inicio .Select__multi-value__label {
+    color: #f1f5f9 !important;
+    font-weight: 600 !important;
+}
+#filtro-mes-inicio .Select__multi-value__remove {
+    color: #ffd43b !important;
+}
+#filtro-mes-inicio .Select__multi-value__remove:hover {
+    background: rgba(239, 68, 68, 0.18) !important;
+    color: #fecaca !important;
+}
+
 /* Button styles - Diseño Premium */
 .btn {
     border-radius: 8px !important;
