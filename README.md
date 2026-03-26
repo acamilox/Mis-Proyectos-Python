@@ -1,4 +1,4 @@
-﻿# Dashboard UCI Adultos 2026
+# Dashboard UCI Adultos 2026
 
 Sistema de monitoreo y análisis de indicadores para la Unidad de Cuidados Intensivos de Adultos del Hospital Infantil Universitario de San José.
 
@@ -63,8 +63,8 @@ gunicorn>=21.0.0
 
 1. Clonar el repositorio:
 ```bash
-git clone https://github.com/tu-usuario/dashboard-uci-adultos-2025.git
-cd dashboard-uci-adultos-2025
+git clone https://github.com/acamilox/Dashboard-UCI-Adultos-2025.git dashboard-uci
+cd dashboard-uci
 ```
 
 2. Crear entorno virtual (opcional pero recomendado):
