@@ -32,6 +32,9 @@ from dashboard_uci import (
 # Tipo para config de Plotly (dcc.Graph acepta dict pero el type checker espera Config)
 _GRAPH_CFG: Any = GRAPH_CONFIG
 
+# Donut IAAS: staticPlot puede afectar el layout de la leyenda en algunos navegadores
+_GRAPH_CFG_IAAS: Any = {**GRAPH_CONFIG, "staticPlot": False}
+
 # IAAS (donut gérmenes): colores bien separados en tono/luminosidad (Okabe-Ito + ampliación)
 _COLORS_IAAS_DISTINCT = [
     "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
@@ -513,14 +516,16 @@ def render_gestion(year_key: str):
                 title={'text': 'G\u00e9rmenes Aislados (IAAS)', 'font': {'size': 13, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                autosize=True, height=400,
-                margin=dict(l=24, r=200, t=50, b=80),
+                autosize=True, height=420,
+                margin=dict(l=20, r=230, t=50, b=70),
                 legend=dict(
                     orientation='v',
-                    yanchor='middle',
-                    y=0.5,
+                    xref='paper',
+                    yref='paper',
+                    x=1.01,
                     xanchor='left',
-                    x=1.02,
+                    y=1,
+                    yanchor='top',
                     bgcolor='rgba(15, 23, 42, 0.92)',
                     font=dict(color='#e2e8f0', size=10, family='Roboto'),
                     bordercolor='rgba(148, 163, 184, 0.35)',
@@ -712,7 +717,7 @@ def render_gestion(year_key: str):
             html.H5("G\u00e9rmenes Aislados y Eventos Adversos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG, style={'height': '520px'}), xs=12, md=8),
+                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG_IAAS, style={'height': '520px'}), xs=12, md=8),
                 dbc.Col(xs=12, md=2)
             ], className="mb-4", justify="center"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12)], className="mb-4 g-3"),
