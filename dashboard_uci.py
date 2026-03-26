@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 import json
+import colorsys
 from io import BytesIO
 import logging
 from typing import Any
@@ -35,12 +36,23 @@ _GRAPH_CFG: Any = GRAPH_CONFIG
 # Donut IAAS: staticPlot puede afectar el layout de la leyenda en algunos navegadores
 _GRAPH_CFG_IAAS: Any = {**GRAPH_CONFIG, "staticPlot": False}
 
-# IAAS (donut gérmenes): colores bien separados en tono/luminosidad (Okabe-Ito + ampliación)
-_COLORS_IAAS_DISTINCT = [
-    "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
-    "#CC79A7", "#332288", "#882255", "#44AA99", "#DDCC77", "#AA4499",
-    "#117733", "#999933", "#661100", "#6699CC", "#E41A1C", "#4DAF4A",
-]
+
+def _palette_iaas_n(n: int) -> list[str]:
+    """
+    Paleta para donut de gérmenes: matiz equiespaciado en HSV (360°/n) para maximizar
+    contraste entre los n segmentos; S/V ligeramente variados para evitar tonos planos.
+    """
+    if n <= 0:
+        return []
+    out: list[str] = []
+    for i in range(n):
+        h = (i / n + 0.02) % 1.0
+        s = 0.68 + (i % 3) * 0.08
+        v = 0.80 + (i % 2) * 0.12
+        r, g, b = colorsys.hsv_to_rgb(h, s, v)
+        out.append(f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}")
+    return out
+
 
 # Configuracion de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -491,7 +503,7 @@ def render_gestion(year_key: str):
             germenes_labels_sorted = [d[1] for d in datos_germenes]
             total_germenes = sum(germenes_values)
             n_g = len(germenes_labels_sorted)
-            colors_germenes = [_COLORS_IAAS_DISTINCT[i % len(_COLORS_IAAS_DISTINCT)] for i in range(n_g)]
+            colors_germenes = _palette_iaas_n(n_g)
             fig_germenes = go.Figure(data=[go.Pie(
                 labels=germenes_labels_sorted,
                 values=germenes_values_sorted,
