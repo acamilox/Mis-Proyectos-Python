@@ -18,6 +18,33 @@ from .config import (
 logger = logging.getLogger(__name__)
 
 
+def _sum_morbilidad_pies_mensuales(df_morb_raw: pd.DataFrame) -> Optional[int]:
+    """
+    Suma los subtotales mensuales de la hoja MORBILIDAD (filas con col2 'Total' y
+    sin diagnóstico en col0). Coincide con la suma que se obtiene en el Excel al
+    totalizar por mes. Si el detalle por filas no cuadra con ese pie (error de
+    digitación en una celda), el total oficial del Excel es esta suma.
+    """
+    total = 0
+    n = 0
+    for _, row in df_morb_raw.iterrows():
+        c0 = row[0]
+        c2 = row[2]
+        c3 = row[3]
+        col0_empty = pd.isna(c0) or not str(c0).strip() or str(c0).strip().upper() == "NAN"
+        if not col0_empty:
+            continue
+        if pd.isna(c2) or str(c2).strip().lower() != "total":
+            continue
+        v = pd.to_numeric(c3, errors="coerce")
+        if pd.notna(v):
+            total += int(v)
+            n += 1
+    if n < 1:
+        return None
+    return total
+
+
 class DataLoader:
     """Clase para cargar y validar datos desde Excel"""
     
@@ -95,6 +122,20 @@ class DataLoader:
             self.df_morbilidad = pd.DataFrame(morbilidad_data).T
             self.df_morbilidad = self.df_morbilidad[self.df_morbilidad['Total'] > 0]
             self.df_morbilidad = self.df_morbilidad.sort_values('Total', ascending=False)
+
+            detail_sum = int(self.df_morbilidad["Total"].sum())
+            footer_sum = _sum_morbilidad_pies_mensuales(df_morb_raw)
+            if footer_sum is not None:
+                self.df_morbilidad.attrs["total_anual"] = footer_sum
+                if footer_sum != detail_sum:
+                    logger.warning(
+                        "MORBILIDAD: suma detalle (%s) != suma pies mensuales (%s); "
+                        "se usa total_anual del Excel (pies).",
+                        detail_sum,
+                        footer_sum,
+                    )
+            else:
+                self.df_morbilidad.attrs["total_anual"] = detail_sum
             
             logger.info(f"Datos MORBILIDAD cargados: {len(self.df_morbilidad)} diagnósticos")
         except Exception as e:

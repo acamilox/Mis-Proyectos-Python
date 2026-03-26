@@ -36,6 +36,22 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 
+def _morbilidad_total_anual(df_morb: pd.DataFrame) -> float:
+    """
+    Total anual mostrado: coincide con la suma de los subtotales mensuales
+    (filas Total) de la hoja MORBILIDAD del Excel cuando existen.
+    Si el detalle por diagnóstico no cuadra con esos pies, el Excel manda.
+    """
+    if df_morb.empty or "Total" not in df_morb.columns:
+        return 0.0
+    attrs = getattr(df_morb, "attrs", None) or {}
+    if "total_anual" in attrs:
+        v = attrs["total_anual"]
+        if v is not None:
+            return float(v)
+    return float(pd.to_numeric(df_morb["Total"], errors="coerce").fillna(0).sum())
+
+
 def _debug_log(run_id: str, hypothesis_id: str, location: str, message: str, data: dict[str, Any]) -> None:
     """Escribe logs NDJSON para depuracion en modo debug."""
     payload = {
@@ -1186,7 +1202,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
 
                     df_morb_y = data_y.get('morbilidad')
                     if isinstance(df_morb_y, pd.DataFrame) and not df_morb_y.empty and 'Total' in df_morb_y.columns:
-                        total_diag_y = int(pd.to_numeric(df_morb_y['Total'], errors='coerce').fillna(0).sum())
+                        total_diag_y = int(round(_morbilidad_total_anual(df_morb_y)))
                     else:
                         total_diag_y = 0
 
@@ -1338,7 +1354,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
         # Morbilidad
         if not data_actual['morbilidad'].empty:
             df_morb = data_actual['morbilidad'].sort_values('Total', ascending=False)
-            total_morb = float(df_morb['Total'].sum())
+            total_morb = _morbilidad_total_anual(df_morb)
             df_morb_top = df_morb.head(8).copy()
             if len(df_morb) > 8:
                 otros_total = float(df_morb.iloc[8:]['Total'].sum())
