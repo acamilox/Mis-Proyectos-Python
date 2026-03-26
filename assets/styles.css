@@ -157,6 +157,38 @@ body {
     z-index: 1000 !important;
 }
 
+/* Fallback fuerte: algunos temas/Bootstrap fuerzan fondo blanco en el input */
+#filtro-anio .Select,
+#filtro-mes-inicio .Select,
+#filtro-anio .Select-control,
+#filtro-mes-inicio .Select-control,
+#filtro-anio .Select__control,
+#filtro-mes-inicio .Select__control {
+    background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+#filtro-anio .Select-input input,
+#filtro-mes-inicio .Select-input input,
+#filtro-anio .Select__input-container,
+#filtro-mes-inicio .Select__input-container,
+#filtro-anio .Select__input-container input,
+#filtro-mes-inicio .Select__input-container input {
+    color: #f1f5f9 !important;
+}
+
+#filtro-anio .Select-placeholder,
+#filtro-mes-inicio .Select-placeholder,
+#filtro-anio .Select__placeholder,
+#filtro-mes-inicio .Select__placeholder {
+    color: #94a3b8 !important;
+}
+
+#filtro-mes-inicio .Select-value-label,
+#filtro-mes-inicio .Select-value-label span,
+#filtro-mes-inicio .Select__multi-value__label {
+    color: #f1f5f9 !important;
+}
+
 /* Prioridad de capas para evitar que el selector de meses tape el selector de año */
 #filtro-anio {
     position: relative;

@@ -20,5 +20,5 @@ fi
 git pull --rebase --quiet
 
 # Reiniciar para que cambios (incl. assets CSS) queden reflejados.
-systemctl restart "$SERVICE_NAME"
+sudo systemctl restart "$SERVICE_NAME"
 
