@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 import json
 import colorsys
-import math
 from io import BytesIO
 import logging
 from typing import Any
@@ -38,28 +37,40 @@ _GRAPH_CFG: Any = GRAPH_CONFIG
 _GRAPH_CFG_IAAS: Any = {**GRAPH_CONFIG, "staticPlot": False}
 
 
+# 14 tonos fijos (familias distintas: un azul, un naranja, etc.) → orden = ranking mayor→menor
+_COLORS_IAAS_FIXED: tuple[str, ...] = (
+    "#E63946",  # rojo
+    "#F77F00",  # naranja
+    "#FCBF49",  # amarillo
+    "#4ADE80",  # verde
+    "#14B8A6",  # teal
+    "#BE185D",  # magenta oscuro
+    "#2563EB",  # azul
+    "#4F46E5",  # índigo
+    "#65A30D",  # verde oliva intenso
+    "#EC4899",  # rosa
+    "#F43F5E",  # coral
+    "#581C87",  # púrpura oscuro
+    "#A16207",  # ocre / marrón dorado
+    "#92400E",  # marrón rojizo
+)
+
+
 def _palette_iaas_n(n: int) -> list[str]:
     """
-    Paleta para donut de gérmenes: n matices equiespaciados en el círculo HSV pero
-    **asignados con permutación** (paso coprimo con n) al orden por ranking (mayor→menor),
-    para que segmentos consecutivos en el gráfico no caigan todos en verdes/azules parecidos.
+    Paleta IAAS: hasta 14 colores fijos bien diferenciados; si hay más categorías,
+    completa con HSV (caso raro).
     """
     if n <= 0:
         return []
-    step = 1
-    for cand in (5, 7, 3, 11, 9, 13, 4, 6, 8, 2):
-        if n > 1 and math.gcd(cand, n) == 1:
-            step = cand
-            break
-    out: list[str] = []
-    for i in range(n):
-        h = ((i * step) % n) / n + 0.03
-        h %= 1.0
-        sat = 0.74 + (i % 5) * 0.04
-        val = 0.82 + (i % 3) * 0.055
-        r, g, b = colorsys.hsv_to_rgb(h, sat, val)
-        out.append(f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}")
-    return out
+    fixed = list(_COLORS_IAAS_FIXED[: min(n, len(_COLORS_IAAS_FIXED))])
+    if n <= len(_COLORS_IAAS_FIXED):
+        return fixed
+    for i in range(len(_COLORS_IAAS_FIXED), n):
+        h = (i * 0.618033988749895) % 1.0
+        r, g, b = colorsys.hsv_to_rgb(h, 0.78, 0.92)
+        fixed.append(f"#{int(r * 255):02x}{int(g * 255):02x}{int(b * 255):02x}")
+    return fixed
 
 
 # Configuracion de logging
