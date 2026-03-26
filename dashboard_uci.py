@@ -628,10 +628,23 @@ def render_gestion(year_key: str):
                 hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>'
             ))
             fig_eventos.update_layout(
-                title={'text': 'Eventos Adversos (Pareto)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
+                title={
+                    'text': 'Eventos adversos (Pareto)',
+                    'subtitle': {
+                        'text': (
+                            'Barras: veces que ocurrió cada tipo de evento (año). '
+                            'Línea amarilla: % acumulado — muestra qué parte del total '
+                            'explican los eventos más frecuentes (regla 80/20).'
+                        ),
+                        'font': {'size': 11, 'color': '#94a3b8', 'family': 'Roboto'},
+                    },
+                    'font': {'size': 13, 'color': '#f1f5f9', 'family': 'Roboto'},
+                    'x': 0.5,
+                    'xanchor': 'center',
+                },
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                autosize=True, height=560, margin=dict(l=48, r=28, t=50, b=180),
+                autosize=True, height=600, margin=dict(l=48, r=36, t=72, b=180),
                 hovermode='x unified',
                 xaxis={
                     'tickfont': {'color': '#e2e8f0', 'size': 10},
@@ -640,13 +653,20 @@ def render_gestion(year_key: str):
                     'automargin': True,
                     'gridcolor': 'rgba(148, 163, 184, 0.1)'
                 },
-                yaxis={'title': 'Cantidad', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={
+                    'title': {'text': 'N.º de eventos', 'font': {'color': '#94a3b8'}},
+                    'tickfont': {'color': '#94a3b8'},
+                    'gridcolor': 'rgba(148, 163, 184, 0.1)',
+                },
                 yaxis2={
                     'overlaying': 'y',
                     'side': 'right',
                     'range': [0, 110],
                     'tickfont': {'color': '#fbbf24'},
-                    'title': {'text': 'Acumulado %', 'font': {'color': '#fbbf24'}},
+                    'title': {
+                        'text': '% acumulado (de izq. a der.)',
+                        'font': {'color': '#fbbf24'},
+                    },
                     'showgrid': False
                 },
                 legend=dict(
