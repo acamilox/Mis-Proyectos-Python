@@ -939,6 +939,11 @@ h5[style*="color: #f1f5f9"]::after {
     box-shadow: none !important;
 }
 
+.filtros-section .uci-dd-dark .VirtualizedSelect,
+.filtros-section .uci-dd-dark .VirtualizedSelect * {
+    color: #f1f5f9 !important;
+}
+
 .filtros-section .uci-dd-dark .Select-value-label,
 .filtros-section .uci-dd-dark .Select__single-value,
 .filtros-section .uci-dd-dark [class*="singleValue"],
@@ -979,6 +984,21 @@ h5[style*="color: #f1f5f9"]::after {
     background: #1e293b !important;
     border: 1px solid rgba(55, 118, 171, 0.35) !important;
     z-index: 2000 !important;
+}
+
+.filtros-section .uci-dd-dark .VirtualizedSelectOption {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+.filtros-section .uci-dd-dark .VirtualizedSelectFocusedOption {
+    background: rgba(55, 118, 171, 0.25) !important;
+    color: #f1f5f9 !important;
+}
+
+.filtros-section .uci-dd-dark .VirtualizedSelectSelectedOption {
+    background: rgba(55, 118, 171, 0.45) !important;
+    color: #ffd43b !important;
 }
 
 .filtros-section .uci-dd-dark .Select__option,
