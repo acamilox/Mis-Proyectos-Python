@@ -597,21 +597,20 @@ def render_gestion(year_key: str):
                         [df_eventos_top, pd.DataFrame([{'Evento': 'Otros', 'Cantidad': otros_eventos}])],
                         ignore_index=True
                     )
-                df_eventos = df_eventos_top
+                # Orden Pareto: por frecuencia (si "Otros" suma más, debe ir a la izquierda)
+                df_eventos = df_eventos_top.sort_values('Cantidad', ascending=False).reset_index(drop=True)
+            else:
+                df_eventos = df_eventos.reset_index(drop=True)
             total_eventos = max(float(df_eventos['Cantidad'].sum()), 1.0)
             df_eventos['Acumulado %'] = (df_eventos['Cantidad'].cumsum() / total_eventos) * 100
-            colors_eventos = [
-                '#ef4444', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899',
-                '#f97316', '#14b8a6', '#a855f7', '#0ea5e9', '#84cc16', '#e11d48', '#22c55e',
-                '#3b82f6', '#eab308', '#d946ef', '#0891b2', '#f43f5e', '#4ade80', '#818cf8',
-                '#fb923c', '#2dd4bf', '#c084fc', '#38bdf8', '#a3e635', '#fb7185', '#34d399'
-            ]
+            n_bar = len(df_eventos)
+            bar_colors = _palette_iaas_n(n_bar)
             fig_eventos = go.Figure()
             fig_eventos.add_trace(go.Bar(
                 x=df_eventos['Evento'],
                 y=df_eventos['Cantidad'],
-                name='Cantidad',
-                marker_color=[colors_eventos[i % len(colors_eventos)] for i in range(len(df_eventos))],
+                name='N.º de eventos',
+                marker_color=bar_colors,
                 text=df_eventos['Cantidad'],
                 textposition='inside',
                 textfont=dict(color='#f1f5f9', size=11),
