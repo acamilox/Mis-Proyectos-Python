@@ -32,6 +32,13 @@ from dashboard_uci import (
 # Tipo para config de Plotly (dcc.Graph acepta dict pero el type checker espera Config)
 _GRAPH_CFG: Any = GRAPH_CONFIG
 
+# IAAS (donut gérmenes): colores bien separados en tono/luminosidad (Okabe-Ito + ampliación)
+_COLORS_IAAS_DISTINCT = [
+    "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
+    "#CC79A7", "#332288", "#882255", "#44AA99", "#DDCC77", "#AA4499",
+    "#117733", "#999933", "#661100", "#6699CC", "#E41A1C", "#4DAF4A",
+]
+
 # Configuracion de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -480,19 +487,21 @@ def render_gestion(year_key: str):
             germenes_values_sorted = [d[0] for d in datos_germenes]
             germenes_labels_sorted = [d[1] for d in datos_germenes]
             total_germenes = sum(germenes_values)
-            colors_germenes = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
+            n_g = len(germenes_labels_sorted)
+            colors_germenes = [_COLORS_IAAS_DISTINCT[i % len(_COLORS_IAAS_DISTINCT)] for i in range(n_g)]
             fig_germenes = go.Figure(data=[go.Pie(
                 labels=germenes_labels_sorted,
                 values=germenes_values_sorted,
                 hole=0.55,
-                marker=dict(colors=colors_germenes[:len(germenes_labels_sorted)], line=dict(color='#0f172a', width=2)),
+                marker=dict(colors=colors_germenes, line=dict(color='#0f172a', width=2)),
                 textinfo='percent',
                 textposition='inside',
                 textfont=dict(size=12, color='white', family='Roboto'),
                 hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
                 direction='clockwise',
                 sort=False,
-                pull=[0.03 if i == 0 else 0 for i in range(len(germenes_labels_sorted))]
+                rotation=90,
+                pull=[0.03 if i == 0 else 0 for i in range(n_g)]
             )])
             fig_germenes.add_annotation(
                 text=f"<b style='font-size:22px'>{int(total_germenes)}</b><br><span style='color:#94a3b8'>Aislados</span>",
@@ -505,18 +514,19 @@ def render_gestion(year_key: str):
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 autosize=True, height=400,
-                margin=dict(l=24, r=24, t=50, b=100),
+                margin=dict(l=24, r=200, t=50, b=80),
                 legend=dict(
-                    orientation='h',
-                    yanchor='top',
-                    y=-0.15,
-                    xanchor='center',
-                    x=0.5,
-                    bgcolor='rgba(15, 23, 42, 0.9)',
+                    orientation='v',
+                    yanchor='middle',
+                    y=0.5,
+                    xanchor='left',
+                    x=1.02,
+                    bgcolor='rgba(15, 23, 42, 0.92)',
                     font=dict(color='#e2e8f0', size=10, family='Roboto'),
-                    bordercolor='rgba(148, 163, 184, 0.3)',
+                    bordercolor='rgba(148, 163, 184, 0.35)',
                     borderwidth=1,
-                    itemsizing='constant'
+                    itemsizing='constant',
+                    traceorder='normal',
                 ),
                 showlegend=True
             )
