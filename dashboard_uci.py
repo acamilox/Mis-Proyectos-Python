@@ -8,6 +8,7 @@ import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+import numpy as np
 import pandas as pd
 import json
 from io import BytesIO
@@ -50,6 +51,60 @@ def _morbilidad_total_anual(df_morb: pd.DataFrame) -> float:
         if v is not None:
             return float(v)
     return float(pd.to_numeric(df_morb["Total"], errors="coerce").fillna(0).sum())
+
+
+def _enteros_prop_por_suma(values: np.ndarray, target: int) -> np.ndarray:
+    """Reparte `target` en enteros proporcionales a `values` (método mayores restos)."""
+    values = np.asarray(values, dtype=float)
+    s = float(values.sum())
+    n = len(values)
+    if n == 0 or target <= 0:
+        return np.zeros(n, dtype=int)
+    if s <= 0:
+        return np.zeros(n, dtype=int)
+    scaled = values * (target / s)
+    floor = np.floor(scaled).astype(int)
+    rem = int(target - floor.sum())
+    frac = scaled - floor
+    order = np.argsort(-frac)
+    out = floor.copy()
+    for j in range(rem):
+        out[order[j % n]] += 1
+    return out
+
+
+def _morbilidad_escalada_al_total_oficial(df_morb: pd.DataFrame, total_oficial: float) -> pd.DataFrame:
+    """
+    Escala Hombre/Mujer/Total para que la suma de Total coincida con total_oficial
+    (pies mensuales), repartiendo la diferencia de forma proporcional al detalle.
+    """
+    if df_morb.empty or "Total" not in df_morb.columns:
+        return df_morb.copy()
+    t = pd.to_numeric(df_morb["Total"], errors="coerce").fillna(0)
+    detail = float(t.sum())
+    target = int(round(total_oficial))
+    if detail <= 0 or target <= 0 or abs(detail - target) < 1e-6:
+        return df_morb.copy()
+    new_totals = _enteros_prop_por_suma(t.values, target)
+    out = df_morb.copy()
+    for i, idx in enumerate(df_morb.index):
+        Ti = int(new_totals[i])
+        hi = float(pd.to_numeric(df_morb.loc[idx, "Hombre"], errors="coerce") or 0)
+        mi = float(pd.to_numeric(df_morb.loc[idx, "Mujer"], errors="coerce") or 0)
+        sm = hi + mi
+        out.loc[idx, "Total"] = Ti
+        if Ti <= 0:
+            out.loc[idx, "Hombre"] = 0
+            out.loc[idx, "Mujer"] = 0
+        elif sm <= 0:
+            out.loc[idx, "Hombre"] = Ti // 2
+            out.loc[idx, "Mujer"] = Ti - int(out.loc[idx, "Hombre"])
+        else:
+            hi_n = int(round(Ti * hi / sm))
+            hi_n = max(0, min(hi_n, Ti))
+            out.loc[idx, "Hombre"] = hi_n
+            out.loc[idx, "Mujer"] = Ti - hi_n
+    return out
 
 
 def _debug_log(run_id: str, hypothesis_id: str, location: str, message: str, data: dict[str, Any]) -> None:
@@ -1355,6 +1410,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
         if not data_actual['morbilidad'].empty:
             df_morb = data_actual['morbilidad'].sort_values('Total', ascending=False)
             total_morb = _morbilidad_total_anual(df_morb)
+            detail_morb = float(pd.to_numeric(df_morb['Total'], errors='coerce').fillna(0).sum())
+            if abs(detail_morb - total_morb) > 1e-6:
+                df_morb = _morbilidad_escalada_al_total_oficial(df_morb, total_morb)
+                df_morb = df_morb.sort_values('Total', ascending=False)
             df_morb_top = df_morb.head(8).copy()
             if len(df_morb) > 8:
                 otros_total = float(df_morb.iloc[8:]['Total'].sum())
