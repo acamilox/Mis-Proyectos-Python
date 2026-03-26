@@ -919,3 +919,81 @@ h5[style*="color: #f1f5f9"]::after {
     left: 100%;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Filtros Resumen: React-Select v5 (clases css-*) + Bootstrap — contraste fijo */
+/* -------------------------------------------------------------------------- */
+.filtros-section .uci-dd-dark,
+.filtros-section .uci-dd-dark > div {
+    background-color: transparent !important;
+}
+
+/* Control principal (v4 Select__control y v5 css-*-control) */
+.filtros-section .uci-dd-dark .Select-control,
+.filtros-section .uci-dd-dark .Select__control,
+.filtros-section .uci-dd-dark div[class*="control"] {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+    background-color: #1e293b !important;
+    border: 1px solid rgba(55, 118, 171, 0.35) !important;
+    border-radius: 8px !important;
+    min-height: 42px !important;
+    box-shadow: none !important;
+}
+
+.filtros-section .uci-dd-dark .Select-value-label,
+.filtros-section .uci-dd-dark .Select__single-value,
+.filtros-section .uci-dd-dark [class*="singleValue"],
+.filtros-section .uci-dd-dark [class*="SingleValue"] {
+    color: #f1f5f9 !important;
+}
+
+.filtros-section .uci-dd-dark .Select-placeholder,
+.filtros-section .uci-dd-dark .Select__placeholder,
+.filtros-section .uci-dd-dark [class*="placeholder"] {
+    color: #94a3b8 !important;
+}
+
+.filtros-section .uci-dd-dark .Select-input > input,
+.filtros-section .uci-dd-dark .Select__input-container input,
+.filtros-section .uci-dd-dark [class*="Input"] input {
+    color: #f1f5f9 !important;
+}
+
+.filtros-section .uci-dd-dark .Select-multi-value-wrapper .Select-value,
+.filtros-section .uci-dd-dark .Select__multi-value,
+.filtros-section .uci-dd-dark [class*="multiValue"] {
+    background: rgba(55, 118, 171, 0.35) !important;
+    border: 1px solid rgba(55, 118, 171, 0.45) !important;
+    border-radius: 6px !important;
+}
+
+.filtros-section .uci-dd-dark .Select__multi-value__label,
+.filtros-section .uci-dd-dark [class*="multiValue"] [class*="label"],
+.filtros-section .uci-dd-dark .Select-value-label {
+    color: #f1f5f9 !important;
+    font-weight: 600 !important;
+}
+
+.filtros-section .uci-dd-dark .Select__menu,
+.filtros-section .uci-dd-dark .Select-menu-outer,
+.filtros-section .uci-dd-dark [class*="menu"] {
+    background: #1e293b !important;
+    border: 1px solid rgba(55, 118, 171, 0.35) !important;
+    z-index: 2000 !important;
+}
+
+.filtros-section .uci-dd-dark .Select__option,
+.filtros-section .uci-dd-dark [class*="option"] {
+    color: #f1f5f9 !important;
+}
+
+.filtros-section .uci-dd-dark .Select__option--is-focused,
+.filtros-section .uci-dd-dark [class*="option"]:hover {
+    background: rgba(55, 118, 171, 0.25) !important;
+}
+
+.filtros-section .uci-dd-dark .Select__option--is-selected,
+.filtros-section .uci-dd-dark [class*="option"][aria-selected="true"] {
+    background: rgba(55, 118, 171, 0.45) !important;
+    color: #ffd43b !important;
+}
+

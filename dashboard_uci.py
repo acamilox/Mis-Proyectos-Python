@@ -274,7 +274,13 @@ def render_resumen(year_key: str):
                     clearable=False,
                     persistence=True,
                     persistence_type='session',
-                    style={'fontSize': '13px'}
+                    className='uci-dd-dark',
+                    style={
+                        'fontSize': '13px',
+                        'width': '100%',
+                        'color': '#f1f5f9',
+                        'backgroundColor': '#1e293b',
+                    },
                 ),
             ], className="filtro-grupo"),
             # Meses: etiqueta + dropdown
@@ -288,7 +294,13 @@ def render_resumen(year_key: str):
                     value=MESES,
                     multi=True,
                     placeholder="Seleccionar meses",
-                    style={'fontSize': '13px'}
+                    className='uci-dd-dark',
+                    style={
+                        'fontSize': '13px',
+                        'width': '100%',
+                        'color': '#f1f5f9',
+                        'backgroundColor': '#1e293b',
+                    },
                 ),
             ], className="filtro-grupo"),
             # Botones
