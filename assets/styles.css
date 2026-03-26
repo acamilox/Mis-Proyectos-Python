@@ -10,7 +10,8 @@
 
 body {
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: radial-gradient(1200px 900px at 12% 8%, rgba(37, 99, 235, 0.18) 0%, rgba(15, 23, 42, 0) 55%),
+                linear-gradient(135deg, #0b1222 0%, #101c33 55%, #0f172a 100%);
     color: #f1f5f9;
     min-height: 100vh;
     margin: 0;
