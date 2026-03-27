@@ -1468,6 +1468,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         marker_color=color,
                         text=[f"{int(v):,}".replace(",", ".") for v in compare_df[key]],
                         textposition='outside',
+                        textfont=dict(color='#e2e8f0', size=10),
+                        cliponaxis=False,
                         hovertemplate=f"<b>{label}</b><br>Año: %{{x}}<br>Valor: %{{y:.0f}}<extra></extra>"
                     ))
                 fig_compare_vol.update_layout(
@@ -1476,7 +1478,11 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                     height=390, margin=dict(l=45, r=20, t=48, b=45),
                     xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                    yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    yaxis={
+                        'tickfont': {'color': '#94a3b8'},
+                        'gridcolor': 'rgba(148, 163, 184, 0.1)',
+                        'rangemode': 'tozero'
+                    },
                     legend=dict(
                         orientation="h", y=-0.22, x=0.5, xanchor="center",
                         bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
@@ -1500,6 +1506,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         marker_color=color,
                         text=[f"{v:.1f}" for v in compare_df[key]],
                         textposition='outside',
+                        textfont=dict(color='#e2e8f0', size=10),
+                        cliponaxis=False,
                         hovertemplate=f"<b>{label}</b><br>Año: %{{x}}<br>Valor: %{{y:.1f}}<extra></extra>"
                     ))
                 fig_compare_rates.update_layout(
@@ -1508,13 +1516,19 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                     height=370, margin=dict(l=45, r=20, t=48, b=45),
                     xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                    yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    yaxis={
+                        'tickfont': {'color': '#94a3b8'},
+                        'gridcolor': 'rgba(148, 163, 184, 0.1)',
+                        'rangemode': 'tozero'
+                    },
                     legend=dict(
                         orientation="h", y=-0.25, x=0.5, xanchor="center",
                         bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
                         bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
                     ),
                 )
+                fig_compare_vol.update_yaxes(range=[0, float(compare_df[[k for k, _, _ in vol_specs]].max().max()) * 1.22])
+                fig_compare_rates.update_yaxes(range=[0, float(compare_df[[k for k, _, _ in rate_specs]].max().max()) * 1.22])
 
                 compare_block = [
                     html.H6("Comparación por año (meses seleccionados)", style={
