@@ -1591,19 +1591,19 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
 
                 compare_block = [
                     html.H6("Comparación por año (meses seleccionados)", style={
-                        'color': '#e5e7eb', 'fontWeight': '600', 'marginTop': '8px', 'fontSize': '13px'
+                        'color': '#f8fafc', 'fontWeight': '700', 'marginTop': '6px', 'fontSize': '17px', 'letterSpacing': '0.2px'
                     }),
                     html.P(
                         f"Periodo aplicado: {period_label}",
-                        style={'color': '#cbd5e1', 'fontSize': '12px', 'margin': '2px 0 0 0'}
+                        style={'color': '#e2e8f0', 'fontSize': '13px', 'margin': '4px 0 0 0', 'fontWeight': '500'}
                     ),
                     html.P(
                         "Nota: Gérmenes y morbilidad ahora también siguen el filtro de meses cuando la hoja trae separadores mensuales.",
-                        style={'color': '#94a3b8', 'fontSize': '11px', 'margin': '4px 0 0 0'}
+                        style={'color': '#cbd5e1', 'fontSize': '12px', 'margin': '6px 0 0 0'}
                     ),
                     html.P(
-                        "Exportación: usa el botón \"Exportar comparación CSV\" en la barra superior.",
-                        style={'color': '#94a3b8', 'fontSize': '11px', 'margin': '6px 0 0 0'}
+                        "Exportación: usa los botones de comparación junto al selector \"Comparar 2025 vs 2026\".",
+                        style={'color': '#cbd5e1', 'fontSize': '12px', 'margin': '6px 0 0 0'}
                     ),
                     html.Div(compare_table, style={
                         'overflowX': 'auto',
@@ -1661,15 +1661,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 return meses_output_value, html.Div([
                     html.Div(
                         compare_block,
-                        style={
-                            'background': 'rgba(15, 23, 42, 0.9)',
-                            'border': '1px solid rgba(148, 163, 184, 0.35)',
-                            'borderRadius': '10px',
-                            'padding': '10px 6px 12px',
-                            'marginBottom': '16px',
-                            'boxShadow': '0 10px 25px rgba(15,23,42,0.7)',
-                            'overflow': 'hidden'
-                        }
+                        style={'padding': '4px 0 8px', 'marginBottom': '14px'}
                     )
                 ]), meses_filtrados, year_store_output
 
