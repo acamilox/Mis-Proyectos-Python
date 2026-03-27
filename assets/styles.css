@@ -227,6 +227,19 @@ body {
     margin-top: 4px;
 }
 
+/* Tabla comparativa: contenedor responsivo base */
+.table-responsive-mobile {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+}
+
+.table-responsive-mobile table {
+    min-width: 980px;
+}
+
 /* Evita que el selector de meses invada el bloque de botones */
 .filtros-actions {
     white-space: nowrap;
@@ -635,8 +648,46 @@ body {
         width: 100%;
         display: flex;
         gap: 10px;
-        justify-content: center;
+        justify-content: flex-start;
         flex-wrap: wrap;
+    }
+
+    .filtros-acciones {
+        gap: 8px !important;
+        justify-content: flex-start !important;
+    }
+
+    #comparar-anios {
+        width: 100%;
+        margin: 2px 0 4px 0;
+    }
+
+    #comparar-anios label {
+        display: flex;
+        align-items: center;
+        line-height: 1.35;
+    }
+
+    .filtros-acciones .filtro-btn {
+        flex: 1 1 calc(50% - 6px);
+        min-width: 145px;
+        text-align: center;
+    }
+
+    .header-main .btn {
+        font-size: 11px !important;
+        padding: 9px 12px !important;
+        letter-spacing: 0.35px;
+    }
+
+    .table-responsive-mobile table {
+        min-width: 860px;
+    }
+
+    .table-responsive-mobile th,
+    .table-responsive-mobile td {
+        font-size: 11px !important;
+        padding: 7px 8px !important;
     }
     
     .filtros-section .btn {
@@ -754,6 +805,21 @@ body {
     .btn {
         font-size: 12px !important;
         padding: 10px 14px !important;
+    }
+
+    .filtros-acciones .filtro-btn {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+
+    .table-responsive-mobile table {
+        min-width: 780px;
+    }
+
+    .table-responsive-mobile th,
+    .table-responsive-mobile td {
+        font-size: 10.5px !important;
+        padding: 6px 7px !important;
     }
     
     h5 {
