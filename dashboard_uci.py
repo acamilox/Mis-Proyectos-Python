@@ -1451,59 +1451,98 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 compare_df = pd.DataFrame(compare_rows)
                 year_labels = compare_df["year"].tolist()
 
-                fig_compare_vol = go.Figure()
-                vol_specs = [
-                    ("ingresos", "Total ingresos", "#6366f1"),
-                    ("total_dias", "Total días estancia", "#10b981"),
-                    ("fallecidos", "Total fallecidos", "#ef4444"),
-                    ("total_eventos", "Eventos adversos", "#f59e0b"),
-                    ("total_germenes", "Gérmenes aislados", "#06b6d4"),
-                    ("total_diag", "Casos morbilidad", "#8b5cf6"),
+                # Paleta fija: un color distinto por métrica en todo el bloque comparativo (sin repetir)
+                _compare_color_keys = [
+                    "total_dias", "total_diag",
+                    "ingresos", "fallecidos", "total_eventos", "total_germenes",
+                    "ocupacion", "mortalidad", "mort_ucI", "estancia", "giro_cama",
                 ]
-                for key, label, color in vol_specs:
-                    fig_compare_vol.add_trace(go.Bar(
-                        x=year_labels,
-                        y=compare_df[key],
-                        name=label,
-                        marker_color=color,
-                        text=[f"{int(v):,}".replace(",", ".") for v in compare_df[key]],
-                        textposition='outside',
-                        textfont=dict(color='#e2e8f0', size=10),
-                        cliponaxis=False,
-                        hovertemplate=f"<b>{label}</b><br>Año: %{{x}}<br>Valor: %{{y:.0f}}<extra></extra>"
-                    ))
-                fig_compare_vol.update_layout(
-                    title={'text': 'Comparación visual - Volúmenes (meses seleccionados)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
-                    barmode='group',
-                    plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                    height=390, margin=dict(l=45, r=20, t=48, b=45),
-                    xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                    yaxis={
-                        'tickfont': {'color': '#94a3b8'},
-                        'gridcolor': 'rgba(148, 163, 184, 0.1)',
-                        'rangemode': 'tozero'
-                    },
-                    legend=dict(
-                        orientation="h", y=-0.22, x=0.5, xanchor="center",
-                        bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
-                        bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
-                    ),
+                _compare_colors = _palette_iaas_n(len(_compare_color_keys))
+                _color_cmp = {k: _compare_colors[i] for i, k in enumerate(_compare_color_keys)}
+
+                def _range_y_vol(keys: list[str]) -> list[float]:
+                    m = float(compare_df[keys].max().max()) if keys else 0.0
+                    if m <= 0:
+                        return [0.0, 1.0]
+                    return [0.0, m * 1.22]
+
+                def _range_y_rates(keys: list[str]) -> list[float]:
+                    m = float(compare_df[keys].max().max()) if keys else 0.0
+                    if m <= 0:
+                        return [0.0, 1.0]
+                    return [0.0, m * 1.22]
+
+                def _fig_compare_bars_vol(title: str, specs: list[tuple[str, str]], height: int) -> go.Figure:
+                    fig = go.Figure()
+                    keys = [k for k, _ in specs]
+                    for key, label in specs:
+                        fig.add_trace(go.Bar(
+                            x=year_labels,
+                            y=compare_df[key],
+                            name=label,
+                            marker_color=_color_cmp[key],
+                            text=[f"{int(v):,}".replace(",", ".") for v in compare_df[key]],
+                            textposition='outside',
+                            textfont=dict(color='#e2e8f0', size=10),
+                            cliponaxis=False,
+                            hovertemplate=f"<b>{label}</b><br>Año: %{{x}}<br>Valor: %{{y:.0f}}<extra></extra>"
+                        ))
+                    fig.update_layout(
+                        title={'text': title, 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
+                        barmode='group',
+                        plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                        height=height, margin=dict(l=45, r=20, t=48, b=45),
+                        xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                        yaxis={
+                            'tickfont': {'color': '#94a3b8'},
+                            'gridcolor': 'rgba(148, 163, 184, 0.1)',
+                            'rangemode': 'tozero'
+                        },
+                        legend=dict(
+                            orientation="h", y=-0.22, x=0.5, xanchor="center",
+                            bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                            bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+                        ),
+                    )
+                    fig.update_yaxes(range=_range_y_vol(keys))
+                    return fig
+
+                # Volúmenes: dos escalas (altos vs resto) para que no aplaste las barras pequeñas
+                vol_specs_large = [
+                    ("total_dias", "Total días estancia"),
+                    ("total_diag", "Casos morbilidad (anual)"),
+                ]
+                vol_specs_small = [
+                    ("ingresos", "Total ingresos"),
+                    ("fallecidos", "Total fallecidos"),
+                    ("total_eventos", "Eventos adversos"),
+                    ("total_germenes", "Gérmenes aislados (anual)"),
+                ]
+                fig_compare_vol_hi = _fig_compare_bars_vol(
+                    "Comparación visual - Volúmenes altos (días estancia / morbilidad)",
+                    vol_specs_large,
+                    340,
+                )
+                fig_compare_vol_lo = _fig_compare_bars_vol(
+                    "Comparación visual - Volúmenes restantes",
+                    vol_specs_small,
+                    360,
                 )
 
                 fig_compare_rates = go.Figure()
                 rate_specs = [
-                    ("ocupacion", "% Ocupación", "#22c55e"),
-                    ("mortalidad", "% Mortalidad", "#f43f5e"),
-                    ("mort_ucI", "% Mortalidad UCI", "#f97316"),
-                    ("estancia", "Estancia prom. (días)", "#60a5fa"),
-                    ("giro_cama", "Giro cama prom.", "#a78bfa"),
+                    ("ocupacion", "% Ocupación"),
+                    ("mortalidad", "% Mortalidad"),
+                    ("mort_ucI", "% Mortalidad UCI"),
+                    ("estancia", "Estancia prom. (días)"),
+                    ("giro_cama", "Giro cama prom."),
                 ]
-                for key, label, color in rate_specs:
+                for key, label in rate_specs:
                     fig_compare_rates.add_trace(go.Bar(
                         x=year_labels,
                         y=compare_df[key],
                         name=label,
-                        marker_color=color,
+                        marker_color=_color_cmp[key],
                         text=[f"{v:.1f}" for v in compare_df[key]],
                         textposition='outside',
                         textfont=dict(color='#e2e8f0', size=10),
@@ -1527,8 +1566,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
                     ),
                 )
-                fig_compare_vol.update_yaxes(range=[0, float(compare_df[[k for k, _, _ in vol_specs]].max().max()) * 1.22])
-                fig_compare_rates.update_yaxes(range=[0, float(compare_df[[k for k, _, _ in rate_specs]].max().max()) * 1.22])
+                fig_compare_rates.update_yaxes(range=_range_y_rates([k for k, _ in rate_specs]))
 
                 compare_block = [
                     html.H6("Comparación por año (meses seleccionados)", style={
@@ -1546,8 +1584,11 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     }, className="table-responsive-mobile")
                     ,
                     dbc.Row([
-                        dbc.Col(dcc.Graph(figure=fig_compare_vol, config=_GRAPH_CFG, style={'height': '390px'}), xs=12)
+                        dbc.Col(dcc.Graph(figure=fig_compare_vol_hi, config=_GRAPH_CFG, style={'height': '340px'}), xs=12)
                     ], className="mt-3 mb-2 g-3"),
+                    dbc.Row([
+                        dbc.Col(dcc.Graph(figure=fig_compare_vol_lo, config=_GRAPH_CFG, style={'height': '360px'}), xs=12)
+                    ], className="mb-2 g-3"),
                     dbc.Row([
                         dbc.Col(dcc.Graph(figure=fig_compare_rates, config=_GRAPH_CFG, style={'height': '370px'}), xs=12)
                     ], className="mb-1 g-3"),
