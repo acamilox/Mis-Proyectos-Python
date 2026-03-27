@@ -347,11 +347,18 @@ app.layout = html.Div([
             ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'flex': '1'}),
             html.Div([
                 dbc.Button("Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
-                dbc.Button("Exportar CSV", id="btn-export-csv", color="primary", size="sm"),
+                dbc.Button("Exportar CSV", id="btn-export-csv", color="primary", size="sm", className="me-2"),
+                dbc.Button(
+                    "Exportar comparación CSV",
+                    id="btn-export-compare-csv",
+                    color="info",
+                    size="sm",
+                    title="Descarga la tabla 2025 vs 2026 según los meses guardados en Resumen (tras Aplicar)",
+                ),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
                 dcc.Download(id="download-compare-csv"),
-            ], style={'display': 'flex', 'gap': '8px', 'position': 'absolute', 'right': '20px'})
+            ], style={'display': 'flex', 'gap': '8px', 'position': 'absolute', 'right': '20px', 'flexWrap': 'wrap', 'justifyContent': 'flex-end'})
         ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'position': 'relative', 'padding': '20px 0'})
     ], className="header-main", style={
         'background': 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
@@ -1584,7 +1591,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         "Nota: Gérmenes y morbilidad ahora también siguen el filtro de meses cuando la hoja trae separadores mensuales.",
                         style={'color': '#94a3b8', 'fontSize': '11px', 'margin': '4px 0 0 0'}
                     ),
-                    dbc.Button("Exportar comparación CSV", id="btn-export-compare-csv", color="info", size="sm", className="mt-2"),
+                    html.P(
+                        "Exportación: usa el botón \"Exportar comparación CSV\" en la barra superior.",
+                        style={'color': '#94a3b8', 'fontSize': '11px', 'margin': '6px 0 0 0'}
+                    ),
                     html.Div(compare_table, style={
                         'overflowX': 'auto',
                         'WebkitOverflowScrolling': 'touch',
@@ -1950,7 +1960,13 @@ def export_csv(_n_clicks, selected_year, selected_months):
     State('selected-months-store', 'data'),
     prevent_initial_call=True
 )
-def export_compare_csv(_n_clicks, selected_months):
+def export_compare_csv(n_clicks, selected_months):
+    # Evita descargas espurias al montar botones dinámicos (el botón vive fijo en el header).
+    if not n_clicks:
+        raise dash.exceptions.PreventUpdate
+    ctx = dash.callback_context
+    if not ctx.triggered or ctx.triggered[0]["prop_id"].split(".")[0] != "btn-export-compare-csv":
+        raise dash.exceptions.PreventUpdate
     meses_export = selected_months if isinstance(selected_months, list) and selected_months else MESES
     meses_filtrados = [m for m in meses_export if m in MESES]
     if not meses_filtrados:
