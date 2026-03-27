@@ -348,15 +348,29 @@ app.layout = html.Div([
             html.Div([
                 dbc.Button("Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
                 dbc.Button("Exportar CSV", id="btn-export-csv", color="primary", size="sm", className="me-2"),
+                html.Span(
+                    "Comparación:",
+                    style={'color': '#cbd5e1', 'fontSize': '12px', 'alignSelf': 'center', 'marginRight': '2px'}
+                ),
+                dbc.Button(
+                    "Exportar comparación Excel",
+                    id="btn-export-compare-excel",
+                    color="info",
+                    size="sm",
+                    className="me-2",
+                    title="Descarga la tabla 2025 vs 2026 en Excel según los meses guardados en Resumen (tras Aplicar)",
+                ),
                 dbc.Button(
                     "Exportar comparación CSV",
                     id="btn-export-compare-csv",
                     color="info",
                     size="sm",
+                    className="me-2",
                     title="Descarga la tabla 2025 vs 2026 según los meses guardados en Resumen (tras Aplicar)",
                 ),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
+                dcc.Download(id="download-compare-excel"),
                 dcc.Download(id="download-compare-csv"),
             ], style={'display': 'flex', 'gap': '8px', 'position': 'absolute', 'right': '20px', 'flexWrap': 'wrap', 'justifyContent': 'flex-end'})
         ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'position': 'relative', 'padding': '20px 0'})
@@ -1952,6 +1966,29 @@ def export_csv(_n_clicks, selected_year, selected_months):
     if 'Resumen General' in datos:
         return dcc.send_data_frame(datos['Resumen General'].to_csv, "dashboard_uci_resumen.csv")  # type: ignore[attr-defined]
     return dash.no_update
+
+
+@app.callback(
+    Output("download-compare-excel", "data"),
+    Input("btn-export-compare-excel", "n_clicks"),
+    State('selected-months-store', 'data'),
+    prevent_initial_call=True
+)
+def export_compare_excel(n_clicks, selected_months):
+    if not n_clicks:
+        raise dash.exceptions.PreventUpdate
+    ctx = dash.callback_context
+    if not ctx.triggered or ctx.triggered[0]["prop_id"].split(".")[0] != "btn-export-compare-excel":
+        raise dash.exceptions.PreventUpdate
+    meses_export = selected_months if isinstance(selected_months, list) and selected_months else MESES
+    meses_filtrados = [m for m in meses_export if m in MESES]
+    if not meses_filtrados:
+        meses_filtrados = MESES
+    rows = _build_compare_rows(meses_filtrados)
+    if not rows:
+        return dash.no_update
+    df = pd.DataFrame(rows)
+    return dcc.send_data_frame(df.to_excel, "comparacion_2025_2026.xlsx", index=False)  # type: ignore[attr-defined]
 
 
 @app.callback(
