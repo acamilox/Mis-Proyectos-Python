@@ -337,13 +337,15 @@ app.layout = html.Div([
 
 @app.callback(
     Output('tab-content', 'children'),
-    [Input('tabs', 'active_tab'), Input('selected-year-store', 'data')]
+    [Input('tabs', 'active_tab'), Input('selected-year-store', 'data'), Input('pending-year-store', 'data')]
 )
-def render_content(tab, selected_year):
+def render_content(tab, selected_year, pending_year):
     """
     Renderiza el contenido de cada pesta\u00f1a.
     - En Resumen, NO se vuelve a construir el layout cuando solo cambia el a\u00f1o aplicado,
       para no resetear los filtros de meses.
+    - En otras pesta\u00f1as, el a\u00f1o sigue el desplegable (pending-year-store), no solo el
+      a\u00f1o aplicado con \"Aplicar\" en Resumen; as\u00ed Gesti\u00f3n/otras coinciden con el a\u00f1o elegido.
     """
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
@@ -352,12 +354,20 @@ def render_content(tab, selected_year):
     if tab == 'tab-resumen' and triggered_id == 'selected-year-store':
         return dash.no_update
 
-    year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
-    year_key = year_candidate if year_candidate in PROCESSOR_BY_YEAR else DEFAULT_YEAR
+    # Cambio solo en el desplegable de a\u00f1o (sin Aplicar): no re-renderizar Resumen para no pisar el valor del dropdown
+    if tab == 'tab-resumen' and triggered_id == 'pending-year-store':
+        return dash.no_update
+
+    selected_resolved = str(selected_year) if selected_year is not None else DEFAULT_YEAR
+    selected_resolved = selected_resolved if selected_resolved in PROCESSOR_BY_YEAR else DEFAULT_YEAR
 
     if tab == 'tab-resumen':
-        return render_resumen(year_key)
-    elif tab == 'tab-gestion':
+        return render_resumen(selected_resolved)
+
+    pend = str(pending_year) if pending_year is not None else ''
+    year_key = pend if pend in PROCESSOR_BY_YEAR else selected_resolved
+
+    if tab == 'tab-gestion':
         return render_gestion(year_key)
     elif tab == 'tab-especialidades':
         return render_especialidades(year_key)
