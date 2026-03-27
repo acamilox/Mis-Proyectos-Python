@@ -1309,21 +1309,47 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
         if compare_enabled:
             available_years = sorted(PROCESSOR_BY_YEAR.keys())
             if len(available_years) >= 2:
+                def _sum_row_months(proc: DataProcessor, row_name: str, months: list[str]) -> float:
+                    row = proc.safe_get_row(row_name, months, silent=True)
+                    if isinstance(row, pd.Series):
+                        return float(pd.to_numeric(row, errors='coerce').fillna(0).sum())
+                    return 0.0
+
                 compare_rows = []
                 for y in available_years:
                     proc_y = PROCESSOR_BY_YEAR[y]
                     data_y = DATA_BY_YEAR.get(y, DATA)
                     k_resumen = proc_y.get_kpis_resumen(meses_filtrados)
                     k_gestion = proc_y.get_kpis_gestion()
-                    k_mort = proc_y.get_kpis_mortalidad()
 
-                    # Totales de otros módulos
-                    df_eventos_y = data_y.get('eventos_adversos')
-                    if isinstance(df_eventos_y, pd.DataFrame) and not df_eventos_y.empty and 'Cantidad' in df_eventos_y.columns:
-                        total_eventos_y = int(pd.to_numeric(df_eventos_y['Cantidad'], errors='coerce').fillna(0).sum())
+                    # Total días estancia: seguir meses seleccionados (si no hay fila mensual, usa total anual)
+                    total_dias_meses = _sum_row_months(proc_y, 'TOTAL DIAS ESTANCIA', meses_filtrados)
+                    if total_dias_meses > 0:
+                        total_dias_y = total_dias_meses
                     else:
-                        total_eventos_y = 0
+                        total_dias_y = float(k_gestion.get("total_dias_estancia", 0) or 0)
 
+                    # Fallecidos y mortalidad: consistentes con meses seleccionados (igual que KPIs de Resumen)
+                    total_fallecidos_y = int(k_resumen.get("total_fallecidos", 0) or 0)
+                    total_egresos_y = float(k_resumen.get("total_egresos", 0) or 0)
+                    mort_uci_y = (total_fallecidos_y / total_egresos_y * 100.0) if total_egresos_y > 0 else 0.0
+
+                    # Eventos adversos: preferir detalle por mes cuando exista, fallback anual agregado
+                    df_eventos_det_y = data_y.get('eventos_adversos_detalle')
+                    if (
+                        isinstance(df_eventos_det_y, pd.DataFrame)
+                        and not df_eventos_det_y.empty
+                        and 'Mes' in df_eventos_det_y.columns
+                    ):
+                        total_eventos_y = int(df_eventos_det_y[df_eventos_det_y['Mes'].isin(meses_filtrados)].shape[0])
+                    else:
+                        df_eventos_y = data_y.get('eventos_adversos')
+                        if isinstance(df_eventos_y, pd.DataFrame) and not df_eventos_y.empty and 'Cantidad' in df_eventos_y.columns:
+                            total_eventos_y = int(pd.to_numeric(df_eventos_y['Cantidad'], errors='coerce').fillna(0).sum())
+                        else:
+                            total_eventos_y = 0
+
+                    # Gérmenes y morbilidad cargan agregados anuales (sin mes en fuente)
                     df_germenes_y = data_y.get('germenes')
                     if isinstance(df_germenes_y, pd.DataFrame) and not df_germenes_y.empty and 'Cantidad' in df_germenes_y.columns:
                         total_germenes_y = int(pd.to_numeric(df_germenes_y['Cantidad'], errors='coerce').fillna(0).sum())
@@ -1342,10 +1368,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         "ocupacion": float(k_resumen.get("promedio_ocupacional", 0) or 0),
                         "mortalidad": float(k_resumen.get("mortalidad", 0) or 0),
                         "estancia": float(k_resumen.get("promedio_estancia", 0) or 0),
-                        "giro_cama": float(k_gestion.get("giro_cama", 0) or 0),
-                        "total_dias": float(k_gestion.get("total_dias_estancia", 0) or 0),
-                        "fallecidos": int(k_mort.get("total_fallecidos", 0) or 0),
-                        "mort_ucI": float(k_mort.get("mortalidad_general", 0) or 0),
+                        "giro_cama": float(k_resumen.get("giro_cama", 0) or 0),
+                        "total_dias": float(total_dias_y),
+                        "fallecidos": total_fallecidos_y,
+                        "mort_ucI": float(mort_uci_y),
                         "total_eventos": total_eventos_y,
                         "total_germenes": total_germenes_y,
                         "total_diag": total_diag_y,
@@ -1426,6 +1452,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     html.H6("Comparación por año (meses seleccionados)", style={
                         'color': '#e5e7eb', 'fontWeight': '600', 'marginTop': '8px', 'fontSize': '13px'
                     }),
+                    html.P(
+                        "Nota: Gérmenes aislados y casos de morbilidad se muestran como total anual (la fuente no tiene desglose mensual).",
+                        style={'color': '#94a3b8', 'fontSize': '11px', 'margin': '4px 0 0 0'}
+                    ),
                     html.Div(compare_table, style={
                         'overflowX': 'auto',
                         'WebkitOverflowScrolling': 'touch',
