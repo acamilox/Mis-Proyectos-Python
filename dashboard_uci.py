@@ -344,36 +344,16 @@ app.layout = html.Div([
                         'fontWeight': '500', 'letterSpacing': '0.5px'
                     }, className="header-subtitle")
                 ])
-            ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'width': '100%'}),
+            ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'center', 'flex': '1'}),
             html.Div([
                 dbc.Button("Exportar Excel", id="btn-export-excel", color="success", size="sm", className="me-2"),
                 dbc.Button("Exportar CSV", id="btn-export-csv", color="primary", size="sm", className="me-2"),
-                html.Span(
-                    "Comparación:",
-                    style={'color': '#cbd5e1', 'fontSize': '12px', 'alignSelf': 'center', 'marginRight': '2px'}
-                ),
-                dbc.Button(
-                    "Exportar comparación Excel",
-                    id="btn-export-compare-excel",
-                    color="info",
-                    size="sm",
-                    className="me-2",
-                    title="Descarga la tabla 2025 vs 2026 en Excel según los meses guardados en Resumen (tras Aplicar)",
-                ),
-                dbc.Button(
-                    "Exportar comparación CSV",
-                    id="btn-export-compare-csv",
-                    color="info",
-                    size="sm",
-                    className="me-2",
-                    title="Descarga la tabla 2025 vs 2026 según los meses guardados en Resumen (tras Aplicar)",
-                ),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
                 dcc.Download(id="download-compare-excel"),
                 dcc.Download(id="download-compare-csv"),
-            ], style={'display': 'flex', 'gap': '8px', 'flexWrap': 'wrap', 'justifyContent': 'center', 'alignItems': 'center'})
-        ], style={'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'center', 'alignItems': 'center', 'gap': '10px', 'padding': '12px 0 4px 0'})
+            ], style={'display': 'flex', 'gap': '8px', 'position': 'absolute', 'right': '20px', 'flexWrap': 'wrap', 'justifyContent': 'flex-end'})
+        ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'position': 'relative', 'padding': '20px 0'})
     ], className="header-main", style={
         'background': 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
         'borderBottom': '1px solid rgba(148, 163, 184, 0.2)',
@@ -519,6 +499,22 @@ def render_resumen(year_key: str):
                     value=[],
                     inputStyle={'marginRight': '6px'},
                     labelStyle={'color': '#e5e7eb', 'fontSize': '12px', 'fontWeight': '500'}
+                ),
+                dbc.Button(
+                    "Exportar comparación Excel",
+                    id="btn-export-compare-excel",
+                    color="info",
+                    size="sm",
+                    className="filtro-btn",
+                    title="Descarga la tabla 2025 vs 2026 en Excel según los meses guardados en Resumen (tras Aplicar)",
+                ),
+                dbc.Button(
+                    "Exportar comparación CSV",
+                    id="btn-export-compare-csv",
+                    color="info",
+                    size="sm",
+                    className="filtro-btn",
+                    title="Descarga la tabla 2025 vs 2026 según los meses guardados en Resumen (tras Aplicar)",
                 ),
             ], className="filtros-acciones")
         ], style={'display': 'grid', 'gridTemplateColumns': '100px minmax(0, 1fr)', 'alignItems': 'start', 'columnGap': '16px', 'rowGap': '16px'}, className="filtros-inner")
