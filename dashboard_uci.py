@@ -1176,6 +1176,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             rango_texto = ", ".join([MESES_COMPLETOS.get(m, m)[:3] for m in meses_filtrados])
 
         rango_texto = f"{rango_texto} {year_key}"
+        year_store_output = dash.no_update
+        if triggered_id in ('btn-aplicar-filtros', 'btn-todos-meses'):
+            year_store_output = year_key
 
         kpis = processor.get_kpis_resumen(meses_filtrados)
         # region agent log
@@ -1593,6 +1596,21 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         dbc.Col(dcc.Graph(figure=fig_compare_rates, config=_GRAPH_CFG, style={'height': '370px'}), xs=12)
                     ], className="mb-1 g-3"),
                 ]
+                # Modo comparación exclusivo: si está activo, oculta el resto del resumen.
+                return meses_output_value, html.Div([
+                    html.Div(
+                        compare_block,
+                        style={
+                            'background': 'rgba(15, 23, 42, 0.9)',
+                            'border': '1px solid rgba(148, 163, 184, 0.35)',
+                            'borderRadius': '10px',
+                            'padding': '10px 6px 12px',
+                            'marginBottom': '16px',
+                            'boxShadow': '0 10px 25px rgba(15,23,42,0.7)',
+                            'overflow': 'hidden'
+                        }
+                    )
+                ]), meses_filtrados, year_store_output
 
         # Ocupacional
         datos_ocup = processor.safe_get_row('% OCUPACIONAL', meses_filtrados)
@@ -1758,10 +1776,6 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 showarrow=False,
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
-
-        year_store_output = dash.no_update
-        if triggered_id in ('btn-aplicar-filtros', 'btn-todos-meses'):
-            year_store_output = year_key
 
         return meses_output_value, html.Div([
             html.Div(
