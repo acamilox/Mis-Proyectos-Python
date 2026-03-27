@@ -163,6 +163,65 @@ def _debug_log(run_id: str, hypothesis_id: str, location: str, message: str, dat
     with log_path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
+
+def _build_compare_rows(meses_filtrados: list[str]) -> list[dict[str, Any]]:
+    """Construye filas de comparación anual coherentes con meses seleccionados."""
+    rows: list[dict[str, Any]] = []
+    available_years = sorted(PROCESSOR_BY_YEAR.keys())
+    for y in available_years:
+        proc_y = PROCESSOR_BY_YEAR[y]
+        data_y = DATA_BY_YEAR.get(y, DATA)
+        k_resumen = proc_y.get_kpis_resumen(meses_filtrados)
+        k_gestion = proc_y.get_kpis_gestion()
+
+        row_td = proc_y.safe_get_row('TOTAL DIAS ESTANCIA', meses_filtrados, silent=True)
+        total_dias_meses = float(pd.to_numeric(row_td, errors='coerce').fillna(0).sum()) if isinstance(row_td, pd.Series) else 0.0
+        total_dias_y = total_dias_meses if total_dias_meses > 0 else float(k_gestion.get("total_dias_estancia", 0) or 0)
+
+        total_fallecidos_y = int(k_resumen.get("total_fallecidos", 0) or 0)
+        total_egresos_y = float(k_resumen.get("total_egresos", 0) or 0)
+        mort_uci_y = (total_fallecidos_y / total_egresos_y * 100.0) if total_egresos_y > 0 else 0.0
+
+        df_eventos_det_y = data_y.get('eventos_adversos_detalle')
+        if isinstance(df_eventos_det_y, pd.DataFrame) and not df_eventos_det_y.empty and 'Mes' in df_eventos_det_y.columns:
+            total_eventos_y = int(df_eventos_det_y[df_eventos_det_y['Mes'].isin(meses_filtrados)].shape[0])
+        else:
+            df_eventos_y = data_y.get('eventos_adversos')
+            total_eventos_y = int(pd.to_numeric(df_eventos_y.get('Cantidad', pd.Series(dtype=float)), errors='coerce').fillna(0).sum()) if isinstance(df_eventos_y, pd.DataFrame) else 0
+
+        df_germ_det = data_y.get('germenes_detalle')
+        if isinstance(df_germ_det, pd.DataFrame) and not df_germ_det.empty and 'Mes' in df_germ_det.columns:
+            total_germenes_y = int(df_germ_det[df_germ_det['Mes'].isin(meses_filtrados)].shape[0])
+        else:
+            df_germenes_y = data_y.get('germenes')
+            total_germenes_y = int(pd.to_numeric(df_germenes_y.get('Cantidad', pd.Series(dtype=float)), errors='coerce').fillna(0).sum()) if isinstance(df_germenes_y, pd.DataFrame) else 0
+
+        df_morb_y = data_y.get('morbilidad')
+        total_diag_y = 0
+        if isinstance(df_morb_y, pd.DataFrame) and not df_morb_y.empty:
+            attrs = getattr(df_morb_y, "attrs", None) or {}
+            monthly = attrs.get("totales_mensuales", {})
+            if isinstance(monthly, dict):
+                total_diag_y = int(sum(int(monthly.get(m, 0) or 0) for m in meses_filtrados))
+            if total_diag_y <= 0 and 'Total' in df_morb_y.columns:
+                total_diag_y = int(round(_morbilidad_total_anual(df_morb_y)))
+
+        rows.append({
+            "year": y,
+            "ingresos": int(k_resumen.get("total_ingresos", 0) or 0),
+            "ocupacion": float(k_resumen.get("promedio_ocupacional", 0) or 0),
+            "mortalidad": float(k_resumen.get("mortalidad", 0) or 0),
+            "estancia": float(k_resumen.get("promedio_estancia", 0) or 0),
+            "giro_cama": float(k_resumen.get("giro_cama", 0) or 0),
+            "total_dias": float(total_dias_y),
+            "fallecidos": total_fallecidos_y,
+            "mort_ucI": float(mort_uci_y),
+            "total_eventos": total_eventos_y,
+            "total_germenes": total_germenes_y,
+            "total_diag": total_diag_y,
+        })
+    return rows
+
 # ==============================================================================
 # INICIALIZACION DE LA APLICACION
 # ==============================================================================
@@ -187,6 +246,7 @@ def _empty_data() -> dict[str, pd.DataFrame]:
         'estadistica': pd.DataFrame(),
         'morbilidad': pd.DataFrame(),
         'germenes': pd.DataFrame(),
+        'germenes_detalle': pd.DataFrame(),
         'fallecidos': pd.DataFrame(),
         'eventos_adversos': pd.DataFrame(),
         'eventos_adversos_detalle': pd.DataFrame(),
@@ -290,6 +350,7 @@ app.layout = html.Div([
                 dbc.Button("Exportar CSV", id="btn-export-csv", color="primary", size="sm"),
                 dcc.Download(id="download-excel"),
                 dcc.Download(id="download-csv"),
+                dcc.Download(id="download-compare-csv"),
             ], style={'display': 'flex', 'gap': '8px', 'position': 'absolute', 'right': '20px'})
         ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'position': 'relative', 'padding': '20px 0'})
     ], className="header-main", style={
@@ -1312,73 +1373,13 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
         if compare_enabled:
             available_years = sorted(PROCESSOR_BY_YEAR.keys())
             if len(available_years) >= 2:
-                def _sum_row_months(proc: DataProcessor, row_name: str, months: list[str]) -> float:
-                    row = proc.safe_get_row(row_name, months, silent=True)
-                    if isinstance(row, pd.Series):
-                        return float(pd.to_numeric(row, errors='coerce').fillna(0).sum())
-                    return 0.0
-
-                compare_rows = []
-                for y in available_years:
-                    proc_y = PROCESSOR_BY_YEAR[y]
-                    data_y = DATA_BY_YEAR.get(y, DATA)
-                    k_resumen = proc_y.get_kpis_resumen(meses_filtrados)
-                    k_gestion = proc_y.get_kpis_gestion()
-
-                    # Total días estancia: seguir meses seleccionados (si no hay fila mensual, usa total anual)
-                    total_dias_meses = _sum_row_months(proc_y, 'TOTAL DIAS ESTANCIA', meses_filtrados)
-                    if total_dias_meses > 0:
-                        total_dias_y = total_dias_meses
-                    else:
-                        total_dias_y = float(k_gestion.get("total_dias_estancia", 0) or 0)
-
-                    # Fallecidos y mortalidad: consistentes con meses seleccionados (igual que KPIs de Resumen)
-                    total_fallecidos_y = int(k_resumen.get("total_fallecidos", 0) or 0)
-                    total_egresos_y = float(k_resumen.get("total_egresos", 0) or 0)
-                    mort_uci_y = (total_fallecidos_y / total_egresos_y * 100.0) if total_egresos_y > 0 else 0.0
-
-                    # Eventos adversos: preferir detalle por mes cuando exista, fallback anual agregado
-                    df_eventos_det_y = data_y.get('eventos_adversos_detalle')
-                    if (
-                        isinstance(df_eventos_det_y, pd.DataFrame)
-                        and not df_eventos_det_y.empty
-                        and 'Mes' in df_eventos_det_y.columns
-                    ):
-                        total_eventos_y = int(df_eventos_det_y[df_eventos_det_y['Mes'].isin(meses_filtrados)].shape[0])
-                    else:
-                        df_eventos_y = data_y.get('eventos_adversos')
-                        if isinstance(df_eventos_y, pd.DataFrame) and not df_eventos_y.empty and 'Cantidad' in df_eventos_y.columns:
-                            total_eventos_y = int(pd.to_numeric(df_eventos_y['Cantidad'], errors='coerce').fillna(0).sum())
-                        else:
-                            total_eventos_y = 0
-
-                    # Gérmenes y morbilidad cargan agregados anuales (sin mes en fuente)
-                    df_germenes_y = data_y.get('germenes')
-                    if isinstance(df_germenes_y, pd.DataFrame) and not df_germenes_y.empty and 'Cantidad' in df_germenes_y.columns:
-                        total_germenes_y = int(pd.to_numeric(df_germenes_y['Cantidad'], errors='coerce').fillna(0).sum())
-                    else:
-                        total_germenes_y = 0
-
-                    df_morb_y = data_y.get('morbilidad')
-                    if isinstance(df_morb_y, pd.DataFrame) and not df_morb_y.empty and 'Total' in df_morb_y.columns:
-                        total_diag_y = int(round(_morbilidad_total_anual(df_morb_y)))
-                    else:
-                        total_diag_y = 0
-
-                    compare_rows.append({
-                        "year": y,
-                        "ingresos": int(k_resumen.get("total_ingresos", 0) or 0),
-                        "ocupacion": float(k_resumen.get("promedio_ocupacional", 0) or 0),
-                        "mortalidad": float(k_resumen.get("mortalidad", 0) or 0),
-                        "estancia": float(k_resumen.get("promedio_estancia", 0) or 0),
-                        "giro_cama": float(k_resumen.get("giro_cama", 0) or 0),
-                        "total_dias": float(total_dias_y),
-                        "fallecidos": total_fallecidos_y,
-                        "mort_ucI": float(mort_uci_y),
-                        "total_eventos": total_eventos_y,
-                        "total_germenes": total_germenes_y,
-                        "total_diag": total_diag_y,
-                    })
+                compare_rows = _build_compare_rows(meses_filtrados)
+                period_label = (
+                    MESES_COMPLETOS.get(meses_filtrados[0], meses_filtrados[0])
+                    if len(meses_filtrados) == 1
+                    else ("Ene - Dic" if len(meses_filtrados) == len(MESES)
+                          else ", ".join([MESES_COMPLETOS.get(m, m)[:3] for m in meses_filtrados]))
+                )
 
                 header_style = {
                     'backgroundColor': 'rgba(15,23,42,0.98)',
@@ -1576,9 +1577,14 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         'color': '#e5e7eb', 'fontWeight': '600', 'marginTop': '8px', 'fontSize': '13px'
                     }),
                     html.P(
-                        "Nota: Gérmenes aislados y casos de morbilidad se muestran como total anual (la fuente no tiene desglose mensual).",
+                        f"Periodo aplicado: {period_label}",
+                        style={'color': '#cbd5e1', 'fontSize': '12px', 'margin': '2px 0 0 0'}
+                    ),
+                    html.P(
+                        "Nota: Gérmenes y morbilidad ahora también siguen el filtro de meses cuando la hoja trae separadores mensuales.",
                         style={'color': '#94a3b8', 'fontSize': '11px', 'margin': '4px 0 0 0'}
                     ),
+                    dbc.Button("Exportar comparación CSV", id="btn-export-compare-csv", color="info", size="sm", className="mt-2"),
                     html.Div(compare_table, style={
                         'overflowX': 'auto',
                         'WebkitOverflowScrolling': 'touch',
@@ -1586,6 +1592,41 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         'borderRadius': '8px'
                     }, className="table-responsive-mobile")
                     ,
+                    html.Div([
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.Div(row["year"], style={'fontWeight': '700', 'color': '#f1f5f9', 'marginBottom': '8px'}),
+                                html.Div(f"Ingresos: {row['ingresos']:,}".replace(",", "."), style={'color': '#cbd5e1', 'fontSize': '12px'}),
+                                html.Div(f"Fallecidos: {row['fallecidos']}", style={'color': '#cbd5e1', 'fontSize': '12px'}),
+                                html.Div(f"Mortalidad UCI: {row['mort_ucI']:.1f}%", style={'color': '#cbd5e1', 'fontSize': '12px'}),
+                                html.Div(f"Eventos: {row['total_eventos']}", style={'color': '#cbd5e1', 'fontSize': '12px'}),
+                            ]),
+                            style={'background': 'rgba(15,23,42,0.8)', 'border': '1px solid rgba(148,163,184,0.25)'}
+                        ) for row in compare_rows
+                    ], style={'display': 'grid', 'gridTemplateColumns': 'repeat(auto-fit, minmax(180px, 1fr))', 'gap': '10px', 'marginTop': '10px'})
+                    ,
+                    html.Div([
+                        html.Span("Leyenda única:", style={'color': '#e5e7eb', 'fontSize': '12px', 'marginRight': '10px'}),
+                        *[
+                            html.Span([
+                                html.Span(style={'display': 'inline-block', 'width': '10px', 'height': '10px', 'background': _color_cmp[k], 'marginRight': '6px', 'borderRadius': '2px'}),
+                                lbl
+                            ], style={'color': '#cbd5e1', 'fontSize': '11px', 'marginRight': '12px'})
+                            for k, lbl in [
+                                ('total_dias', 'Días estancia'),
+                                ('total_diag', 'Morbilidad'),
+                                ('ingresos', 'Ingresos'),
+                                ('fallecidos', 'Fallecidos'),
+                                ('total_eventos', 'Eventos'),
+                                ('total_germenes', 'Gérmenes'),
+                                ('ocupacion', '% Ocupación'),
+                                ('mortalidad', '% Mortalidad'),
+                                ('mort_ucI', '% Mortalidad UCI'),
+                                ('estancia', 'Estancia prom.'),
+                                ('giro_cama', 'Giro cama'),
+                            ]
+                        ],
+                    ], style={'marginTop': '12px', 'marginBottom': '2px', 'display': 'flex', 'flexWrap': 'wrap', 'alignItems': 'center'}),
                     dbc.Row([
                         dbc.Col(dcc.Graph(figure=fig_compare_vol_hi, config=_GRAPH_CFG, style={'height': '340px'}), xs=12)
                     ], className="mt-3 mb-2 g-3"),
@@ -1901,6 +1942,24 @@ def export_csv(_n_clicks, selected_year, selected_months):
     if 'Resumen General' in datos:
         return dcc.send_data_frame(datos['Resumen General'].to_csv, "dashboard_uci_resumen.csv")  # type: ignore[attr-defined]
     return dash.no_update
+
+
+@app.callback(
+    Output("download-compare-csv", "data"),
+    Input("btn-export-compare-csv", "n_clicks"),
+    State('selected-months-store', 'data'),
+    prevent_initial_call=True
+)
+def export_compare_csv(_n_clicks, selected_months):
+    meses_export = selected_months if isinstance(selected_months, list) and selected_months else MESES
+    meses_filtrados = [m for m in meses_export if m in MESES]
+    if not meses_filtrados:
+        meses_filtrados = MESES
+    rows = _build_compare_rows(meses_filtrados)
+    if not rows:
+        return dash.no_update
+    df = pd.DataFrame(rows)
+    return dcc.send_data_frame(df.to_csv, "comparacion_2025_2026.csv", index=False)  # type: ignore[attr-defined]
 
 
 # ==============================================================================

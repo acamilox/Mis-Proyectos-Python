@@ -45,6 +45,30 @@ def _sum_morbilidad_pies_mensuales(df_morb_raw: pd.DataFrame) -> Optional[int]:
     return total
 
 
+def _morbilidad_pies_por_mes(df_morb_raw: pd.DataFrame) -> Dict[str, int]:
+    """Extrae subtotales mensuales (fila Total) de la hoja MORBILIDAD."""
+    meses_upper = {m.upper(): k for k, m in MESES_COMPLETOS.items()}
+    mes_actual: Optional[str] = None
+    out: Dict[str, int] = {k: 0 for k in MESES}
+    for _, row in df_morb_raw.iterrows():
+        c0 = row[0]
+        c2 = row[2]
+        c3 = row[3]
+        if pd.notna(c0):
+            s0 = str(c0).strip().upper()
+            if s0 in meses_upper:
+                mes_actual = meses_upper[s0]
+                continue
+        if mes_actual is None:
+            continue
+        if pd.isna(c2) or str(c2).strip().lower() != "total":
+            continue
+        v = pd.to_numeric(c3, errors="coerce")
+        if pd.notna(v):
+            out[mes_actual] += int(v)
+    return out
+
+
 class DataLoader:
     """Clase para cargar y validar datos desde Excel"""
     
@@ -53,6 +77,7 @@ class DataLoader:
         self.df = pd.DataFrame()
         self.df_morbilidad = pd.DataFrame()
         self.df_germenes = pd.DataFrame()
+        self.df_germenes_detalle = pd.DataFrame()
         self.df_fallecidos = pd.DataFrame()
         self.df_eventos_adversos = pd.DataFrame()
         self.df_eventos_detalle = pd.DataFrame()
@@ -71,6 +96,7 @@ class DataLoader:
             'estadistica': self.df,
             'morbilidad': self.df_morbilidad,
             'germenes': self.df_germenes,
+            'germenes_detalle': self.df_germenes_detalle,
             'fallecidos': self.df_fallecidos,
             'eventos_adversos': self.df_eventos_adversos,
             'eventos_adversos_detalle': self.df_eventos_detalle,
@@ -125,6 +151,7 @@ class DataLoader:
 
             detail_sum = int(self.df_morbilidad["Total"].sum())
             footer_sum = _sum_morbilidad_pies_mensuales(df_morb_raw)
+            self.df_morbilidad.attrs["totales_mensuales"] = _morbilidad_pies_por_mes(df_morb_raw)
             if footer_sum is not None:
                 self.df_morbilidad.attrs["total_anual"] = footer_sum
                 if footer_sum != detail_sum:
@@ -164,12 +191,27 @@ class DataLoader:
                     "Hoja IAAS sin columna de germenes (columna 5). Se carga vacio."
                 )
                 self.df_germenes = pd.DataFrame(columns=['Germen', 'Cantidad'])
+                self.df_germenes_detalle = pd.DataFrame(columns=['Mes', 'Germen'])
                 return
 
-            germenes_raw = df_iaas[5].dropna()
-            germenes_raw = germenes_raw[germenes_raw.astype(str).str.strip() != '']
-            
-            germenes_norm = germenes_raw.apply(self._normalize_germen)
+            filas_detalle: List[Dict[str, str]] = []
+            mes_actual: Optional[str] = None
+            for _, row in df_iaas.iterrows():
+                col0 = row[0] if 0 in df_iaas.columns else None
+                col5 = row[5]
+                if pd.notna(col0):
+                    nombre_raw = str(col0).strip().lower()
+                    if nombre_raw in MESES_MAP_GRAM:
+                        mes_actual = MESES_MAP_GRAM[nombre_raw]
+                        continue
+                if pd.isna(col5) or not str(col5).strip():
+                    continue
+                germen_norm = self._normalize_germen(str(col5).strip())
+                if germen_norm and str(germen_norm).upper() != "NAN":
+                    filas_detalle.append({"Mes": mes_actual or "N/A", "Germen": germen_norm})
+
+            self.df_germenes_detalle = pd.DataFrame(filas_detalle) if filas_detalle else pd.DataFrame(columns=['Mes', 'Germen'])
+            germenes_norm = self.df_germenes_detalle['Germen'] if not self.df_germenes_detalle.empty else pd.Series(dtype=str)
             self.df_germenes = germenes_norm.value_counts().reset_index()
             self.df_germenes.columns = ['Germen', 'Cantidad']
             
@@ -177,6 +219,7 @@ class DataLoader:
         except Exception as e:
             logger.error(f"Error cargando IAAS: {e}")
             self.df_germenes = pd.DataFrame()
+            self.df_germenes_detalle = pd.DataFrame()
     
     def _normalize_germen(self, g: str) -> str:
         """Normaliza nombres de gérmenes"""
