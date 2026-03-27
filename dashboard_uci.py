@@ -1448,6 +1448,74 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         'tableLayout': 'fixed'
                     }
                 )
+                compare_df = pd.DataFrame(compare_rows)
+                year_labels = compare_df["year"].tolist()
+
+                fig_compare_vol = go.Figure()
+                vol_specs = [
+                    ("ingresos", "Total ingresos", "#6366f1"),
+                    ("total_dias", "Total días estancia", "#10b981"),
+                    ("fallecidos", "Total fallecidos", "#ef4444"),
+                    ("total_eventos", "Eventos adversos", "#f59e0b"),
+                    ("total_germenes", "Gérmenes aislados", "#06b6d4"),
+                    ("total_diag", "Casos morbilidad", "#8b5cf6"),
+                ]
+                for key, label, color in vol_specs:
+                    fig_compare_vol.add_trace(go.Bar(
+                        x=year_labels,
+                        y=compare_df[key],
+                        name=label,
+                        marker_color=color,
+                        text=[f"{int(v):,}".replace(",", ".") for v in compare_df[key]],
+                        textposition='outside',
+                        hovertemplate=f"<b>{label}</b><br>Año: %{{x}}<br>Valor: %{{y:.0f}}<extra></extra>"
+                    ))
+                fig_compare_vol.update_layout(
+                    title={'text': 'Comparación visual - Volúmenes (meses seleccionados)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
+                    barmode='group',
+                    plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                    height=390, margin=dict(l=45, r=20, t=48, b=45),
+                    xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    legend=dict(
+                        orientation="h", y=-0.22, x=0.5, xanchor="center",
+                        bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                        bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+                    ),
+                )
+
+                fig_compare_rates = go.Figure()
+                rate_specs = [
+                    ("ocupacion", "% Ocupación", "#22c55e"),
+                    ("mortalidad", "% Mortalidad", "#f43f5e"),
+                    ("mort_ucI", "% Mortalidad UCI", "#f97316"),
+                    ("estancia", "Estancia prom. (días)", "#60a5fa"),
+                    ("giro_cama", "Giro cama prom.", "#a78bfa"),
+                ]
+                for key, label, color in rate_specs:
+                    fig_compare_rates.add_trace(go.Bar(
+                        x=year_labels,
+                        y=compare_df[key],
+                        name=label,
+                        marker_color=color,
+                        text=[f"{v:.1f}" for v in compare_df[key]],
+                        textposition='outside',
+                        hovertemplate=f"<b>{label}</b><br>Año: %{{x}}<br>Valor: %{{y:.1f}}<extra></extra>"
+                    ))
+                fig_compare_rates.update_layout(
+                    title={'text': 'Comparación visual - Tasas y promedios', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
+                    barmode='group',
+                    plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                    height=370, margin=dict(l=45, r=20, t=48, b=45),
+                    xaxis={'tickfont': {'color': '#cbd5e1'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    legend=dict(
+                        orientation="h", y=-0.25, x=0.5, xanchor="center",
+                        bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                        bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+                    ),
+                )
+
                 compare_block = [
                     html.H6("Comparación por año (meses seleccionados)", style={
                         'color': '#e5e7eb', 'fontWeight': '600', 'marginTop': '8px', 'fontSize': '13px'
@@ -1462,6 +1530,13 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         'marginTop': '8px',
                         'borderRadius': '8px'
                     }, className="table-responsive-mobile")
+                    ,
+                    dbc.Row([
+                        dbc.Col(dcc.Graph(figure=fig_compare_vol, config=_GRAPH_CFG, style={'height': '390px'}), xs=12)
+                    ], className="mt-3 mb-2 g-3"),
+                    dbc.Row([
+                        dbc.Col(dcc.Graph(figure=fig_compare_rates, config=_GRAPH_CFG, style={'height': '370px'}), xs=12)
+                    ], className="mb-1 g-3"),
                 ]
 
         # Ocupacional
