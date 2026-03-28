@@ -1584,18 +1584,11 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         title={
                             "text": "Comparación en gráfico de araña (radar)",
                             "x": 0.5,
-                            "font": {"size": 14, "color": "#f1f5f9"},
-                            "subtitle": {
-                                "text": (
-                                    "En cada eje, 100% es el valor más alto entre los dos años en esa métrica "
-                                    "(sirve para ver forma del perfil; en mortalidad u otros, “más grande” no siempre es mejor)."
-                                ),
-                                "font": {"size": 11, "color": "#94a3b8"},
-                            },
+                            "font": {"size": 15, "color": "#f1f5f9"},
                         },
                         polar=dict(
-                            # Deja aire alrededor del círculo para que las etiquetas no queden pegadas al borde
-                            domain=dict(x=[0.12, 0.88], y=[0.10, 0.78]),
+                            # Dominio amplio: gráfico más grande; márgenes del papel reservan espacio a etiquetas
+                            domain=dict(x=[0.06, 0.94], y=[0.04, 0.88]),
                             bgcolor="#1e293b",
                             radialaxis=dict(
                                 visible=True,
@@ -1620,8 +1613,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             ),
                         ),
                         paper_bgcolor="#1e293b",
-                        height=640,
-                        margin=dict(l=88, r=88, t=110, b=100),
+                        height=780,
+                        margin=dict(l=72, r=72, t=64, b=88),
                         legend=dict(
                             orientation="h",
                             y=-0.11,
@@ -1760,7 +1753,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     ], style={'marginTop': '12px', 'marginBottom': '2px', 'display': 'flex', 'flexWrap': 'wrap', 'alignItems': 'center'}),
                     dbc.Row([
                         dbc.Col(
-                            dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG, style={'height': '640px'}),
+                            dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG, style={'height': '780px'}),
                             xs=12,
                             className="px-1 py-2",
                         )
