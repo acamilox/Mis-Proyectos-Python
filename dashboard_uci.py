@@ -837,35 +837,35 @@ def render_gestion(year_key: str):
                 *[dbc.Col(k, xs=12, md=True) for k in kpi_cards_g]
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_estancia, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_estancia, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, className="plotly-chart plotly-chart--sm")
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_giro, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_giro, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, className="plotly-chart plotly-chart--sm")
             ], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=1),
-                dbc.Col(dcc.Graph(figure=fig_vm, config=_GRAPH_CFG, style={'height': '470px'}), xs=12, md=10),
+                dbc.Col(dcc.Graph(figure=fig_vm, config=_GRAPH_CFG, style={'height': '470px'}), xs=12, md=10, className="plotly-chart plotly-chart--lg"),
                 dbc.Col(xs=12, md=1)
             ], className="mb-4", justify="center"),
             html.H5("Indicadores de Calidad e Infecciones", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_bacteriemia, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, className="plotly-chart plotly-chart--sm")
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, className="plotly-chart plotly-chart--sm")
             ], className="mb-3 g-3"),
             html.H5("G\u00e9rmenes Aislados y Eventos Adversos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG_IAAS, style={'height': '520px'}), xs=12, md=8),
+                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG_IAAS, style={'height': '520px'}), xs=12, md=8, className="plotly-chart plotly-chart--xl"),
                 dbc.Col(xs=12, md=2)
             ], className="mb-4", justify="center"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12)], className="mb-4 g-3"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12, className="plotly-chart plotly-chart--xxl")], className="mb-4 g-3"),
         ] + ([dbc.Row(
-            [dbc.Col(dcc.Graph(figure=fig_dist_pac, config=_GRAPH_CFG, style={'height': '320px'}), xs=12, md=6),
-             dbc.Col(dcc.Graph(figure=fig_esp_ea, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=6)]
+            [dbc.Col(dcc.Graph(figure=fig_dist_pac, config=_GRAPH_CFG, style={'height': '320px'}), xs=12, md=6, className="plotly-chart plotly-chart--sm"),
+             dbc.Col(dcc.Graph(figure=fig_esp_ea, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=6, className="plotly-chart plotly-chart--md")]
             if fig_dist_pac and fig_esp_ea
-            else [dbc.Col(dcc.Graph(figure=(fig_dist_pac or fig_esp_ea), config=_GRAPH_CFG, style={'height': '380px'}), xs=12)],
+            else [dbc.Col(dcc.Graph(figure=(fig_dist_pac or fig_esp_ea), config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")],
             className="mb-5 g-3"
         )] if (fig_dist_pac or fig_esp_ea) else []))
     except Exception as e:
@@ -984,10 +984,10 @@ def render_especialidades(year_key: str):
             html.H5("Principales Especialidades", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '12px'}),
             dbc.Row([dbc.Col(k, xs=12, md=3) for k in kpi_cards_esp], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_especialidades_area, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_especialidades_area, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")
             ], className="mb-3 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_especialidades_mix, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_especialidades_mix, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")
             ], className="g-3")
         ])
     except Exception as e:
@@ -1162,19 +1162,19 @@ def render_mortalidad(year_key: str):
             dbc.Row([dbc.Col(k, xs=12, md=6) for k in kpi_cards_estancia_mort], className="mb-3 g-3"),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_mort, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, md=8),
+                dbc.Col(dcc.Graph(figure=fig_mort, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, md=8, className="plotly-chart plotly-chart--sm"),
                 dbc.Col(xs=12, md=2)
             ], className="mb-3", justify="center"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG, style={'height': '400px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG, style={'height': '400px'}), xs=12, className="plotly-chart plotly-chart--lg")
             ], className="g-3"),
             html.H5("Distribución de fallecidos por EPS y Especialidad", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '18px', 'marginBottom': '12px', 'textAlign': 'center'}),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_eps_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=7),
-                dbc.Col(dcc.Graph(figure=fig_espec_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=5),
+                dbc.Col(dcc.Graph(figure=fig_eps_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=7, className="plotly-chart plotly-chart--md"),
+                dbc.Col(dcc.Graph(figure=fig_espec_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=5, className="plotly-chart plotly-chart--md"),
             ], className="mb-4 g-3")
         ])
     except Exception as e:
@@ -1854,17 +1854,17 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         dbc.Col(
                             dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG_RADAR, style={'height': '780px'}),
                             xs=12,
-                            className="px-1 py-2 graph-radar-compare",
+                            className="px-1 py-2 graph-radar-compare plotly-chart",
                         )
                     ], className="mb-2 g-3"),
                     dbc.Row([
-                        dbc.Col(dcc.Graph(figure=fig_compare_vol_hi, config=_GRAPH_CFG, style={'height': '340px'}), xs=12)
+                        dbc.Col(dcc.Graph(figure=fig_compare_vol_hi, config=_GRAPH_CFG, style={'height': '340px'}), xs=12, className="plotly-chart plotly-chart--cmp")
                     ], className="mt-3 mb-2 g-3"),
                     dbc.Row([
-                        dbc.Col(dcc.Graph(figure=fig_compare_vol_lo, config=_GRAPH_CFG, style={'height': '360px'}), xs=12)
+                        dbc.Col(dcc.Graph(figure=fig_compare_vol_lo, config=_GRAPH_CFG, style={'height': '360px'}), xs=12, className="plotly-chart plotly-chart--cmp")
                     ], className="mb-2 g-3"),
                     dbc.Row([
-                        dbc.Col(dcc.Graph(figure=fig_compare_rates, config=_GRAPH_CFG, style={'height': '370px'}), xs=12)
+                        dbc.Col(dcc.Graph(figure=fig_compare_rates, config=_GRAPH_CFG, style={'height': '370px'}), xs=12, className="plotly-chart plotly-chart--cmp")
                     ], className="mb-1 g-3"),
                 ]
                 # Modo comparación exclusivo: si está activo, oculta el resto del resumen.
@@ -2054,14 +2054,14 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 }
             ) if compare_block else html.Div(),
             dbc.Row([dbc.Col(k, xs=6, sm=6, md=True) for k in kpi_cards_r], className="mb-4 g-3"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocup, config=_GRAPH_CFG, style={'height': '350px'}), xs=12)], className="mb-4"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ie, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)], className="mb-4"),
-            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=_GRAPH_CFG, style={'height': '520px'}), xs=12)], className="mb-4 g-3"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ocup, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, className="plotly-chart plotly-chart--sm")], className="mb-4"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_ie, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")], className="mb-4"),
+            dbc.Row([dbc.Col(dcc.Graph(figure=fig_eps, config=_GRAPH_CFG, style={'height': '520px'}), xs=12, className="plotly-chart plotly-chart--xl")], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_morb, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_morb, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")
             ], className="mb-4 g-3"),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG, style={'height': '380px'}), xs=12)
+                dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")
             ], className="mb-2 g-3")
         ]), meses_filtrados, year_store_output
     except Exception as e:

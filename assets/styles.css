@@ -639,15 +639,53 @@ body {
         margin-bottom: 12px;
     }
     
-    /* Gráficas - mejor visualización en móvil */
-    .dash-graph {
-        min-height: 260px !important;
+    /* Gráficas Plotly: anchura completa; alturas por filas (clases en dashboard_uci.py) */
+    .tab-content .dash-graph {
         width: 100% !important;
-        overflow: hidden;
+    }
+
+    .tab-content .plotly-chart .dash-graph {
+        overflow: visible !important;
+    }
+
+    .tab-content .plotly-chart--sm .dash-graph {
+        height: min(52vh, 310px) !important;
+        min-height: 240px !important;
+        max-height: 340px !important;
+    }
+
+    .tab-content .plotly-chart--md .dash-graph {
+        height: min(55vh, 340px) !important;
+        min-height: 260px !important;
+        max-height: 380px !important;
+    }
+
+    .tab-content .plotly-chart--lg .dash-graph {
+        height: min(58vh, 400px) !important;
+        min-height: 280px !important;
+        max-height: 440px !important;
+    }
+
+    .tab-content .plotly-chart--xl .dash-graph {
+        height: min(62vh, 500px) !important;
+        min-height: 300px !important;
+        max-height: 540px !important;
+    }
+
+    .tab-content .plotly-chart--xxl .dash-graph {
+        height: min(68vh, 580px) !important;
+        min-height: 320px !important;
+        max-height: 640px !important;
+    }
+
+    .tab-content .plotly-chart--cmp .dash-graph {
+        height: min(50vh, 300px) !important;
+        min-height: 240px !important;
+        max-height: 360px !important;
     }
     
     .js-plotly-plot {
-        min-height: 240px;
+        min-height: 0;
         width: 100% !important;
     }
     
@@ -887,6 +925,37 @@ body {
     
     h6 {
         font-size: 13px !important;
+    }
+
+    /* Gráficas: pantallas muy estrechas — un poco más compactas */
+    .tab-content .plotly-chart--sm .dash-graph {
+        height: min(48vh, 280px) !important;
+        max-height: 300px !important;
+    }
+
+    .tab-content .plotly-chart--md .dash-graph {
+        height: min(50vh, 300px) !important;
+        max-height: 340px !important;
+    }
+
+    .tab-content .plotly-chart--lg .dash-graph {
+        height: min(52vh, 340px) !important;
+        max-height: 400px !important;
+    }
+
+    .tab-content .plotly-chart--xl .dash-graph {
+        height: min(55vh, 420px) !important;
+        max-height: 480px !important;
+    }
+
+    .tab-content .plotly-chart--xxl .dash-graph {
+        height: min(58vh, 500px) !important;
+        max-height: 560px !important;
+    }
+
+    .tab-content .plotly-chart--cmp .dash-graph {
+        height: min(46vh, 280px) !important;
+        max-height: 320px !important;
     }
 }
 
