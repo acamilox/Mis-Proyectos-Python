@@ -1528,6 +1528,99 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     fig.update_yaxes(range=_range_y_vol(keys))
                     return fig
 
+                def _fig_compare_radar(compare_df: pd.DataFrame, year_labels: list) -> go.Figure:
+                    """Gráfico de araña/radar: cada eje es una métrica; radio = % del máximo entre años."""
+                    radar_specs = [
+                        ("total_dias", "Días estancia"),
+                        ("total_diag", "Morbilidad"),
+                        ("ingresos", "Ingresos"),
+                        ("fallecidos", "Fallecidos"),
+                        ("total_eventos", "Eventos adv."),
+                        ("total_germenes", "Gérmenes"),
+                        ("ocupacion", "% Ocupación"),
+                        ("mortalidad", "% Mortalidad"),
+                        ("mort_ucI", "% Mort. UCI"),
+                        ("estancia", "Estancia (d)"),
+                        ("giro_cama", "Giro cama"),
+                    ]
+                    theta_labels = [lbl for _, lbl in radar_specs]
+                    theta = theta_labels + [theta_labels[0]]
+                    fig_r = go.Figure()
+                    year_colors = ("#6366f1", "#22d3ee")
+                    for yi, year in enumerate(year_labels):
+                        sub = compare_df[compare_df["year"].astype(str) == str(year)]
+                        if sub.empty:
+                            continue
+                        row = sub.iloc[0]
+                        r_norm: list[float] = []
+                        r_raw: list[float] = []
+                        for key, _lbl in radar_specs:
+                            v = float(row[key])
+                            colmax = float(compare_df[key].max())
+                            r_raw.append(v)
+                            r_norm.append((v / colmax) * 100.0 if colmax > 0 else 0.0)
+                        r_norm_closed = r_norm + [r_norm[0]]
+                        r_raw_closed = r_raw + [r_raw[0]]
+                        customdata = [[x] for x in r_raw_closed]
+                        fig_r.add_trace(go.Scatterpolar(
+                            r=r_norm_closed,
+                            theta=theta,
+                            name=str(year),
+                            mode="lines",
+                            line=dict(color=year_colors[yi % len(year_colors)], width=2.5),
+                            fillcolor=year_colors[yi % len(year_colors)],
+                            fill="toself",
+                            opacity=0.22,
+                            customdata=customdata,
+                            hovertemplate=(
+                                "<b>%{theta}</b><br>%{data.name}<br>"
+                                "Valor: %{customdata[0]:,.2f}<br>"
+                                "Relativo al máximo: %{r:.1f}%%<extra></extra>"
+                            ),
+                        ))
+                    fig_r.update_layout(
+                        title={
+                            "text": "Comparación en gráfico de araña (radar)",
+                            "x": 0.5,
+                            "font": {"size": 14, "color": "#f1f5f9"},
+                            "subtitle": {
+                                "text": (
+                                    "En cada eje, 100% es el valor más alto entre los dos años en esa métrica "
+                                    "(sirve para ver forma del perfil; en mortalidad u otros, “más grande” no siempre es mejor)."
+                                ),
+                                "font": {"size": 11, "color": "#94a3b8"},
+                            },
+                        },
+                        polar=dict(
+                            bgcolor="#1e293b",
+                            radialaxis=dict(
+                                visible=True,
+                                range=[0, 100],
+                                tickfont=dict(color="#94a3b8", size=10),
+                                gridcolor="rgba(148, 163, 184, 0.25)",
+                            ),
+                            angularaxis=dict(
+                                tickfont=dict(color="#cbd5e1", size=10),
+                                direction="clockwise",
+                            ),
+                        ),
+                        paper_bgcolor="#1e293b",
+                        height=540,
+                        margin=dict(l=56, r=56, t=88, b=56),
+                        legend=dict(
+                            orientation="h",
+                            y=-0.06,
+                            x=0.5,
+                            xanchor="center",
+                            font=dict(color="#f1f5f9", size=12),
+                            bgcolor="rgba(30, 41, 59, 0.85)",
+                            bordercolor="rgba(148, 163, 184, 0.3)",
+                            borderwidth=1,
+                        ),
+                        font=dict(color="#f1f5f9"),
+                    )
+                    return fig_r
+
                 # Volúmenes: dos escalas (altos vs resto) para que no aplaste las barras pequeñas
                 vol_specs_large = [
                     ("total_dias", "Total días estancia"),
@@ -1589,6 +1682,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 )
                 fig_compare_rates.update_yaxes(range=_range_y_rates([k for k, _ in rate_specs]))
 
+                fig_compare_radar = _fig_compare_radar(compare_df, year_labels)
+
                 compare_block = [
                     html.H6("Comparación por año (meses seleccionados)", style={
                         'color': '#f8fafc', 'fontWeight': '700', 'marginTop': '6px', 'fontSize': '17px', 'letterSpacing': '0.2px'
@@ -1647,6 +1742,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             ]
                         ],
                     ], style={'marginTop': '12px', 'marginBottom': '2px', 'display': 'flex', 'flexWrap': 'wrap', 'alignItems': 'center'}),
+                    dbc.Row([
+                        dbc.Col(dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG, style={'height': '540px'}), xs=12)
+                    ], className="mb-2 g-3"),
                     dbc.Row([
                         dbc.Col(dcc.Graph(figure=fig_compare_vol_hi, config=_GRAPH_CFG, style={'height': '340px'}), xs=12)
                     ], className="mt-3 mb-2 g-3"),
