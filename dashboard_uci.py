@@ -35,6 +35,8 @@ _GRAPH_CFG: Any = GRAPH_CONFIG
 
 # Donut IAAS: staticPlot puede afectar el layout de la leyenda en algunos navegadores
 _GRAPH_CFG_IAAS: Any = {**GRAPH_CONFIG, "staticPlot": False}
+# Radar comparación: hover por vértice / relleno (requiere staticPlot False)
+_GRAPH_CFG_RADAR: Any = {**GRAPH_CONFIG, "staticPlot": False}
 
 
 # 14 tonos fijos (familias distintas: un azul, un naranja, etc.) → orden = ranking mayor→menor
@@ -1555,29 +1557,41 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             continue
                         row = sub.iloc[0]
                         r_norm: list[float] = []
-                        r_raw: list[float] = []
-                        for key, _lbl in radar_specs:
+                        # Por vértice: etiqueta, valor real, máximo entre años en esa métrica, % relativo
+                        meta_rows: list[tuple[str, float, float, float]] = []
+                        for key, lbl in radar_specs:
                             v = float(row[key])
                             colmax = float(compare_df[key].max())
-                            r_raw.append(v)
-                            r_norm.append((v / colmax) * 100.0 if colmax > 0 else 0.0)
+                            rel_pct = (v / colmax) * 100.0 if colmax > 0 else 0.0
+                            meta_rows.append((lbl, v, colmax, rel_pct))
+                            r_norm.append(rel_pct)
                         r_norm_closed = r_norm + [r_norm[0]]
-                        r_raw_closed = r_raw + [r_raw[0]]
-                        customdata = [[x] for x in r_raw_closed]
+                        meta_closed = meta_rows + [meta_rows[0]]
+                        customdata = [[a, b, c, d] for (a, b, c, d) in meta_closed]
+                        yc = year_line_colors[yi % len(year_line_colors)]
                         fig_r.add_trace(go.Scatterpolar(
                             r=r_norm_closed,
                             theta=theta,
                             name=str(year),
-                            mode="lines",
-                            line=dict(color=year_line_colors[yi % len(year_line_colors)], width=3.5),
+                            mode="lines+markers",
+                            line=dict(color=yc, width=3.5),
+                            marker=dict(
+                                size=12,
+                                color=yc,
+                                opacity=0.95,
+                                line=dict(color="#f8fafc", width=1.2),
+                            ),
                             fillcolor=year_fill_colors[yi % len(year_fill_colors)],
                             fill="toself",
                             opacity=1,
+                            hoveron="points+fills",
                             customdata=customdata,
                             hovertemplate=(
-                                "<b>%{theta}</b><br>%{data.name}<br>"
-                                "Valor: %{customdata[0]:,.2f}<br>"
-                                "Relativo al máximo: %{r:.1f}%%<extra></extra>"
+                                "<b style='font-size:14px'>%{customdata[0]}</b><br>"
+                                "<span style='color:#94a3b8'>Año %{fullData.name}</span><br><br>"
+                                "Valor: <b>%{customdata[1]:,.2f}</b><br>"
+                                "Máximo entre años (esta métrica): %{customdata[2]:,.2f}<br>"
+                                "Relativo al máximo: <b>%{customdata[3]:.1f}%</b><extra></extra>"
                             ),
                         ))
                     fig_r.update_layout(
@@ -1625,6 +1639,15 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             bgcolor="rgba(30, 41, 59, 0.85)",
                             bordercolor="rgba(148, 163, 184, 0.3)",
                             borderwidth=1,
+                        ),
+                        hovermode="closest",
+                        hoverlabel=dict(
+                            bgcolor="rgba(15, 23, 42, 0.96)",
+                            bordercolor="rgba(148, 163, 184, 0.55)",
+                            font_size=13,
+                            font_family="Roboto",
+                            font_color="#f1f5f9",
+                            align="left",
                         ),
                         font=dict(color="#f1f5f9"),
                     )
@@ -1753,7 +1776,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     ], style={'marginTop': '12px', 'marginBottom': '2px', 'display': 'flex', 'flexWrap': 'wrap', 'alignItems': 'center'}),
                     dbc.Row([
                         dbc.Col(
-                            dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG, style={'height': '780px'}),
+                            dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG_RADAR, style={'height': '780px'}),
                             xs=12,
                             className="px-1 py-2",
                         )
