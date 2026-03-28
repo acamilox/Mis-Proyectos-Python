@@ -1778,7 +1778,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         dbc.Col(
                             dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG_RADAR, style={'height': '780px'}),
                             xs=12,
-                            className="px-1 py-2",
+                            className="px-1 py-2 graph-radar-compare",
                         )
                     ], className="mb-2 g-3"),
                     dbc.Row([

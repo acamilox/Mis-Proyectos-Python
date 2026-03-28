@@ -227,6 +227,50 @@ body {
     margin-top: 4px;
 }
 
+/* Gráfico radar (comparación): base en escritorio */
+.graph-radar-compare .dash-graph {
+    width: 100%;
+    max-width: 100%;
+}
+
+.graph-radar-compare .js-plotly-plot {
+    width: 100% !important;
+}
+
+/* Radar en móvil / tablet: altura flexible, sin recortar etiquetas */
+@media (max-width: 992px) {
+    .graph-radar-compare {
+        margin-left: -6px;
+        margin-right: -6px;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+    }
+
+    .graph-radar-compare .dash-graph {
+        height: min(68vh, 620px) !important;
+        min-height: 340px !important;
+        max-height: 620px !important;
+        overflow: visible !important;
+    }
+
+    .graph-radar-compare .dash-graph > div {
+        overflow: visible !important;
+    }
+
+    .graph-radar-compare .plotly .main-svg,
+    .graph-radar-compare .plotly .svg-container {
+        overflow: visible !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .graph-radar-compare .dash-graph {
+        height: min(62vh, 520px) !important;
+        min-height: 300px !important;
+        max-height: 520px !important;
+    }
+}
+
 /* Tabla comparativa: contenedor responsivo base */
 .table-responsive-mobile {
     width: 100%;
