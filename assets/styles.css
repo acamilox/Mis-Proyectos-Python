@@ -271,6 +271,21 @@ body {
     }
 }
 
+/* Comparación: tarjetas por año en móvil (sin scroll horizontal) */
+.compare-table-mobile-stack {
+    width: 100%;
+}
+
+.compare-table-mobile-stack .compare-mobile-year-card {
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 767.98px) {
+    .compare-table-mobile-stack .card-body {
+        padding: 14px 16px !important;
+    }
+}
+
 /* Tabla comparativa: contenedor responsivo base */
 .table-responsive-mobile {
     width: 100%;

@@ -1471,6 +1471,76 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         'tableLayout': 'fixed'
                     }
                 )
+
+                def _compare_mobile_metric_rows(row: dict[str, Any]) -> list[tuple[str, str]]:
+                    """Pares (etiqueta, valor) para vista móvil en tarjetas."""
+                    return [
+                        ("Total ingresos", f"{row['ingresos']:,}".replace(",", ".")),
+                        ("% Ocupación", f"{row['ocupacion']:.1f}%"),
+                        ("% Mortalidad", f"{row['mortalidad']:.1f}%"),
+                        ("Estancia prom. (días)", f"{row['estancia']:.2f}"),
+                        ("Giro cama prom.", f"{row['giro_cama']:.2f}"),
+                        ("Total días estancia", f"{row['total_dias']:.0f}"),
+                        ("Total fallecidos", str(row["fallecidos"])),
+                        ("% Mortalidad UCI", f"{row['mort_ucI']:.1f}%"),
+                        ("Eventos adversos", str(row["total_eventos"])),
+                        ("Gérmenes aislados", str(row["total_germenes"])),
+                        ("Casos morbilidad", str(row["total_diag"])),
+                    ]
+
+                compare_table_mobile = html.Div(
+                    [
+                        dbc.Card(
+                            dbc.CardBody([
+                                html.H6(
+                                    f"Año {row['year']}",
+                                    style={
+                                        'color': '#f8fafc', 'fontWeight': '700', 'fontSize': '16px',
+                                        'marginBottom': '10px', 'paddingBottom': '10px',
+                                        'borderBottom': '1px solid rgba(148, 163, 184, 0.35)',
+                                    },
+                                ),
+                                *[
+                                    html.Div(
+                                        [
+                                            html.Span(
+                                                lbl,
+                                                style={
+                                                    'color': '#94a3b8', 'fontSize': '12px', 'lineHeight': '1.35',
+                                                    'paddingRight': '10px', 'flex': '1', 'minWidth': '0',
+                                                },
+                                            ),
+                                            html.Span(
+                                                val,
+                                                style={
+                                                    'color': '#e5e7eb', 'fontSize': '13px', 'fontWeight': '600',
+                                                    'textAlign': 'right', 'flexShrink': '0',
+                                                },
+                                            ),
+                                        ],
+                                        style={
+                                            'display': 'flex', 'justifyContent': 'space-between',
+                                            'alignItems': 'flex-start', 'gap': '8px',
+                                            'padding': '9px 0',
+                                            'borderBottom': '1px solid rgba(71, 85, 105, 0.45)',
+                                        },
+                                    )
+                                    for lbl, val in _compare_mobile_metric_rows(row)
+                                ],
+                            ]),
+                            className="compare-mobile-year-card",
+                            style={
+                                'background': 'rgba(15, 23, 42, 0.96)',
+                                'border': '1px solid rgba(148, 163, 184, 0.28)',
+                                'borderRadius': '10px',
+                            },
+                        )
+                        for row in compare_rows
+                    ],
+                    className="d-md-none compare-table-mobile-stack",
+                    style={'marginTop': '10px'},
+                )
+
                 compare_df = pd.DataFrame(compare_rows)
                 year_labels = compare_df["year"].tolist()
 
@@ -1732,13 +1802,19 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         "Exportación: usa los botones de comparación junto al selector \"Comparar 2025 vs 2026\".",
                         style={'color': '#cbd5e1', 'fontSize': '12px', 'margin': '6px 0 0 0'}
                     ),
-                    html.Div(compare_table, style={
-                        'overflowX': 'auto',
-                        'WebkitOverflowScrolling': 'touch',
-                        'marginTop': '8px',
-                        'borderRadius': '8px'
-                    }, className="table-responsive-mobile")
-                    ,
+                    html.Div([
+                        html.Div(
+                            compare_table,
+                            style={
+                                'overflowX': 'auto',
+                                'WebkitOverflowScrolling': 'touch',
+                                'marginTop': '8px',
+                                'borderRadius': '8px',
+                            },
+                            className="d-none d-md-block table-responsive-mobile",
+                        ),
+                        compare_table_mobile,
+                    ]),
                     html.Div([
                         dbc.Card(
                             dbc.CardBody([
