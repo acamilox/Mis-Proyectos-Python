@@ -1546,7 +1546,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     theta_labels = [lbl for _, lbl in radar_specs]
                     theta = theta_labels + [theta_labels[0]]
                     fig_r = go.Figure()
-                    year_colors = ("#6366f1", "#22d3ee")
+                    # Colores muy contrastantes sobre fondo oscuro (naranja vs verde lima; líneas gruesas)
+                    year_line_colors = ("#fb923c", "#a3e635")
+                    year_fill_colors = ("rgba(251, 146, 60, 0.35)", "rgba(163, 230, 53, 0.35)")
                     for yi, year in enumerate(year_labels):
                         sub = compare_df[compare_df["year"].astype(str) == str(year)]
                         if sub.empty:
@@ -1567,10 +1569,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             theta=theta,
                             name=str(year),
                             mode="lines",
-                            line=dict(color=year_colors[yi % len(year_colors)], width=2.5),
-                            fillcolor=year_colors[yi % len(year_colors)],
+                            line=dict(color=year_line_colors[yi % len(year_line_colors)], width=3.5),
+                            fillcolor=year_fill_colors[yi % len(year_fill_colors)],
                             fill="toself",
-                            opacity=0.22,
+                            opacity=1,
                             customdata=customdata,
                             hovertemplate=(
                                 "<b>%{theta}</b><br>%{data.name}<br>"
@@ -1596,8 +1598,8 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             radialaxis=dict(
                                 visible=True,
                                 range=[0, 100],
-                                tickfont=dict(color="#94a3b8", size=10),
-                                gridcolor="rgba(148, 163, 184, 0.25)",
+                                tickfont=dict(color="#cbd5e1", size=10),
+                                gridcolor="rgba(148, 163, 184, 0.4)",
                             ),
                             angularaxis=dict(
                                 tickfont=dict(color="#cbd5e1", size=10),
