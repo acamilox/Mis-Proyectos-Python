@@ -1594,11 +1594,15 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             },
                         },
                         polar=dict(
+                            # Deja aire alrededor del círculo para que las etiquetas no queden pegadas al borde
+                            domain=dict(x=[0.12, 0.88], y=[0.10, 0.78]),
                             bgcolor="#1e293b",
                             radialaxis=dict(
                                 visible=True,
                                 range=[0, 100],
-                                # Etiquetas 20–100: color cálido y tamaño mayor (evita confundirse con la rejilla)
+                                dtick=25,
+                                tick0=0,
+                                # Etiquetas 0–100: color cálido y tamaño mayor (evita confundirse con la rejilla)
                                 tickfont=dict(color="#fef08a", size=13, family="Roboto"),
                                 gridcolor="rgba(71, 85, 105, 0.75)",
                                 gridwidth=1,
@@ -1606,17 +1610,22 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                                 linewidth=1,
                             ),
                             angularaxis=dict(
-                                tickfont=dict(color="#e2e8f0", size=11, family="Roboto"),
+                                tickfont=dict(color="#e2e8f0", size=10, family="Roboto"),
                                 direction="clockwise",
                                 gridcolor="rgba(71, 85, 105, 0.55)",
+                                ticklen=10,
+                                ticks="outside",
+                                showline=True,
+                                linecolor="rgba(148, 163, 184, 0.35)",
                             ),
                         ),
                         paper_bgcolor="#1e293b",
-                        height=540,
-                        margin=dict(l=56, r=56, t=88, b=56),
+                        height=640,
+                        margin=dict(l=88, r=88, t=110, b=100),
                         legend=dict(
                             orientation="h",
-                            y=-0.06,
+                            y=-0.11,
+                            yanchor="top",
                             x=0.5,
                             xanchor="center",
                             font=dict(color="#f1f5f9", size=12),
@@ -1750,7 +1759,11 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         ],
                     ], style={'marginTop': '12px', 'marginBottom': '2px', 'display': 'flex', 'flexWrap': 'wrap', 'alignItems': 'center'}),
                     dbc.Row([
-                        dbc.Col(dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG, style={'height': '540px'}), xs=12)
+                        dbc.Col(
+                            dcc.Graph(figure=fig_compare_radar, config=_GRAPH_CFG, style={'height': '640px'}),
+                            xs=12,
+                            className="px-1 py-2",
+                        )
                     ], className="mb-2 g-3"),
                     dbc.Row([
                         dbc.Col(dcc.Graph(figure=fig_compare_vol_hi, config=_GRAPH_CFG, style={'height': '340px'}), xs=12)
