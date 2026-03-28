@@ -1963,6 +1963,8 @@ def export_csv(_n_clicks, selected_year, selected_months):
     prevent_initial_call=True
 )
 def export_compare_excel(n_clicks, selected_months):
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
     if not n_clicks:
         raise dash.exceptions.PreventUpdate
     ctx = dash.callback_context
@@ -1976,7 +1978,81 @@ def export_compare_excel(n_clicks, selected_months):
     if not rows:
         return dash.no_update
     df = pd.DataFrame(rows)
-    return dcc.send_data_frame(df.to_excel, "comparacion_2025_2026.xlsx", index=False)  # type: ignore[attr-defined]
+
+    column_map = {
+        "year": "Año",
+        "ingresos": "Total ingresos",
+        "ocupacion": "% Ocupación",
+        "mortalidad": "% Mortalidad",
+        "estancia": "Estancia prom. (días)",
+        "giro_cama": "Giro cama prom.",
+        "total_dias": "Total días estancia",
+        "fallecidos": "Total fallecidos",
+        "mort_ucI": "% Mortalidad UCI",
+        "total_eventos": "Eventos adversos",
+        "total_germenes": "Gérmenes aislados",
+        "total_diag": "Casos morbilidad",
+    }
+    ordered_columns = [c for c in column_map if c in df.columns]
+    df_export = df[ordered_columns].rename(columns=column_map)
+
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_export.to_excel(writer, sheet_name="Comparación 2025-2026", index=False)
+        ws = writer.sheets["Comparación 2025-2026"]
+
+        header_fill = PatternFill(fill_type="solid", fgColor="1E3A5F")
+        header_font = Font(color="FFFFFF", bold=True)
+        header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell_alignment = Alignment(horizontal="center", vertical="center")
+        thin_border = Border(
+            left=Side(style="thin", color="D1D5DB"),
+            right=Side(style="thin", color="D1D5DB"),
+            top=Side(style="thin", color="D1D5DB"),
+            bottom=Side(style="thin", color="D1D5DB"),
+        )
+
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+            cell.border = thin_border
+
+        # Valores de % vienen en escala 0–100 (no 0–1): usar sufijo "%" sin escalar de Excel.
+        percent_columns = {"% Ocupación", "% Mortalidad", "% Mortalidad UCI"}
+        two_decimal_columns = {"Estancia prom. (días)", "Giro cama prom."}
+        int_columns = {
+            "Total ingresos", "Total días estancia", "Total fallecidos",
+            "Eventos adversos", "Gérmenes aislados", "Casos morbilidad",
+        }
+
+        for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):
+            for cell in row:
+                cell.border = thin_border
+                cell.alignment = cell_alignment
+                header_name = ws.cell(row=1, column=cell.column).value
+                if header_name == "Año" and isinstance(cell.value, (int, float)):
+                    cell.number_format = "0"
+                elif header_name in percent_columns and isinstance(cell.value, (int, float)):
+                    cell.number_format = '0.0"%"'
+                elif header_name in two_decimal_columns and isinstance(cell.value, (int, float)):
+                    cell.number_format = "0.00"
+                elif header_name in int_columns and isinstance(cell.value, (int, float)):
+                    cell.number_format = "#,##0"
+
+        ws.freeze_panes = "A2"
+        ws.auto_filter.ref = ws.dimensions
+
+        for col in ws.columns:
+            col_letter = col[0].column_letter
+            max_length = 0
+            for cell in col:
+                value_len = len(str(cell.value)) if cell.value is not None else 0
+                if value_len > max_length:
+                    max_length = value_len
+            ws.column_dimensions[col_letter].width = min(max(max_length + 2, 12), 30)
+
+    return dcc.send_bytes(output.getvalue(), "comparacion_2025_2026.xlsx")  # type: ignore[attr-defined]
 
 
 @app.callback(
