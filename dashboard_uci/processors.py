@@ -5,6 +5,7 @@ Transformaciones y cálculos sobre los datos cargados
 """
 
 import pandas as pd
+from datetime import date
 from typing import Dict, List, Optional, Tuple, Any
 import logging
 import unicodedata
@@ -12,6 +13,27 @@ import re
 from difflib import SequenceMatcher
 
 logger = logging.getLogger(__name__)
+
+
+def _etiqueta_rango_calendario(year_key: str, meses: List[str]) -> str:
+    """
+    Solo calendario: si año actual, hasta mes en curso; si año pasado, Ene-Dic.
+    (Respaldo cuando no hay meses con dato en ESTADISTICA.)
+    """
+    try:
+        y = int(str(year_key).strip())
+    except (TypeError, ValueError):
+        return "Ene - Dic"
+    today = date.today()
+    if y < today.year or y > today.year:
+        return "Ene - Dic"
+    if today.month <= 1:
+        return meses[0]
+    start = meses[0]
+    end = meses[today.month - 1]
+    if start == end:
+        return start
+    return f"{start} - {end}"
 
 
 class DataProcessor:
@@ -139,6 +161,57 @@ class DataProcessor:
 
         trend_value = f"{'+' if cambio_pct > 0 else ''}{cambio_pct:.1f}%"
         return trend, trend_value
+
+    def _indices_meses_con_datos_estadistica(self) -> List[int]:
+        """Índices en self.meses donde el Excel trae celda mensual informada (no NaN)."""
+        for row_name in (
+            'NUMERO DE INGRESOS DEL MES',
+            'NÚMERO DE EGRESOS DEL MES',
+            'TOTAL DIAS ESTANCIA',
+        ):
+            datos = self.safe_get_row(row_name, self.meses, silent=True)
+            if isinstance(datos, pd.Series) and len(datos) >= len(self.meses):
+                idx = [i for i in range(len(self.meses)) if pd.notna(datos.iloc[i])]
+                if idx:
+                    return idx
+        return []
+
+    def etiqueta_rango_periodo(self, year_key: str) -> str:
+        """
+        Rango Ene-Mes alineado con datos cargados en el Excel, sin exceder el mes
+        calendario actual cuando el año seleccionado es el año en curso.
+        """
+        meses = self.meses
+        try:
+            y = int(str(year_key).strip())
+        except (TypeError, ValueError):
+            return "Ene - Dic"
+        today = date.today()
+        idx_data = self._indices_meses_con_datos_estadistica()
+        if not idx_data:
+            return _etiqueta_rango_calendario(year_key, meses)
+
+        first_i = min(idx_data)
+        last_i = max(idx_data)
+
+        def span(si: int, ei: int) -> str:
+            if si == ei:
+                return meses[si]
+            return f"{meses[si]} - {meses[ei]}"
+
+        if y < today.year:
+            if first_i == 0 and last_i == len(meses) - 1:
+                return "Ene - Dic"
+            return span(first_i, last_i)
+
+        if y > today.year:
+            return "Ene - Dic"
+
+        last_cal_i = today.month - 1
+        end_i = min(last_i, last_cal_i)
+        if end_i < first_i:
+            return _etiqueta_rango_calendario(year_key, meses)
+        return span(first_i, end_i)
 
     def calcular_promedio_mensual(self, row_name: str, meses: Optional[List[str]] = None) -> float:
         """Calcula el promedio de una fila para meses seleccionados"""
