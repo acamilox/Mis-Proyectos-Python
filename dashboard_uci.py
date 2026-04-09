@@ -17,6 +17,7 @@ import logging
 from typing import Any
 from pathlib import Path
 from time import time
+from datetime import date
 
 # Imports del paquete modular (paquete dashboard_uci/, no este script)
 from dashboard_uci import (
@@ -78,6 +79,27 @@ def _palette_iaas_n(n: int) -> list[str]:
 # Configuracion de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
+def _etiqueta_rango_meses_anio(year_key: str) -> str:
+    """
+    Etiqueta corta del rango de meses para un año (p. ej. 'Ene - Dic').
+    Si el año es el calendario actual, el rango termina en el mes en curso (YTD).
+    """
+    try:
+        y = int(str(year_key).strip())
+    except (TypeError, ValueError):
+        return "Ene - Dic"
+    today = date.today()
+    if y < today.year or y > today.year:
+        return "Ene - Dic"
+    if today.month <= 1:
+        return "Ene"
+    start = MESES[0]
+    end = MESES[today.month - 1]
+    if start == end:
+        return start
+    return f"{start} - {end}"
 
 
 def _morbilidad_total_anual(df_morb: pd.DataFrame) -> float:
@@ -542,8 +564,9 @@ def render_gestion(year_key: str):
         )
         # endregion
         kpis = processor.get_kpis_gestion()
+        rango_gestion = _etiqueta_rango_meses_anio(year_key)
         kpi_items_g = [
-            (float(kpis['total_dias_estancia'] or 0), chart_factory.create_kpi_card("Total D\u00edas Estancia", f"{int(kpis['total_dias_estancia'])}", "Ene - Dic", "#10b981")),
+            (float(kpis['total_dias_estancia'] or 0), chart_factory.create_kpi_card("Total D\u00edas Estancia", f"{int(kpis['total_dias_estancia'])}", rango_gestion, "#10b981")),
             (float(kpis['capacidad_uci'] or 0), chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#8b5cf6")),
             (float(kpis['promedio_dias_vm'] or 0), chart_factory.create_kpi_card("Promedio D\u00edas VM", f"{kpis['promedio_dias_vm']:.2f}", "Ventilaci\u00f3n Mec\u00e1nica", "#06b6d4")),
             (float(kpis['promedio_estancia'] or 0), chart_factory.create_kpi_card("Estancia Promedio", f"{kpis['promedio_estancia']:.2f}", "D\u00edas", "#6366f1")),
@@ -998,10 +1021,11 @@ def render_mortalidad(year_key: str):
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
         data_year = DATA_BY_YEAR.get(year_key, DATA)
         kpis_mort = processor.get_kpis_mortalidad()
+        rango_mort = _etiqueta_rango_meses_anio(year_key)
         kpi_items_mort = [
-            (float(kpis_mort.get('total_fallecidos') or 0), chart_factory.create_kpi_card("Total Fallecidos", f"{int(kpis_mort['total_fallecidos'])}", "Ene - Dic", "#e74c3c")),
-            (float(kpis_mort.get('mortalidad_general') or 0), chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis_mort['mortalidad_general']), "Ene - Dic", "#c0392b")),
-            (float(kpis_mort.get('fallecidos_covid') or 0), chart_factory.create_kpi_card("Fallecidos COVID-19", f"{int(kpis_mort['fallecidos_covid'])}", "Ene - Dic", "#34495e")),
+            (float(kpis_mort.get('total_fallecidos') or 0), chart_factory.create_kpi_card("Total Fallecidos", f"{int(kpis_mort['total_fallecidos'])}", rango_mort, "#e74c3c")),
+            (float(kpis_mort.get('mortalidad_general') or 0), chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis_mort['mortalidad_general']), rango_mort, "#c0392b")),
+            (float(kpis_mort.get('fallecidos_covid') or 0), chart_factory.create_kpi_card("Fallecidos COVID-19", f"{int(kpis_mort['fallecidos_covid'])}", rango_mort, "#34495e")),
             (float(kpis_mort.get('mortalidad_trauma') or 0), chart_factory.create_kpi_card("% Mortalidad Trauma", processor.formatear_porcentaje(kpis_mort['mortalidad_trauma']), "Promedio", "#f39c12")),
         ]
         kpi_cards_mort = [c for _, c in sorted(kpi_items_mort, key=lambda x: x[0], reverse=True)]
@@ -1249,7 +1273,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
         if len(meses_filtrados) == 1:
             rango_texto = MESES_COMPLETOS.get(meses_filtrados[0], meses_filtrados[0])
         elif len(meses_filtrados) == len(MESES):
-            rango_texto = "Ene - Dic"
+            rango_texto = _etiqueta_rango_meses_anio(year_key)
         else:
             rango_texto = ", ".join([MESES_COMPLETOS.get(m, m)[:3] for m in meses_filtrados])
 
@@ -1394,7 +1418,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 period_label = (
                     MESES_COMPLETOS.get(meses_filtrados[0], meses_filtrados[0])
                     if len(meses_filtrados) == 1
-                    else ("Ene - Dic" if len(meses_filtrados) == len(MESES)
+                    else (_etiqueta_rango_meses_anio(year_key) if len(meses_filtrados) == len(MESES)
                           else ", ".join([MESES_COMPLETOS.get(m, m)[:3] for m in meses_filtrados]))
                 )
 
