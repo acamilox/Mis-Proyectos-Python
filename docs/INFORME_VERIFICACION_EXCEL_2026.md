@@ -1,13 +1,15 @@
 # Informe de verificación: Excel 2026 vs Dashboard
 
 **Archivo:** `data/Estadistica 2026.xlsx`  
-**Fecha de verificación:** Marzo 2026
+**Fecha de verificación:** 28 de marzo de 2026 (revisión tras actualización de datos)
 
 ---
 
 ## Resumen
 
-Se compararon los datos del Excel con la estructura y lógica que usa el dashboard. Se encontraron **inconsistencias** que afectan la coherencia entre pestañas y algunas hojas con estructura incompleta.
+Se compararon los datos del Excel con la estructura y lógica que usa el dashboard (`dashboard_uci/loaders.py`, `processors.py`). El archivo **carga sin errores**; persisten **inconsistencias** entre hojas y **hojas incompletas** respecto al archivo 2025 de referencia.
+
+**Comprobación automática:** `python scripts/verificar_excel_2026.py` (requiere dependencias del proyecto: `pandas`, `openpyxl`).
 
 ---
 
@@ -85,7 +87,14 @@ El archivo 2026 no incluye la hoja **"GRAM - SOT"** (donaciones/trasplantes).
 
 ### Columnas en ESTADISTICA
 
-Ene, Feb, Mar, Abr, May, Jun, Jul, Agos, Sep, Oct, Nov, Dic, ∑, PROMEDIO
+Ene, Feb, Mar, Abr, May, Jun, Jul, Agos, Sep, Oct, Nov, Dic, ∑, PROMEDIO (y a veces una columna extra `Unnamed: 15` al final; el código no la usa).
+
+### Comparación con `Estadistica 2025.xlsx`
+
+| Aspecto | 2025 | 2026 (actual) |
+| :------ | :--- | :-------------- |
+| Hoja **GRAM - SOT** | Presente | **Ausente** |
+| Hoja **IAAS** | ~55 filas × 6 columnas (gérmenes en col. F) | **1 celda** (“ENERO”), sin datos de pacientes/gérmenes |
 
 ---
 
