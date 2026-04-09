@@ -1948,10 +1948,23 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 df_morb = _morbilidad_escalada_al_total_oficial(df_morb, total_morb)
                 df_morb = df_morb.sort_values('Total', ascending=False)
             df_morb_top = df_morb.head(8).copy()
+            # No usar el índice 'OTROS': choca con el grupo diagnóstico homónimo del Excel y
+            # sobrescribe su valor; la suma del treemap quedaba por debajo del total oficial.
             if len(df_morb) > 8:
-                otros_total = float(df_morb.iloc[8:]['Total'].sum())
+                tail = df_morb.iloc[8:]
+                otros_total = float(pd.to_numeric(tail['Total'], errors='coerce').fillna(0).sum())
                 if otros_total > 0:
-                    df_morb_top.loc['OTROS'] = {'Hombre': 0, 'Mujer': 0, 'Total': otros_total}
+                    h_rest = int(pd.to_numeric(tail['Hombre'], errors='coerce').fillna(0).sum())
+                    m_rest = int(pd.to_numeric(tail['Mujer'], errors='coerce').fillna(0).sum())
+                    df_morb_top = pd.concat(
+                        [
+                            df_morb_top,
+                            pd.DataFrame(
+                                [{'Hombre': h_rest, 'Mujer': m_rest, 'Total': otros_total}],
+                                index=['Resto (demás grupos)'],
+                            ),
+                        ]
+                    )
             colors_morb = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
             fig_morb = go.Figure(data=[go.Treemap(
                 labels=[str(idx) for idx in df_morb_top.index],
@@ -1965,8 +1978,9 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                 textfont=dict(size=11, color='white', family='Roboto'),
                 hovertemplate='<b>%{label}</b><br>Total: %{value:.0f}<br>Participación: %{percentRoot:.1%}<extra></extra>'
             )])
+            total_treemap = int(pd.to_numeric(df_morb_top['Total'], errors='coerce').fillna(0).sum())
             fig_morb.update_layout(
-                title={'text': f'Morbilidad por Grupo Diagnóstico (Top, Total: {int(total_morb)})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': f'Morbilidad por Grupo Diagnóstico (Top, Total: {total_treemap})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=20, r=20, t=50, b=20),
