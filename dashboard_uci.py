@@ -1046,7 +1046,7 @@ def render_especialidades(year_key: str):
             insidetextanchor='middle',
             textangle=0,
             textfont=_txt_mix,
-            constraintext=False,
+            constraintext='none',
         )
         # Franja superior (Neurología): si el % es bajo, el texto dentro se rota o recorta → fuera de la barra
         pct_nl = (df_especialidades['Neurología'] / df_especialidades['Total']) * 100
