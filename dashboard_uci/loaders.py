@@ -335,7 +335,7 @@ class DataLoader:
             todos_eventos = []
             filas_detalle = []
             mes_actual = None
-            for i in range(1, 200):
+            for i in range(1, 400):
                 col1 = ws.cell(i, 1).value
                 col5 = ws.cell(i, 5).value
                 col6 = ws.cell(i, 6).value
@@ -382,8 +382,18 @@ class DataLoader:
     def _normalizar_evento(self, e: str) -> str:
         """Normaliza nombres de eventos adversos"""
         e_lower = e.lower().strip()
-        
-        # Mapeo de eventos (más específicos primero)
+
+        # Variantes ortográficas: cualquier coincidencia basta (no AND como en frases compuestas)
+        eventos_sinonimos: Tuple[Tuple[str, Tuple[str, ...]], ...] = (
+            ('Autoextubación', ('autoextubación', 'autoextubacion', 'auto extub', 'auto-extub', 'autoextub')),
+            ('Neumotórax', ('neumotórax', 'neumotorax')),
+            ('Caída', ('caida', 'caída')),
+        )
+        for normalized, opciones in eventos_sinonimos:
+            if any(op in e_lower for op in opciones):
+                return normalized
+
+        # Mapeo de eventos compuestos: todas las subcadenas deben aparecer (AND)
         eventos_map = {
             'Ruptura accidental balón traqueostomía': ['ruptura', 'balón', 'traqueostom'],
             'Desplazamiento tubo tórax': ['desplazamiento', 'tubo'],
@@ -391,7 +401,6 @@ class DataLoader:
             'LPP occipital y LECASH': ['lpp', 'occipital', 'lecash'],
             'LPP glúteo y LECASH': ['lpp', 'gluteo', 'lecash'],
             'LPP occipital categoría II': ['lpp', 'occipital', 'categor'],
-            'Autoextubación': ['autoextubación', 'autoextubacion'],
             'Autoretiro CVC': ['autoretiro', 'cvc'],
             'Autoretiro PICC': ['autoretiro', 'picc'],
             'Autoretiro Ventriculostomía': ['autoretiro', 'ventriculostomia'],
@@ -415,9 +424,7 @@ class DataLoader:
             'Retraso administración medicamento': ['retraso', 'medicamento', 'administración'],
             'Error de medicación': ['error', 'medicamento', 'medicación'],
             'Problema con medicamento': ['problema', 'medicamento'],
-            'Caída': ['caida', 'caída'],
             'Flebitis': ['flebitis'],
-            'Neumotórax': ['neumotórax', 'neumotorax'],
         }
         
         for normalized, variants in eventos_map.items():
