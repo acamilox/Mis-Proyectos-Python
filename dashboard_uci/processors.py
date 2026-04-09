@@ -236,6 +236,36 @@ class DataProcessor:
             return float(pd.to_numeric(valor, errors='coerce').fillna(0).sum())
         return float(valor) if pd.notna(valor) else 0.0
 
+    def serie_tasa_por_mil_dias(
+        self,
+        nombre_fila_casos: str,
+        nombre_fila_dias: str,
+        meses: Optional[List[str]] = None,
+    ) -> pd.Series:
+        """
+        Tasa por 1.000 días (ITS AC y NAV en ESTADISTICA): (casos / días) × 1000.
+        Casos vacíos/NaN → 0. Misma convención que la hoja de cálculo del hospital.
+        """
+        if meses is None:
+            meses = self.meses
+        casos = self.safe_get_row(nombre_fila_casos, meses, silent=True)
+        dias = self.safe_get_row(nombre_fila_dias, meses, silent=True)
+        if not isinstance(casos, pd.Series):
+            casos = pd.Series(0.0, index=meses)
+        if not isinstance(dias, pd.Series):
+            dias = pd.Series(0.0, index=meses)
+        casos_aln = pd.to_numeric(casos.reindex(meses), errors='coerce').fillna(0.0)
+        dias_aln = pd.to_numeric(dias.reindex(meses), errors='coerce')
+        valores: List[float] = []
+        for m in meses:
+            n_f = float(casos_aln.loc[m])
+            d_v = dias_aln.loc[m]
+            if pd.notna(d_v) and float(d_v) > 0:
+                valores.append(n_f / float(d_v) * 1000.0)
+            else:
+                valores.append(0.0)
+        return pd.Series(valores, index=meses)
+
     def formatear_porcentaje(self, valor: float, con_simbolo: bool = True) -> str:
         """Formatea porcentaje: sin decimales si es entero, con 1 decimal si no"""
         simbolo = "%" if con_simbolo else ""

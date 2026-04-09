@@ -611,12 +611,20 @@ def render_gestion(year_key: str):
         )
 
         fig_bacteriemia = chart_factory.create_line_chart(
-            processor.safe_get_row('TASA DE BACTERIEMIA ASOC.  A C. CENTRAL', MESES),
-            'Tasa de ITS AC', color='#ef4444', decimals=1
+            processor.serie_tasa_por_mil_dias(
+                'N\u00daMERO DE BACTERIEMIAS ASOC.  A  C. CENTRAL',
+                'DIAS CAT\u00c9TER CENTRAL',
+                MESES,
+            ),
+            'Tasa de ITS AC (por 1.000 d\u00edas cat\u00e9ter central)', color='#ef4444', decimals=1
         )
         fig_nav = chart_factory.create_line_chart(
-            processor.safe_get_row('TASA NEUMON\u00cdA ASOCIADA A VENTILADOR', MESES),
-            'Tasa NAV', color='#ef4444', decimals=1
+            processor.serie_tasa_por_mil_dias(
+                'NUMERO CASOS NAV',
+                'DIAS VENTILADOR',
+                MESES,
+            ),
+            'Tasa NAV (por 1.000 d\u00edas VM)', color='#ef4444', decimals=1
         )
 
         # Germenes - Donut
