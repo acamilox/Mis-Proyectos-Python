@@ -330,6 +330,46 @@ class DataProcessor:
             'mortalidad': mortalidad
         }
 
+    def _resolve_mortalidad_trauma(self) -> float:
+        """
+        % mortalidad en población trauma: mismo criterio que el gráfico de trauma (barras).
+        Prioriza Σ fallecidos / Σ pacientes cuando hay datos mensuales; si no, lee PROMEDIO
+        probando alias de fila (el Excel puede titular la fila distinto).
+        """
+        row_pac = 'Pacientes con diagnóstico de Trauma'
+        row_fall = 'Pacientes fallecidos por Trauma'
+        pac_m = self.safe_get_row(row_pac, self.meses, silent=True)
+        fall_m = self.safe_get_row(row_fall, self.meses, silent=True)
+        if isinstance(pac_m, pd.Series) and isinstance(fall_m, pd.Series):
+            tp = float(pd.to_numeric(pac_m, errors='coerce').fillna(0).sum())
+            tf = float(pd.to_numeric(fall_m, errors='coerce').fillna(0).sum())
+            if tp > 0:
+                return (tf / tp) * 100.0
+
+        if self.df is None or getattr(self.df, 'empty', True) or 'PROMEDIO' not in self.df.columns:
+            return 0.0
+
+        for key in (
+            '% mortalidad en trauma',
+            '% de mortalidad en trauma',
+            '% mortalidad trauma',
+            '% de mortalidad trauma',
+            '% MORTALIDAD TRAUMA',
+        ):
+            rows = self._find_matching_rows(key)
+            if not rows:
+                continue
+            try:
+                val = self.df.loc[rows[0], 'PROMEDIO']
+            except (KeyError, TypeError, IndexError):
+                continue
+            if pd.notna(val):
+                try:
+                    return float(val)
+                except (TypeError, ValueError):
+                    continue
+        return 0.0
+
     def get_kpis_mortalidad(self) -> Dict[str, Any]:
         """Calcula KPIs para el módulo de Mortalidad"""
         suma_col = self.get_suma_column()
@@ -354,9 +394,7 @@ class DataProcessor:
         if pd.isna(mortalidad_general):
             mortalidad_general = (total_fallecidos / total_egresos * 100)
 
-        mortalidad_trauma = self.safe_get_value('% mortalidad en trauma', 'PROMEDIO')
-        if pd.isna(mortalidad_trauma):
-            mortalidad_trauma = 0
+        mortalidad_trauma = self._resolve_mortalidad_trauma()
 
         # Estadísticas de días de estancia
         dias_estancia_validos = self.df_fallecidos['Dias_Estancia'].dropna() if not self.df_fallecidos.empty else pd.Series([0])
