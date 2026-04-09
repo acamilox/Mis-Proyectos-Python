@@ -1043,7 +1043,6 @@ def render_especialidades(year_key: str):
         _txt_mix = dict(color='#f8fafc', size=11, family='Arial Black')
         _bar_text_kw = dict(
             insidetextanchor='middle',
-            insidetextorientation='horizontal',
             textangle=0,
             textfont=_txt_mix,
         )
