@@ -550,15 +550,15 @@ def render_resumen(year_key: str):
                 dbc.Button(
                     "Exportar comparación Excel",
                     id="btn-export-compare-excel",
-                    color="info",
+                    color="success",
                     size="sm",
-                    className="filtro-btn",
+                    className="filtro-btn me-2",
                     title="Descarga la tabla 2025 vs 2026 en Excel según los meses guardados en Resumen (tras Aplicar)",
                 ),
                 dbc.Button(
                     "Exportar comparación CSV",
                     id="btn-export-compare-csv",
-                    color="info",
+                    color="primary",
                     size="sm",
                     className="filtro-btn",
                     title="Descarga la tabla 2025 vs 2026 según los meses guardados en Resumen (tras Aplicar)",
