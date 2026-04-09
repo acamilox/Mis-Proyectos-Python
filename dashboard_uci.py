@@ -96,6 +96,23 @@ def _morbilidad_total_anual(df_morb: pd.DataFrame) -> float:
     return float(pd.to_numeric(df_morb["Total"], errors="coerce").fillna(0).sum())
 
 
+def _morbilidad_total_para_meses(df_morb: pd.DataFrame, meses_filtrados: list[str]) -> float:
+    """
+    Total de casos de morbilidad para los meses seleccionados: suma de los pies
+    mensuales (attrs totales_mensuales) alineada con la hoja MORBILIDAD.
+    Prioridad sobre total_anual cuando hay filtro de meses.
+    """
+    if df_morb.empty or "Total" not in df_morb.columns:
+        return 0.0
+    attrs = getattr(df_morb, "attrs", None) or {}
+    monthly = attrs.get("totales_mensuales")
+    if isinstance(monthly, dict) and meses_filtrados:
+        s = int(sum(int(monthly.get(m, 0) or 0) for m in meses_filtrados))
+        if s > 0:
+            return float(s)
+    return _morbilidad_total_anual(df_morb)
+
+
 def _enteros_prop_por_suma(values: np.ndarray, target: int) -> np.ndarray:
     """Reparte `target` en enteros proporcionales a `values` (método mayores restos)."""
     values = np.asarray(values, dtype=float)
@@ -1922,10 +1939,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
 
-        # Morbilidad
+        # Morbilidad (total oficial = pies mensuales en Excel para meses_filtrados; escalar detalle si no cuadra)
         if not data_actual['morbilidad'].empty:
             df_morb = data_actual['morbilidad'].sort_values('Total', ascending=False)
-            total_morb = _morbilidad_total_anual(df_morb)
+            total_morb = _morbilidad_total_para_meses(df_morb, meses_filtrados)
             detail_morb = float(pd.to_numeric(df_morb['Total'], errors='coerce').fillna(0).sum())
             if abs(detail_morb - total_morb) > 1e-6:
                 df_morb = _morbilidad_escalada_al_total_oficial(df_morb, total_morb)
