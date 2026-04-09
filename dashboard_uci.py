@@ -188,6 +188,7 @@ def _build_compare_rows(meses_filtrados: list[str]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     available_years = sorted(PROCESSOR_BY_YEAR.keys())
     for y in available_years:
+        _ensure_year_data_fresh(y)
         proc_y = PROCESSOR_BY_YEAR[y]
         data_y = DATA_BY_YEAR.get(y, DATA)
         k_resumen = proc_y.get_kpis_resumen(meses_filtrados)
@@ -275,6 +276,7 @@ def _empty_data() -> dict[str, pd.DataFrame]:
 
 DATA_BY_YEAR: dict[str, dict[str, pd.DataFrame]] = {}
 PROCESSOR_BY_YEAR: dict[str, DataProcessor] = {}
+_YEAR_FILE_MTIME: dict[str, float] = {}
 
 for year, filename in YEAR_FILES.items():
     excel_path = BASE_DIR / "data" / filename
@@ -286,6 +288,10 @@ for year, filename in YEAR_FILES.items():
         year_data = DataLoader(Path(excel_path)).load_all()
         DATA_BY_YEAR[year] = year_data
         PROCESSOR_BY_YEAR[year] = DataProcessor(year_data)
+        try:
+            _YEAR_FILE_MTIME[year] = excel_path.stat().st_mtime
+        except OSError:
+            pass
         logger.info("Datos cargados para %s desde %s", year, filename)
         # region agent log
         _debug_log(
@@ -316,6 +322,30 @@ for year, filename in YEAR_FILES.items():
 if not PROCESSOR_BY_YEAR:
     DATA_BY_YEAR["2026"] = _empty_data()
     PROCESSOR_BY_YEAR["2026"] = DataProcessor(DATA_BY_YEAR["2026"])
+
+
+def _ensure_year_data_fresh(year_key: str) -> None:
+    """Recarga datos desde el Excel si el archivo en disco cambió (sin reiniciar el servidor)."""
+    if year_key not in YEAR_FILES:
+        return
+    excel_path = BASE_DIR / "data" / YEAR_FILES[year_key]
+    if not excel_path.exists():
+        return
+    try:
+        mtime = excel_path.stat().st_mtime
+    except OSError:
+        return
+    if _YEAR_FILE_MTIME.get(year_key) == mtime:
+        return
+    try:
+        year_data = DataLoader(excel_path).load_all()
+        DATA_BY_YEAR[year_key] = year_data
+        PROCESSOR_BY_YEAR[year_key] = DataProcessor(year_data)
+        _YEAR_FILE_MTIME[year_key] = mtime
+        logger.info("Datos recargados para %s tras cambio en el Excel", year_key)
+    except Exception as e:
+        logger.error("Error recargando datos de %s: %s", year_key, e)
+
 
 AVAILABLE_YEARS = sorted(PROCESSOR_BY_YEAR.keys())
 DEFAULT_YEAR = "2025" if "2025" in PROCESSOR_BY_YEAR else AVAILABLE_YEARS[0]
@@ -547,6 +577,7 @@ def render_resumen(year_key: str):
 
 def render_gestion(year_key: str):
     try:
+        _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
         data_year = DATA_BY_YEAR.get(year_key, DATA)
         # region agent log
@@ -899,6 +930,7 @@ def render_gestion(year_key: str):
 
 def render_especialidades(year_key: str):
     try:
+        _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
         suma_col = processor.get_suma_column()
         total_medicina = processor.safe_get_value('MEDICINA INTERNA', suma_col)
@@ -1021,6 +1053,7 @@ def render_especialidades(year_key: str):
 
 def render_mortalidad(year_key: str):
     try:
+        _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
         data_year = DATA_BY_YEAR.get(year_key, DATA)
         kpis_mort = processor.get_kpis_mortalidad()
@@ -1249,6 +1282,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
         year_key = str(anio_seleccionado) if anio_seleccionado is not None else DEFAULT_YEAR
         if year_key not in PROCESSOR_BY_YEAR:
             year_key = DEFAULT_YEAR
+        _ensure_year_data_fresh(year_key)
 
         processor = PROCESSOR_BY_YEAR[year_key]
         data_actual = DATA_BY_YEAR[year_key]
@@ -2140,6 +2174,7 @@ def export_excel(_n_clicks, selected_year, selected_months):
 
     year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     year_key = year_candidate if year_candidate in DATA_BY_YEAR else DEFAULT_YEAR
+    _ensure_year_data_fresh(year_key)
     meses_export = selected_months if isinstance(selected_months, list) and selected_months else MESES
     datos = create_export_data(DATA_BY_YEAR[year_key], meses_export)
     output = BytesIO()
@@ -2198,6 +2233,7 @@ def export_excel(_n_clicks, selected_year, selected_months):
 def export_csv(_n_clicks, selected_year, selected_months):
     year_candidate = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     year_key = year_candidate if year_candidate in DATA_BY_YEAR else DEFAULT_YEAR
+    _ensure_year_data_fresh(year_key)
     meses_export = selected_months if isinstance(selected_months, list) and selected_months else MESES
     datos = create_export_data(DATA_BY_YEAR[year_key], meses_export)
     if 'Resumen General' in datos:

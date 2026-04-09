@@ -335,7 +335,7 @@ class DataLoader:
             todos_eventos = []
             filas_detalle = []
             mes_actual = None
-            for i in range(1, 400):
+            for i in range(1, 1200):
                 col1 = ws.cell(i, 1).value
                 col5 = ws.cell(i, 5).value
                 col6 = ws.cell(i, 6).value
