@@ -574,16 +574,17 @@ class ChartFactory:
                 'color': '#94a3b8',
                 'fontSize': '12px',
                 'marginBottom': '8px',
-                'fontWeight': '600',
+                'fontWeight': '500',
                 'textTransform': 'uppercase',
                 'letterSpacing': '0.3px'
             }),
             html.H2(value, style={
-                'color': '#f1f5f9',
-                'fontWeight': '700',
+                'color': '#e2e8f0',
+                'fontWeight': '400',
                 'marginBottom': '4px',
                 'fontSize': '28px',
-                'lineHeight': '1'
+                'lineHeight': '1',
+                'fontFamily': 'system-ui, -apple-system, Segoe UI, sans-serif',
             }),
             html.P(self._capitalizar(subtitle), style={
                 'color': '#94a3b8',
