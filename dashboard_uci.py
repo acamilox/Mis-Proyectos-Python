@@ -1004,8 +1004,8 @@ def render_especialidades(year_key: str):
         # Mismo color claro en todas las capas: mejor contraste que el color de la serie sobre el fondo oscuro
         _txt_font_area = dict(
             size=12,
-            color='#f8fafc',
-            family='Arial Black',
+            color='#e2e8f0',
+            family='Arial',
         )
         for y_mid, series_vol in (
             (y_mid_mi, m_vol),
@@ -1040,11 +1040,13 @@ def render_especialidades(year_key: str):
         )
 
         fig_especialidades_mix = go.Figure()
-        _txt_mix = dict(color='#f8fafc', size=11, family='Arial Black')
+        # Tipografía normal (sin negrilla): evita aspecto de “resaltador” de Arial Black
+        _txt_mix = dict(color='#e2e8f0', size=11, family='Arial')
         _bar_text_kw = dict(
             insidetextanchor='middle',
             textangle=0,
             textfont=_txt_mix,
+            constraintext=False,
         )
         # Franja superior (Neurología): si el % es bajo, el texto dentro se rota o recorta → fuera de la barra
         pct_nl = (df_especialidades['Neurología'] / df_especialidades['Total']) * 100
@@ -1085,21 +1087,27 @@ def render_especialidades(year_key: str):
             textposition=text_pos_nl,
             cliponaxis=False,
             **_bar_text_kw,
+            insidetextfont=_txt_mix,
+            outsidetextfont=_txt_mix,
         ))
         fig_especialidades_mix.update_layout(
             title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
             barmode='stack',
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            autosize=True, height=360, margin=dict(l=48, r=24, t=58, b=55),
+            autosize=True, height=360, margin=dict(l=48, r=24, t=72, b=55),
             hovermode='x unified',
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={
                 'title': '% del total mensual',
                 'tickfont': {'color': '#94a3b8'},
                 'ticksuffix': '%',
-                'range': [0, 100],
-                'gridcolor': 'rgba(148, 163, 184, 0.1)'
+                # Rango >100% para que las etiquetas "outside" del trazo superior no se recorten (p. ej. el 4 en Ene)
+                'range': [0, 118],
+                'tickmode': 'linear',
+                'tick0': 0,
+                'dtick': 20,
+                'gridcolor': 'rgba(148, 163, 184, 0.1)',
             },
             legend=dict(
                 orientation="h", y=-0.18, x=0.5, xanchor="center",
