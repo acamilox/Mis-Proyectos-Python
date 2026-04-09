@@ -1001,21 +1001,28 @@ def render_especialidades(year_key: str):
             x=df_especialidades['Mes'], y=df_especialidades['Neurología'],
             name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#f39c12')
         ))
-        _txt_font_area = dict(size=9, color='#f8fafc')
-        for y_mid, series_vol, color in (
-            (y_mid_mi, m_vol, '#3498db'),
-            (y_mid_cg, c_vol, '#e74c3c'),
-            (y_mid_nc, n_vol, '#9b59b6'),
-            (y_mid_nl, l_vol, '#f39c12'),
+        # Mismo color claro en todas las capas: mejor contraste que el color de la serie sobre el fondo oscuro
+        _txt_font_area = dict(
+            size=12,
+            color='#f8fafc',
+            family='Arial Black',
+        )
+        for y_mid, series_vol in (
+            (y_mid_mi, m_vol),
+            (y_mid_cg, c_vol),
+            (y_mid_nc, n_vol),
+            (y_mid_nl, l_vol),
         ):
             fig_especialidades_area.add_trace(go.Scatter(
                 x=df_especialidades['Mes'],
                 y=y_mid,
                 mode='text',
                 text=[_esp_label_vol(v) for v in series_vol],
-                textfont={**_txt_font_area, 'color': color},
+                textposition='middle center',
+                textfont=_txt_font_area,
                 showlegend=False,
                 hoverinfo='skip',
+                cliponaxis=False,
             ))
         fig_especialidades_area.update_layout(
             title={'text': 'Volumen Mensual por Especialidad (Área Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
@@ -1033,37 +1040,59 @@ def render_especialidades(year_key: str):
         )
 
         fig_especialidades_mix = go.Figure()
-        _txt_in = dict(color='#f8fafc', size=10)
+        _txt_mix = dict(color='#f8fafc', size=11, family='Arial Black')
+        _bar_text_kw = dict(
+            insidetextanchor='middle',
+            insidetextorientation='horizontal',
+            textangle=0,
+            textfont=_txt_mix,
+        )
+        # Franja superior (Neurología): si el % es bajo, el texto dentro se rota o recorta → fuera de la barra
+        pct_nl = (df_especialidades['Neurología'] / df_especialidades['Total']) * 100
+        nl_vals = df_especialidades['Neurología'].astype(float)
+        text_pos_nl: list[str] = []
+        for p, v in zip(pct_nl, nl_vals):
+            if float(v) <= 0:
+                text_pos_nl.append('none')
+            elif float(p) < 14.0:
+                text_pos_nl.append('outside')
+            else:
+                text_pos_nl.append('inside')
         fig_especialidades_mix.add_trace(go.Bar(
             x=MESES, y=(df_especialidades['Medicina Interna'] / df_especialidades['Total']) * 100,
             name='Medicina Interna', marker_color='#3498db',
             text=[_esp_label_vol(v) for v in df_especialidades['Medicina Interna']],
-            textposition='inside', insidetextanchor='middle', textfont=_txt_in,
+            textposition='inside',
+            **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
             x=MESES, y=(df_especialidades['Cirugía General'] / df_especialidades['Total']) * 100,
             name='Cirugía General', marker_color='#e74c3c',
             text=[_esp_label_vol(v) for v in df_especialidades['Cirugía General']],
-            textposition='inside', insidetextanchor='middle', textfont=_txt_in,
+            textposition='inside',
+            **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
             x=MESES, y=(df_especialidades['Neurocirugía'] / df_especialidades['Total']) * 100,
             name='Neurocirugía', marker_color='#9b59b6',
             text=[_esp_label_vol(v) for v in df_especialidades['Neurocirugía']],
-            textposition='inside', insidetextanchor='middle', textfont=_txt_in,
+            textposition='inside',
+            **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
             x=MESES, y=(df_especialidades['Neurología'] / df_especialidades['Total']) * 100,
             name='Neurología', marker_color='#f39c12',
             text=[_esp_label_vol(v) for v in df_especialidades['Neurología']],
-            textposition='inside', insidetextanchor='middle', textfont=_txt_in,
+            textposition=text_pos_nl,
+            cliponaxis=False,
+            **_bar_text_kw,
         ))
         fig_especialidades_mix.update_layout(
             title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
             transition={'duration': 0},
             barmode='stack',
             plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            autosize=True, height=360, margin=dict(l=48, r=24, t=50, b=55),
+            autosize=True, height=360, margin=dict(l=48, r=24, t=58, b=55),
             hovermode='x unified',
             xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             yaxis={
