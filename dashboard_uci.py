@@ -1162,8 +1162,16 @@ def render_mortalidad(year_key: str):
         )
         fig_piramide = chart_factory.create_pyramid_chart(data_year['fallecidos'])
 
-        # Distribución por EPS (año completo)
+        # Distribución por EPS (año completo): misma suma que Total Fallecidos
+        total_ref_fallecidos = int(kpis_mort.get('total_fallecidos') or 0)
         eps_labels, eps_values = processor.get_eps_data()
+        if total_ref_fallecidos > 0:
+            eps_labels, eps_values = DataProcessor.reconcile_fallecidos_distribution(
+                eps_labels,
+                list(eps_values) if eps_values else [],
+                total_ref_fallecidos,
+                residual_label="Sin clasificar EPS",
+            )
         if eps_values:
             eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
             eps_df = eps_df.sort_values('Cantidad', ascending=False)
@@ -1201,6 +1209,7 @@ def render_mortalidad(year_key: str):
                 'ADMINISTRADORA DE RECURSOS SGSS': '#7c3aed',
                 'OTRA': '#94a3b8',
                 'OTRAS EPS': '#475569',
+                'SIN CLASIFICAR EPS': '#64748b',
             }
             fallback_colors = ['#0ea5e9', '#f43f5e', '#a855f7', '#f97316', '#14b8a6', '#65a30d']
             resolved_eps_colors = []
@@ -1254,7 +1263,7 @@ def render_mortalidad(year_key: str):
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
 
-        # Distribución por especialidad (totales anuales)
+        # Distribución por especialidad (totales anuales): misma suma que Total Fallecidos
         suma_col = processor.get_suma_column()
         total_medicina = processor.safe_get_value('MEDICINA INTERNA', suma_col)
         total_cirugia = processor.safe_get_value('CIRUGIA GENERAL', suma_col)
@@ -1267,12 +1276,20 @@ def render_mortalidad(year_key: str):
             float(total_neuro or 0),
             float(total_neurologia or 0),
         ]
-        if any(v > 0 for v in espec_values):
+        if total_ref_fallecidos > 0:
+            espec_labels, espec_values = DataProcessor.reconcile_fallecidos_distribution(
+                espec_labels,
+                espec_values,
+                total_ref_fallecidos,
+                residual_label="Otras especialidades",
+            )
+        if total_ref_fallecidos > 0 and espec_values and any(v > 0 for v in espec_values):
+            espec_colors = ['#3498db', '#e74c3c', '#9b59b6', '#f39c12', '#64748b']
             fig_espec_mort = chart_factory.create_donut_chart(
                 labels=espec_labels,
                 values=espec_values,
                 title=f'Distribución de fallecidos por Especialidad (año {year_key})',
-                colors=['#3498db', '#e74c3c', '#9b59b6', '#f39c12'],
+                colors=espec_colors[: len(espec_labels)],
                 auto_sort=True
             )
         else:

@@ -4,6 +4,7 @@ Procesadores de datos para el Dashboard UCI
 Transformaciones y cálculos sobre los datos cargados
 """
 
+import math
 import pandas as pd
 from datetime import date
 from typing import Dict, List, Optional, Tuple, Any
@@ -475,6 +476,68 @@ class DataProcessor:
         values = [e[1] for e in eps_data]
 
         return labels, values
+
+    @staticmethod
+    def reconcile_fallecidos_distribution(
+        labels: List[str],
+        values: List[Any],
+        total_target: int,
+        residual_label: str = "Sin clasificar",
+    ) -> Tuple[List[str], List[float]]:
+        """
+        Ajusta conteos para que sumen exactamente total_target (mismo total que «Total Fallecidos»).
+        - Si la suma es menor: añade (o incrementa) categoría residual.
+        - Si la suma es mayor: reparte proporcionalmente en enteros (restos mayores).
+        """
+        in_labels = list(labels)
+        vals: List[float] = []
+        for v in values:
+            try:
+                x = float(v)
+            except (TypeError, ValueError):
+                x = 0.0
+            if pd.isna(x):
+                x = 0.0
+            vals.append(max(0.0, x))
+
+        target = max(0, int(total_target))
+        if target == 0:
+            return [], []
+
+        total = float(sum(vals))
+        if total <= 0:
+            return [residual_label], [float(target)]
+
+        if abs(total - target) < 1e-6:
+            out_l, out_v = in_labels, vals
+        elif total < float(target):
+            diff = float(target) - total
+            new_labels = list(in_labels)
+            new_vals = list(vals)
+            merged = False
+            for i, lab in enumerate(new_labels):
+                if str(lab).strip().lower() == str(residual_label).strip().lower():
+                    new_vals[i] += diff
+                    merged = True
+                    break
+            if not merged:
+                new_labels.append(residual_label)
+                new_vals.append(diff)
+            out_l, out_v = new_labels, new_vals
+        else:
+            scaled = [v * target / total for v in vals]
+            floors = [int(math.floor(s + 1e-9)) for s in scaled]
+            rem = target - sum(floors)
+            fracs = [(scaled[i] - floors[i], i) for i in range(len(floors))]
+            fracs.sort(key=lambda x: x[0], reverse=True)
+            for j in range(max(0, rem)):
+                floors[fracs[j % len(fracs)][1]] += 1
+            out_l, out_v = in_labels, [float(x) for x in floors]
+
+        kept = [(lab, v) for lab, v in zip(out_l, out_v) if v > 0]
+        if not kept:
+            return [residual_label], [float(target)]
+        return [k[0] for k in kept], [k[1] for k in kept]
 
 
 def create_export_data(data: Dict[str, pd.DataFrame], meses: Optional[List[str]] = None) -> Dict[str, pd.DataFrame]:
