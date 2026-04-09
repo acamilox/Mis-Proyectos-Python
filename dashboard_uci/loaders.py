@@ -18,6 +18,23 @@ from .config import (
 logger = logging.getLogger(__name__)
 
 
+def _find_sheet_name(excel_path: Path, candidates: Tuple[str, ...]) -> Optional[str]:
+    """
+    Devuelve el nombre exacto de la hoja en el libro si coincide con algún candidato
+    (ignora mayúsculas y espacios al inicio/fin).
+    """
+    try:
+        xf = pd.ExcelFile(excel_path)
+        by_lower = {str(n).strip().lower(): n for n in xf.sheet_names}
+        for c in candidates:
+            k = str(c).strip().lower()
+            if k in by_lower:
+                return str(by_lower[k])
+    except Exception as exc:
+        logger.warning("No se pudieron listar las hojas de %s: %s", excel_path, exc)
+    return None
+
+
 def _sum_morbilidad_pies_mensuales(df_morb_raw: pd.DataFrame) -> Optional[int]:
     """
     Suma los subtotales mensuales de la hoja MORBILIDAD (filas con col2 'Total' y
@@ -182,7 +199,16 @@ class DataLoader:
     def _load_germenes(self) -> None:
         """Carga datos de gérmenes aislados (IAAS)"""
         try:
-            df_iaas = pd.read_excel(self.excel_path, sheet_name='IAAS', header=None)
+            sh_iaas = _find_sheet_name(self.excel_path, ("IAAS", "I.A.A.S."))
+            if not sh_iaas:
+                logger.warning(
+                    "Hoja IAAS no encontrada en %s (hojas disponibles: usar nombre 'IAAS'). Se carga vacío.",
+                    self.excel_path.name,
+                )
+                self.df_germenes = pd.DataFrame()
+                self.df_germenes_detalle = pd.DataFrame()
+                return
+            df_iaas = pd.read_excel(self.excel_path, sheet_name=sh_iaas, header=None)
 
             # Algunos archivos (p.ej. 2026 parcial) no incluyen la columna esperada.
             # En ese caso devolvemos dataset vacio sin romper el flujo del dashboard.
@@ -329,8 +355,20 @@ class DataLoader:
     def _load_eventos_adversos(self) -> None:
         """Carga datos de eventos adversos (agregado y detalle con paciente/especialidad)"""
         try:
-            wb = load_workbook(self.excel_path)
-            ws = wb['EVENTOS ADVERSOS']
+            sh_ea = _find_sheet_name(
+                self.excel_path,
+                ("EVENTOS ADVERSOS", "EVENTO ADVERSO", "EVENTOS ADVERSO"),
+            )
+            if not sh_ea:
+                logger.warning(
+                    "Hoja EVENTOS ADVERSOS no encontrada en %s. Se carga vacío.",
+                    self.excel_path.name,
+                )
+                self.df_eventos_adversos = pd.DataFrame()
+                self.df_eventos_detalle = pd.DataFrame()
+                return
+            wb = load_workbook(self.excel_path, data_only=True)
+            ws = wb[sh_ea]
             excluir_encabezado = 'tipo de evento o incidente adverso'
             todos_eventos = []
             filas_detalle = []
