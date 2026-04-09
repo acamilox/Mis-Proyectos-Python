@@ -7,7 +7,7 @@ Transformaciones y cálculos sobre los datos cargados
 import math
 import pandas as pd
 from datetime import date
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, Union
 import logging
 import unicodedata
 import re
@@ -237,20 +237,46 @@ class DataProcessor:
             return float(pd.to_numeric(valor, errors='coerce').fillna(0).sum())
         return float(valor) if pd.notna(valor) else 0.0
 
+    def _get_row_series_candidates(
+        self, candidates: List[str], meses: List[str]
+    ) -> pd.Series:
+        """Primera fila de ESTADISTICA que coincida con algún texto candidato."""
+        if self.df is None or getattr(self.df, 'empty', True):
+            return pd.Series(0.0, index=meses)
+        for key in candidates:
+            matching = self._find_matching_rows(key)
+            if not matching:
+                continue
+            idx = matching[0]
+            try:
+                row = self.df.loc[idx, meses]
+            except (KeyError, TypeError, IndexError):
+                continue
+            if isinstance(row, pd.Series):
+                return row
+        logger.warning(
+            "ESTADISTICA: ninguna fila coincide con los candidatos (primeros): %s",
+            candidates[:4],
+        )
+        return pd.Series(0.0, index=meses)
+
     def serie_tasa_por_mil_dias(
         self,
-        nombre_fila_casos: str,
-        nombre_fila_dias: str,
+        nombre_fila_casos: Union[str, List[str]],
+        nombre_fila_dias: Union[str, List[str]],
         meses: Optional[List[str]] = None,
     ) -> pd.Series:
         """
         Tasa por 1.000 días (ITS AC y NAV en ESTADISTICA): (casos / días) × 1000.
         Casos vacíos/NaN → 0. Misma convención que la hoja de cálculo del hospital.
+        nombre_fila_* puede ser un string o lista de variantes de etiqueta de fila en el Excel.
         """
         if meses is None:
             meses = self.meses
-        casos = self.safe_get_row(nombre_fila_casos, meses, silent=True)
-        dias = self.safe_get_row(nombre_fila_dias, meses, silent=True)
+        c_cands = [nombre_fila_casos] if isinstance(nombre_fila_casos, str) else list(nombre_fila_casos)
+        d_cands = [nombre_fila_dias] if isinstance(nombre_fila_dias, str) else list(nombre_fila_dias)
+        casos = self._get_row_series_candidates(c_cands, meses)
+        dias = self._get_row_series_candidates(d_cands, meses)
         if not isinstance(casos, pd.Series):
             casos = pd.Series(0.0, index=meses)
         if not isinstance(dias, pd.Series):

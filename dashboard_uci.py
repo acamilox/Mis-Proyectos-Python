@@ -641,20 +641,39 @@ def render_gestion(year_key: str):
             yaxis={'tickfont': {'color': '#94a3b8', 'size': 12}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
 
+        # Variantes de nombre de fila en ESTADISTICA (Excel 2025/2026 pueden diferir en espacios / DE / tildes)
+        _its_casos_filas = [
+            'N\u00daMERO DE BACTERIEMIAS ASOC.  A  C. CENTRAL',
+            'N\u00daMERO DE BACTERIEMIAS ASOC. A C. CENTRAL',
+            'NUMERO DE BACTERIEMIAS ASOC.  A  C. CENTRAL',
+            'NUMERO DE BACTERIEMIAS ASOC. A C. CENTRAL',
+            'BACTERIEMIAS ASOCIADAS A CATETER CENTRAL',
+            'BACTERIEMIAS ASOC',
+        ]
+        _its_dias_filas = [
+            'DIAS CAT\u00c9TER CENTRAL',
+            'D\u00cdAS CAT\u00c9TER CENTRAL',
+            'DIAS CATETER CENTRAL',
+            'DIAS CATER CENTRAL',
+        ]
+        _nav_casos_filas = [
+            'NUMERO CASOS NAV',
+            'N\u00daMERO CASOS NAV',
+            'NUMERO DE CASOS NAV',
+            'N\u00daMERO DE CASOS NAV',
+            'CASOS NAV',
+        ]
+        _nav_dias_filas = [
+            'DIAS VENTILADOR',
+            'D\u00cdAS VENTILADOR',
+            'DIAS DE VENTILADOR',
+        ]
         fig_bacteriemia = chart_factory.create_line_chart(
-            processor.serie_tasa_por_mil_dias(
-                'N\u00daMERO DE BACTERIEMIAS ASOC.  A  C. CENTRAL',
-                'DIAS CAT\u00c9TER CENTRAL',
-                MESES,
-            ),
+            processor.serie_tasa_por_mil_dias(_its_casos_filas, _its_dias_filas, MESES),
             'Tasa de ITS AC (por 1.000 d\u00edas cat\u00e9ter central)', color='#ef4444', decimals=1
         )
         fig_nav = chart_factory.create_line_chart(
-            processor.serie_tasa_por_mil_dias(
-                'NUMERO CASOS NAV',
-                'DIAS VENTILADOR',
-                MESES,
-            ),
+            processor.serie_tasa_por_mil_dias(_nav_casos_filas, _nav_dias_filas, MESES),
             'Tasa NAV (por 1.000 d\u00edas VM)', color='#ef4444', decimals=1
         )
 
