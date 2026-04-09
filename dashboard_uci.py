@@ -357,8 +357,6 @@ app.layout = html.Div([
             ], style={'display': 'flex', 'gap': '8px', 'position': 'absolute', 'right': '20px', 'flexWrap': 'wrap', 'justifyContent': 'flex-end'})
         ], style={'display': 'flex', 'justifyContent': 'center', 'alignItems': 'center', 'position': 'relative', 'padding': '20px 0'})
     ], className="header-main", style={
-        'background': 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
-        'borderBottom': '1px solid rgba(148, 163, 184, 0.2)',
         'padding': '16px 24px'
     }),
     # Tabs
@@ -389,7 +387,7 @@ app.layout = html.Div([
         ], style={'display': 'flex', 'justifyContent': 'space-between', 'alignItems': 'center', 'flexWrap': 'wrap', 'gap': '16px'})
     ], className="dashboard-footer")
 ], style={
-    'background': 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    'background': 'transparent',
     'minHeight': '100vh',
     'fontFamily': "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"
 }, id='app-container')
