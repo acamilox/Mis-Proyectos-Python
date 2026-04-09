@@ -349,10 +349,15 @@ class DataLoader:
                             break
                     if mes_actual and nombre_raw.upper() in [m.upper() for m in MESES_SHEET_ENERO]:
                         continue
-                # Fila de dato: tiene nombre (col1), edad numérica (col2) y evento (col5)
+                # Fila de dato: nombre (col1), edad parseable (col2) y evento (col5).
+                # Excel a veces guarda la edad como texto ("68"); antes solo aceptábamos int/float.
                 edad_val = ws.cell(i, 2).value
+                if isinstance(edad_val, (int, float)) and not isinstance(edad_val, bool):
+                    edad_ok = pd.notna(edad_val)
+                else:
+                    edad_ok = pd.notna(pd.to_numeric(edad_val, errors='coerce'))
                 is_data_row = (col1 and str(col1).strip()
-                    and pd.notna(edad_val) and isinstance(edad_val, (int, float))
+                    and edad_ok
                     and col5 and str(col5).strip().lower() != excluir_encabezado)
                 if is_data_row and col5:
                     evento_norm = self._normalizar_evento(str(col5).strip())
