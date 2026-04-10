@@ -1171,7 +1171,7 @@ def render_mortalidad(year_key: str):
         kpi_cards_estancia_mort = [c for _, c in sorted(kpi_estancia_mort, key=lambda x: x[0], reverse=True)]
 
         fig_mort = chart_factory.create_line_chart(
-            processor.safe_get_row('% DE MORTALIDAD GENERAL', MESES),
+            processor.serie_mortalidad_general_mensual(MESES),
             '% Mortalidad General', color='#e74c3c', decimals=1
         )
         fig_trauma = chart_factory.create_grouped_bar_chart(

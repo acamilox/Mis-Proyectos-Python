@@ -293,6 +293,43 @@ class DataProcessor:
                 valores.append(0.0)
         return pd.Series(valores, index=meses)
 
+    def serie_mortalidad_general_mensual(self, meses: Optional[List[str]] = None) -> pd.Series:
+        """
+        Serie mensual de % mortalidad general.
+        Prioriza la fila de porcentaje del Excel y, cuando un mes queda NaN/cero,
+        reconstruye ese mes con (FALLECIDOS / EGRESOS) * 100 para evitar huecos
+        por estructura parcial del archivo.
+        """
+        if meses is None:
+            meses = self.meses
+        serie_excel = self._get_row_series_candidates(
+            ['% DE MORTALIDAD GENERAL', '% MORTALIDAD GENERAL'],
+            meses,
+        )
+        serie_excel = pd.to_numeric(serie_excel.reindex(meses), errors='coerce')
+
+        fallecidos = pd.to_numeric(
+            self.safe_get_row('FALLECIDOS', meses, silent=True).reindex(meses),
+            errors='coerce',
+        ).fillna(0.0)
+        egresos = pd.to_numeric(
+            self.safe_get_row('NÚMERO DE EGRESOS DEL MES', meses, silent=True).reindex(meses),
+            errors='coerce',
+        ).fillna(0.0)
+
+        salida: List[float] = []
+        for m in meses:
+            v = serie_excel.loc[m]
+            e = float(egresos.loc[m])
+            f = float(fallecidos.loc[m])
+            calc = (f / e * 100.0) if e > 0 else 0.0
+            # Si Excel trae valor válido y no cero artificial, lo respetamos.
+            if pd.notna(v) and (float(v) > 0 or calc <= 0):
+                salida.append(float(v))
+            else:
+                salida.append(calc)
+        return pd.Series(salida, index=meses)
+
     def formatear_porcentaje(self, valor: float, con_simbolo: bool = True) -> str:
         """Formatea porcentaje: sin decimales si es entero, con 1 decimal si no"""
         simbolo = "%" if con_simbolo else ""
