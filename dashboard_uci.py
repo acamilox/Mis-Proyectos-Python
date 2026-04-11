@@ -1113,6 +1113,9 @@ def render_especialidades(year_key: str):
             textfont=_txt_mix,
             constraintext='none',
         )
+        pct_mi = (df_especialidades['Medicina Interna'] / df_especialidades['Total']) * 100
+        pct_cg = (df_especialidades['Cirugía General'] / df_especialidades['Total']) * 100
+        pct_nc = (df_especialidades['Neurocirugía'] / df_especialidades['Total']) * 100
         # Franja superior (Neurología): si el % es bajo, el texto dentro se rota o recorta → fuera de la barra
         pct_nl = (df_especialidades['Neurología'] / df_especialidades['Total']) * 100
         nl_vals = df_especialidades['Neurología'].astype(float)
@@ -1125,30 +1128,30 @@ def render_especialidades(year_key: str):
             else:
                 text_pos_nl.append('inside')
         fig_especialidades_mix.add_trace(go.Bar(
-            x=MESES, y=(df_especialidades['Medicina Interna'] / df_especialidades['Total']) * 100,
+            x=MESES, y=pct_mi,
             name='Medicina Interna', marker_color='#3498db',
-            text=[_esp_label_vol(v) for v in df_especialidades['Medicina Interna']],
+            text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_mi],
             textposition='inside',
             **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
-            x=MESES, y=(df_especialidades['Cirugía General'] / df_especialidades['Total']) * 100,
+            x=MESES, y=pct_cg,
             name='Cirugía General', marker_color='#e74c3c',
-            text=[_esp_label_vol(v) for v in df_especialidades['Cirugía General']],
+            text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_cg],
             textposition='inside',
             **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
-            x=MESES, y=(df_especialidades['Neurocirugía'] / df_especialidades['Total']) * 100,
+            x=MESES, y=pct_nc,
             name='Neurocirugía', marker_color='#9b59b6',
-            text=[_esp_label_vol(v) for v in df_especialidades['Neurocirugía']],
+            text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nc],
             textposition='inside',
             **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
-            x=MESES, y=(df_especialidades['Neurología'] / df_especialidades['Total']) * 100,
+            x=MESES, y=pct_nl,
             name='Neurología', marker_color='#f39c12',
-            text=[_esp_label_vol(v) for v in df_especialidades['Neurología']],
+            text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nl],
             textposition=text_pos_nl,
             cliponaxis=False,
             **_bar_text_kw,
