@@ -938,9 +938,9 @@ def render_gestion(year_key: str):
         else:
             fig_dist_pac = None
 
-        # Distribución por especialidad de pacientes con eventos adversos (no mostrar en 2025)
+        # Distribución por especialidad de pacientes con eventos adversos.
         # Coherente con 1/2/3+ eventos: contar pacientes únicos.
-        if year_key != '2025' and not df_det.empty and {'Nombre', 'Especialidad'}.issubset(df_det.columns):
+        if not df_det.empty and {'Nombre', 'Especialidad'}.issubset(df_det.columns):
             esp_counts = df_det.groupby('Nombre')['Especialidad'].first().value_counts()
             esp_labels = [str(x).strip() or 'Sin especificar' for x in esp_counts.index.tolist()]
             esp_values = esp_counts.tolist()
