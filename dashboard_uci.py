@@ -786,23 +786,19 @@ def render_gestion(year_key: str):
                 textfont=dict(color='#f8fafc', size=12, family='Roboto'),
                 hovertemplate='<b>%{x}</b><br>Eventos: %{y}<extra></extra>'
             ))
-            # Mostrar los "1" en vertical para que no queden acostados y se lean mejor.
+            # Mostrar los "1" encima de su barra, sin resaltado.
             for evento, v in zip(df_eventos['Evento'], bar_values):
                 if 0 < float(v) <= 1.0:
                     fig_eventos.add_annotation(
                         x=evento,
-                        y=max(float(v) * 0.55, 0.45),
+                        y=float(v),
                         xref='x',
                         yref='y',
                         text='1',
                         showarrow=False,
-                        textangle=-90,
+                        yshift=10,
                         font=dict(color='#f8fafc', size=11, family='Roboto'),
                         align='center',
-                        bgcolor='rgba(15, 23, 42, 0.88)',
-                        bordercolor='rgba(226, 232, 240, 0.65)',
-                        borderwidth=1,
-                        borderpad=1,
                     )
             fig_eventos.add_trace(go.Scatter(
                 x=df_eventos['Evento'],
