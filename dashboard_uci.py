@@ -771,11 +771,6 @@ def render_gestion(year_key: str):
             bar_colors = _palette_iaas_n(n_bar)
             acum_values = pd.to_numeric(df_eventos['Acumulado %'], errors='coerce').fillna(0.0)
             acum_labels = [f"{float(v):.1f}%" for v in acum_values]
-            # Alternar posiciones para mejorar legibilidad cuando los puntos quedan cercanos.
-            acum_text_pos = [
-                'bottom center' if (i % 2 == 1 or float(v) >= 97.0) else 'top center'
-                for i, v in enumerate(acum_values)
-            ]
             fig_eventos = go.Figure()
             fig_eventos.add_trace(go.Bar(
                 x=df_eventos['Evento'],
@@ -791,16 +786,30 @@ def render_gestion(year_key: str):
                 x=df_eventos['Evento'],
                 y=acum_values,
                 name='Acumulado %',
-                mode='lines+markers+text',
+                mode='lines+markers',
                 yaxis='y2',
                 line=dict(color='#fbbf24', width=2.5),
                 marker=dict(size=6, color='#fbbf24'),
-                text=acum_labels,
-                textposition=acum_text_pos,
-                textfont=dict(color='#fde68a', size=10),
-                cliponaxis=False,
                 hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>'
             ))
+            # Etiquetas del acumulado con fondo para que no se mezclen con las barras.
+            for i, (evento, v, lbl) in enumerate(zip(df_eventos['Evento'], acum_values, acum_labels)):
+                yshift = -14 if (i % 2 == 1 or float(v) >= 97.0) else 14
+                fig_eventos.add_annotation(
+                    x=evento,
+                    y=float(v),
+                    xref='x',
+                    yref='y2',
+                    text=lbl,
+                    showarrow=False,
+                    yshift=yshift,
+                    font=dict(color='#fde68a', size=10, family='Roboto'),
+                    align='center',
+                    bgcolor='rgba(15, 23, 42, 0.92)',
+                    bordercolor='rgba(251, 191, 36, 0.55)',
+                    borderwidth=1,
+                    borderpad=2,
+                )
             fig_eventos.update_layout(
                 title={
                     'text': 'Eventos adversos (Pareto)',
