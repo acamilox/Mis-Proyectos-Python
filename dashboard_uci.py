@@ -939,14 +939,15 @@ def render_gestion(year_key: str):
             fig_dist_pac = None
 
         # Distribución por especialidad de pacientes con eventos adversos (no mostrar en 2025)
-        if year_key != '2025' and not df_det.empty and 'Especialidad' in df_det.columns:
-            esp_counts = df_det['Especialidad'].value_counts()
+        # Coherente con 1/2/3+ eventos: contar pacientes únicos.
+        if year_key != '2025' and not df_det.empty and {'Nombre', 'Especialidad'}.issubset(df_det.columns):
+            esp_counts = df_det.groupby('Nombre')['Especialidad'].first().value_counts()
             esp_labels = [str(x).strip() or 'Sin especificar' for x in esp_counts.index.tolist()]
             esp_values = esp_counts.tolist()
             if esp_values:
                 fig_esp_ea = chart_factory.create_donut_chart(
                     esp_labels, [float(v) for v in esp_values],
-                    'Distribución por Especialidad (Pacientes con Eventos Adversos)',
+                    'Distribución por Especialidad (Pacientes Únicos con Eventos Adversos)',
                     auto_sort=True
                 )
                 fig_esp_ea.update_layout(height=380)
