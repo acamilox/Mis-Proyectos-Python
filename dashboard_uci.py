@@ -769,19 +769,41 @@ def render_gestion(year_key: str):
             df_eventos['Acumulado %'] = (df_eventos['Cantidad'].cumsum() / total_eventos) * 100
             n_bar = len(df_eventos)
             bar_colors = _palette_iaas_n(n_bar)
+            bar_values = pd.to_numeric(df_eventos['Cantidad'], errors='coerce').fillna(0.0)
+            # Dejar en la traza solo valores > 1; los "1" se dibujan aparte en vertical.
+            bar_labels_main = [f"{int(v)}" if float(v) > 1 else '' for v in bar_values]
             acum_values = pd.to_numeric(df_eventos['Acumulado %'], errors='coerce').fillna(0.0)
             acum_labels = [f"{float(v):.1f}%" for v in acum_values]
             fig_eventos = go.Figure()
             fig_eventos.add_trace(go.Bar(
                 x=df_eventos['Evento'],
-                y=df_eventos['Cantidad'],
+                y=bar_values,
                 name='N.º de eventos',
                 marker_color=bar_colors,
-                text=df_eventos['Cantidad'],
+                text=bar_labels_main,
                 textposition='inside',
-                textfont=dict(color='#f1f5f9', size=11),
+                insidetextanchor='middle',
+                textfont=dict(color='#f8fafc', size=12, family='Roboto'),
                 hovertemplate='<b>%{x}</b><br>Eventos: %{y}<extra></extra>'
             ))
+            # Mostrar los "1" en vertical para que no queden acostados y se lean mejor.
+            for evento, v in zip(df_eventos['Evento'], bar_values):
+                if 0 < float(v) <= 1.0:
+                    fig_eventos.add_annotation(
+                        x=evento,
+                        y=max(float(v) * 0.55, 0.45),
+                        xref='x',
+                        yref='y',
+                        text='1',
+                        showarrow=False,
+                        textangle=-90,
+                        font=dict(color='#f8fafc', size=11, family='Roboto'),
+                        align='center',
+                        bgcolor='rgba(15, 23, 42, 0.88)',
+                        bordercolor='rgba(226, 232, 240, 0.65)',
+                        borderwidth=1,
+                        borderpad=1,
+                    )
             fig_eventos.add_trace(go.Scatter(
                 x=df_eventos['Evento'],
                 y=acum_values,
@@ -815,7 +837,7 @@ def render_gestion(year_key: str):
                     showarrow=False,
                     yshift=yshift,
                     xshift=xshift,
-                    font=dict(color='#fde68a', size=10, family='Roboto'),
+                    font=dict(color='#fef9c3', size=11, family='Roboto'),
                     align='center',
                     bgcolor='rgba(15, 23, 42, 0.92)',
                     bordercolor='rgba(251, 191, 36, 0.55)',
