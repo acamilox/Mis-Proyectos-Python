@@ -1722,8 +1722,19 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     "ingresos", "fallecidos", "total_eventos", "total_germenes",
                     "ocupacion", "mortalidad", "estancia", "giro_cama",
                 ]
-                _compare_colors = _palette_iaas_n(len(_compare_color_keys))
-                _color_cmp = {k: _compare_colors[i] for i, k in enumerate(_compare_color_keys)}
+                # Paleta fija de alto contraste para que cada métrica se diferencie claramente.
+                _color_cmp = {
+                    "total_dias": "#2563eb",      # azul fuerte
+                    "total_diag": "#f59e0b",      # ámbar
+                    "ingresos": "#10b981",        # verde
+                    "fallecidos": "#ef4444",      # rojo
+                    "total_eventos": "#8b5cf6",   # violeta
+                    "total_germenes": "#06b6d4",  # cian
+                    "ocupacion": "#3b82f6",       # azul medio
+                    "mortalidad": "#f97316",      # naranja intenso
+                    "estancia": "#84cc16",        # lima
+                    "giro_cama": "#ec4899",       # fucsia
+                }
 
                 def _range_y_vol(keys: list[str]) -> list[float]:
                     m = float(compare_df[keys].max().max()) if keys else 0.0
