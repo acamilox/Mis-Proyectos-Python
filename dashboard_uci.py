@@ -769,6 +769,13 @@ def render_gestion(year_key: str):
             df_eventos['Acumulado %'] = (df_eventos['Cantidad'].cumsum() / total_eventos) * 100
             n_bar = len(df_eventos)
             bar_colors = _palette_iaas_n(n_bar)
+            acum_values = pd.to_numeric(df_eventos['Acumulado %'], errors='coerce').fillna(0.0)
+            acum_labels = [f"{float(v):.1f}%" for v in acum_values]
+            # Alternar posiciones para mejorar legibilidad cuando los puntos quedan cercanos.
+            acum_text_pos = [
+                'bottom center' if (i % 2 == 1 or float(v) >= 97.0) else 'top center'
+                for i, v in enumerate(acum_values)
+            ]
             fig_eventos = go.Figure()
             fig_eventos.add_trace(go.Bar(
                 x=df_eventos['Evento'],
@@ -782,12 +789,16 @@ def render_gestion(year_key: str):
             ))
             fig_eventos.add_trace(go.Scatter(
                 x=df_eventos['Evento'],
-                y=df_eventos['Acumulado %'],
+                y=acum_values,
                 name='Acumulado %',
-                mode='lines+markers',
+                mode='lines+markers+text',
                 yaxis='y2',
                 line=dict(color='#fbbf24', width=2.5),
                 marker=dict(size=6, color='#fbbf24'),
+                text=acum_labels,
+                textposition=acum_text_pos,
+                textfont=dict(color='#fde68a', size=10),
+                cliponaxis=False,
                 hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>'
             ))
             fig_eventos.update_layout(
@@ -824,7 +835,7 @@ def render_gestion(year_key: str):
                 yaxis2={
                     'overlaying': 'y',
                     'side': 'right',
-                    'range': [0, 110],
+                    'range': [0, 118],
                     'tickfont': {'color': '#fbbf24'},
                     'title': {
                         'text': '% acumulado (de izq. a der.)',
