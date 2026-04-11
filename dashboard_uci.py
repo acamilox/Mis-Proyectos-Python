@@ -796,9 +796,11 @@ def render_gestion(year_key: str):
             for i, (evento, v, lbl) in enumerate(zip(df_eventos['Evento'], acum_values, acum_labels)):
                 # Primer punto: subir etiqueta para no tapar el valor de la barra.
                 if i == 0:
-                    yshift = 20
+                    yshift = 34
+                    xshift = 14
                 else:
                     yshift = -14 if (i % 2 == 1 or float(v) >= 97.0) else 14
+                    xshift = 0
                 fig_eventos.add_annotation(
                     x=evento,
                     y=float(v),
@@ -807,6 +809,7 @@ def render_gestion(year_key: str):
                     text=lbl,
                     showarrow=False,
                     yshift=yshift,
+                    xshift=xshift,
                     font=dict(color='#fde68a', size=10, family='Roboto'),
                     align='center',
                     bgcolor='rgba(15, 23, 42, 0.92)',
