@@ -812,18 +812,14 @@ def render_gestion(year_key: str):
             ))
             # Etiquetas del acumulado con fondo para que no se mezclen con las barras.
             for i, (evento, v, lbl) in enumerate(zip(df_eventos['Evento'], acum_values, acum_labels)):
-                # Solo el segundo punto acumulado (p.ej. 64.8%) va sobre su barra.
-                # El primer punto (p.ej. 40.7%) se mantiene cerca de la línea.
-                if i == 1:
-                    ann_y = float(pd.to_numeric(df_eventos.iloc[i]['Cantidad'], errors='coerce') or 0.0)
-                    ann_yref = 'y'
-                    yshift = 14
-                    xshift = 0
+                # Siempre anclar al punto de la línea acumulada (y2).
+                ann_y = float(v)
+                ann_yref = 'y2'
+                if i in (0, 1):
+                    yshift = 18
                 else:
-                    ann_y = float(v)
-                    ann_yref = 'y2'
                     yshift = -14 if (i % 2 == 1 or float(v) >= 97.0) else 14
-                    xshift = 0
+                xshift = 0
                 fig_eventos.add_annotation(
                     x=evento,
                     y=ann_y,
