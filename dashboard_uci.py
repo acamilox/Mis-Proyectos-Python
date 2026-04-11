@@ -794,9 +794,9 @@ def render_gestion(year_key: str):
             ))
             # Etiquetas del acumulado con fondo para que no se mezclen con las barras.
             for i, (evento, v, lbl) in enumerate(zip(df_eventos['Evento'], acum_values, acum_labels)):
-                # Primeros puntos suelen montarse con el valor de barra -> bajar un poco.
+                # Primer punto: subir etiqueta para no tapar el valor de la barra.
                 if i == 0:
-                    yshift = -24
+                    yshift = 20
                 else:
                     yshift = -14 if (i % 2 == 1 or float(v) >= 97.0) else 14
                 fig_eventos.add_annotation(
