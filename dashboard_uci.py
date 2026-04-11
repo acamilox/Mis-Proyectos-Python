@@ -770,8 +770,9 @@ def render_gestion(year_key: str):
             n_bar = len(df_eventos)
             bar_colors = _palette_iaas_n(n_bar)
             bar_values = pd.to_numeric(df_eventos['Cantidad'], errors='coerce').fillna(0.0)
-            # Mostrar todos los valores dentro de su barra, centrados (incluye los "1").
-            bar_labels_main = [f"{int(v)}" if float(v) > 0 else '' for v in bar_values]
+            # Resaltar especialmente los "1" para que se lean mejor en barras pequeñas.
+            bar_labels_main = [f"{int(v)}" if float(v) > 1 else '' for v in bar_values]
+            bar_labels_ones = ['1' if float(v) == 1.0 else '' for v in bar_values]
             acum_values = pd.to_numeric(df_eventos['Acumulado %'], errors='coerce').fillna(0.0)
             acum_labels = [f"{float(v):.1f}%" for v in acum_values]
             fig_eventos = go.Figure()
@@ -785,6 +786,18 @@ def render_gestion(year_key: str):
                 insidetextanchor='middle',
                 textfont=dict(color='#f8fafc', size=12, family='Roboto'),
                 hovertemplate='<b>%{x}</b><br>Eventos: %{y}<extra></extra>'
+            ))
+            fig_eventos.add_trace(go.Bar(
+                x=df_eventos['Evento'],
+                y=bar_values,
+                name='N.º de eventos',
+                marker_color=bar_colors,
+                text=bar_labels_ones,
+                textposition='inside',
+                insidetextanchor='middle',
+                textfont=dict(color='#ffffff', size=13, family='Roboto'),
+                hoverinfo='skip',
+                showlegend=False,
             ))
             fig_eventos.add_trace(go.Scatter(
                 x=df_eventos['Evento'],
