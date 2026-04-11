@@ -770,8 +770,8 @@ def render_gestion(year_key: str):
             n_bar = len(df_eventos)
             bar_colors = _palette_iaas_n(n_bar)
             bar_values = pd.to_numeric(df_eventos['Cantidad'], errors='coerce').fillna(0.0)
-            # Dejar en la traza solo valores > 1; los "1" se dibujan aparte en vertical.
-            bar_labels_main = [f"{int(v)}" if float(v) > 1 else '' for v in bar_values]
+            # Mostrar todos los valores dentro de su barra, centrados (incluye los "1").
+            bar_labels_main = [f"{int(v)}" if float(v) > 0 else '' for v in bar_values]
             acum_values = pd.to_numeric(df_eventos['Acumulado %'], errors='coerce').fillna(0.0)
             acum_labels = [f"{float(v):.1f}%" for v in acum_values]
             fig_eventos = go.Figure()
@@ -786,20 +786,6 @@ def render_gestion(year_key: str):
                 textfont=dict(color='#f8fafc', size=12, family='Roboto'),
                 hovertemplate='<b>%{x}</b><br>Eventos: %{y}<extra></extra>'
             ))
-            # Mostrar los "1" encima de su barra, sin resaltado.
-            for evento, v in zip(df_eventos['Evento'], bar_values):
-                if 0 < float(v) <= 1.0:
-                    fig_eventos.add_annotation(
-                        x=evento,
-                        y=float(v),
-                        xref='x',
-                        yref='y',
-                        text='1',
-                        showarrow=False,
-                        yshift=10,
-                        font=dict(color='#f8fafc', size=11, family='Roboto'),
-                        align='center',
-                    )
             fig_eventos.add_trace(go.Scatter(
                 x=df_eventos['Evento'],
                 y=acum_values,
