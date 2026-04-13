@@ -51,6 +51,13 @@ class DataProcessor:
         self.df_gram = data.get('gram_sot', pd.DataFrame())
         self.meses = MESES  # Lista de meses disponibles
 
+    def _sanitize_meses(self, meses: Optional[List[str]] = None) -> List[str]:
+        """Normaliza filtro de meses y aplica fallback a lista completa."""
+        if meses is None:
+            return list(self.meses)
+        meses_validos = [m for m in meses if m in self.meses]
+        return meses_validos if meses_validos else list(self.meses)
+
     def get_suma_column(self) -> str:
         """Obtiene el nombre de la columna de suma"""
         suma_cols = [c for c in self.df.columns if str(c).strip() in ['∑', 'SUMA']]
@@ -349,8 +356,7 @@ class DataProcessor:
         """Calcula KPIs para el módulo de Resumen"""
         from .config import MESES_COMPLETOS
 
-        if meses is None:
-            meses = self.meses
+        meses = self._sanitize_meses(meses)
 
         # Datos principales
         datos_ocupacional = self.safe_get_row('% OCUPACIONAL', meses)
@@ -379,9 +385,9 @@ class DataProcessor:
         datos_giro = self.safe_get_row('GIRO CAMA', meses)
         giro_cama = datos_giro[datos_giro > 0].mean() if len(datos_giro[datos_giro > 0]) > 0 else 0
 
-        # Mortalidad
+        # Mortalidad: si el filtro es parcial, recalcular para el periodo aplicado.
         mortalidad = self.safe_get_value('% DE MORTALIDAD GENERAL', 'PROMEDIO')
-        if pd.isna(mortalidad):
+        if pd.isna(mortalidad) or len(meses) != len(self.meses):
             mortalidad = (total_fallecidos / total_egresos * 100) if total_egresos > 0 else 0
 
         return {
@@ -394,16 +400,17 @@ class DataProcessor:
             'mortalidad': mortalidad
         }
 
-    def _resolve_mortalidad_trauma(self) -> float:
+    def _resolve_mortalidad_trauma(self, meses: Optional[List[str]] = None) -> float:
         """
         % mortalidad en población trauma: mismo criterio que el gráfico de trauma (barras).
         Prioriza Σ fallecidos / Σ pacientes cuando hay datos mensuales; si no, lee PROMEDIO
         probando alias de fila (el Excel puede titular la fila distinto).
         """
+        meses = self._sanitize_meses(meses)
         row_pac = 'Pacientes con diagnóstico de Trauma'
         row_fall = 'Pacientes fallecidos por Trauma'
-        pac_m = self.safe_get_row(row_pac, self.meses, silent=True)
-        fall_m = self.safe_get_row(row_fall, self.meses, silent=True)
+        pac_m = self.safe_get_row(row_pac, meses, silent=True)
+        fall_m = self.safe_get_row(row_fall, meses, silent=True)
         if isinstance(pac_m, pd.Series) and isinstance(fall_m, pd.Series):
             tp = float(pd.to_numeric(pac_m, errors='coerce').fillna(0).sum())
             tf = float(pd.to_numeric(fall_m, errors='coerce').fillna(0).sum())
@@ -434,34 +441,55 @@ class DataProcessor:
                     continue
         return 0.0
 
-    def get_kpis_mortalidad(self) -> Dict[str, Any]:
+    def get_kpis_mortalidad(self, meses: Optional[List[str]] = None) -> Dict[str, Any]:
         """Calcula KPIs para el módulo de Mortalidad"""
+        from .config import MESES_COMPLETOS
+
+        meses = self._sanitize_meses(meses)
         suma_col = self.get_suma_column()
+        meses_nombre = [MESES_COMPLETOS.get(m, m) for m in meses]
 
         # Preferir hoja MORTALIDAD (lista real de pacientes) sobre ESTADISTICA para coherencia
         if not self.df_fallecidos.empty:
-            total_fallecidos = len(self.df_fallecidos)
+            df_fallecidos_periodo = self.df_fallecidos
+            if 'Mes' in self.df_fallecidos.columns:
+                df_fallecidos_periodo = self.df_fallecidos[self.df_fallecidos['Mes'].isin(meses_nombre)]
+            total_fallecidos = len(df_fallecidos_periodo)
         else:
-            total_fallecidos = self.safe_get_value('FALLECIDOS', suma_col)
-            if pd.isna(total_fallecidos):
-                total_fallecidos = 0
+            row_fallecidos = self.safe_get_row('FALLECIDOS', meses, silent=True)
+            total_fallecidos = float(pd.to_numeric(row_fallecidos, errors='coerce').fillna(0).sum()) if isinstance(row_fallecidos, pd.Series) else 0
+            if total_fallecidos <= 0:
+                total_fallecidos = self.safe_get_value('FALLECIDOS', suma_col)
+                if pd.isna(total_fallecidos):
+                    total_fallecidos = 0
 
-        fallecidos_covid = self.safe_get_value('FALLECIDOS COVID-19', suma_col)
-        total_egresos = self.safe_get_value('NÚMERO DE EGRESOS DEL MES', suma_col)
+        row_covid = self.safe_get_row('FALLECIDOS COVID-19', meses, silent=True)
+        if isinstance(row_covid, pd.Series):
+            fallecidos_covid = float(pd.to_numeric(row_covid, errors='coerce').fillna(0).sum())
+        else:
+            fallecidos_covid = self.safe_get_value('FALLECIDOS COVID-19', suma_col)
+            if pd.isna(fallecidos_covid):
+                fallecidos_covid = 0
 
-        if pd.isna(fallecidos_covid):
-            fallecidos_covid = 0
-        if pd.isna(total_egresos) or total_egresos == 0:
-            total_egresos = 1
+        row_egresos = self.safe_get_row('NÚMERO DE EGRESOS DEL MES', meses, silent=True)
+        if isinstance(row_egresos, pd.Series):
+            total_egresos = float(pd.to_numeric(row_egresos, errors='coerce').fillna(0).sum())
+        else:
+            total_egresos = self.safe_get_value('NÚMERO DE EGRESOS DEL MES', suma_col)
+            if pd.isna(total_egresos):
+                total_egresos = 0
+        mortalidad_general = (float(total_fallecidos) / float(total_egresos) * 100.0) if float(total_egresos) > 0 else 0.0
 
-        mortalidad_general = self.safe_get_value('% DE MORTALIDAD GENERAL', 'PROMEDIO')
-        if pd.isna(mortalidad_general):
-            mortalidad_general = (total_fallecidos / total_egresos * 100)
-
-        mortalidad_trauma = self._resolve_mortalidad_trauma()
+        mortalidad_trauma = self._resolve_mortalidad_trauma(meses)
 
         # Estadísticas de días de estancia
-        dias_estancia_validos = self.df_fallecidos['Dias_Estancia'].dropna() if not self.df_fallecidos.empty else pd.Series([0])
+        if not self.df_fallecidos.empty:
+            df_estancia = self.df_fallecidos
+            if 'Mes' in df_estancia.columns:
+                df_estancia = df_estancia[df_estancia['Mes'].isin(meses_nombre)]
+            dias_estancia_validos = df_estancia['Dias_Estancia'].dropna()
+        else:
+            dias_estancia_validos = pd.Series([0])
         if len(dias_estancia_validos) == 0:
             dias_estancia_validos = pd.Series([0])
 
@@ -471,7 +499,7 @@ class DataProcessor:
         mediana_dias = dias_estancia_validos.median()
 
         return {
-            'total_fallecidos': total_fallecidos,
+            'total_fallecidos': float(total_fallecidos),
             'fallecidos_covid': fallecidos_covid,
             'total_egresos': total_egresos,
             'mortalidad_general': mortalidad_general,
@@ -482,10 +510,10 @@ class DataProcessor:
             'mediana_dias_estancia': mediana_dias
         }
 
-    def get_kpis_gestion(self) -> Dict[str, Any]:
+    def get_kpis_gestion(self, meses: Optional[List[str]] = None) -> Dict[str, Any]:
         """Calcula KPIs para el módulo de Gestión"""
+        meses = self._sanitize_meses(meses)
         suma_col = self.get_suma_column()
-        meses = self.meses
 
         datos_estancia = self.safe_get_row('PROMEDIO ESTANCIA', meses)
         promedio_estancia = datos_estancia[datos_estancia > 0].mean() if len(datos_estancia[datos_estancia > 0]) > 0 else 0
@@ -493,7 +521,10 @@ class DataProcessor:
         datos_giro = self.safe_get_row('GIRO CAMA', meses)
         giro_cama = datos_giro[datos_giro > 0].mean() if len(datos_giro[datos_giro > 0]) > 0 else 0
 
-        total_dias = self.safe_get_value('TOTAL DIAS ESTANCIA', suma_col)
+        datos_total_dias = self.safe_get_row('TOTAL DIAS ESTANCIA', meses, silent=True)
+        total_dias = float(pd.to_numeric(datos_total_dias, errors='coerce').fillna(0).sum()) if isinstance(datos_total_dias, pd.Series) else 0.0
+        if total_dias <= 0:
+            total_dias = self.safe_get_value('TOTAL DIAS ESTANCIA', suma_col)
         capacidad = self.safe_get_value('CAPACIDAD INSTALADA: UCI', 'Ene')
 
         # Promedio de días de VM
@@ -521,17 +552,24 @@ class DataProcessor:
             'promedio_dias_vm_mensual': promedio_vm
         }
 
-    def get_eps_data(self) -> Tuple[List[str], List[float]]:
+    def get_eps_data(self, meses: Optional[List[str]] = None) -> Tuple[List[str], List[float]]:
         """Obtiene datos de EPS ordenados por cantidad"""
         from .config import EPS_LIST
 
         suma_col = self.get_suma_column()
+        meses = self._sanitize_meses(meses)
 
         eps_data = []
         for eps in EPS_LIST:
-            total = self.safe_get_value(eps, suma_col)
+            row = self.safe_get_row(eps, meses, silent=True)
+            if isinstance(row, pd.Series):
+                total = float(pd.to_numeric(row, errors='coerce').fillna(0).sum())
+                if total <= 0:
+                    total = float(self.safe_get_value(eps, suma_col) or 0)
+            else:
+                total = float(self.safe_get_value(eps, suma_col) or 0)
             if pd.notna(total) and total > 0:
-                eps_data.append((eps.strip(), float(total)))
+                eps_data.append((eps.strip(), total))
 
         eps_data.sort(key=lambda x: x[1], reverse=True)
 

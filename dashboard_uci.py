@@ -192,7 +192,7 @@ def _build_compare_rows(meses_filtrados: list[str]) -> list[dict[str, Any]]:
         proc_y = PROCESSOR_BY_YEAR[y]
         data_y = DATA_BY_YEAR.get(y, DATA)
         k_resumen = proc_y.get_kpis_resumen(meses_filtrados)
-        k_gestion = proc_y.get_kpis_gestion()
+        k_gestion = proc_y.get_kpis_gestion(meses_filtrados)
 
         row_td = proc_y.safe_get_row('TOTAL DIAS ESTANCIA', meses_filtrados, silent=True)
         total_dias_meses = float(pd.to_numeric(row_td, errors='coerce').fillna(0).sum()) if isinstance(row_td, pd.Series) else 0.0
@@ -446,15 +446,18 @@ app.layout = html.Div([
 
 @app.callback(
     Output('tab-content', 'children'),
-    [Input('tabs', 'active_tab'), Input('selected-year-store', 'data'), Input('pending-year-store', 'data')]
+    [
+        Input('tabs', 'active_tab'),
+        Input('selected-year-store', 'data'),
+        Input('pending-year-store', 'data'),
+        Input('selected-months-store', 'data'),
+    ]
 )
-def render_content(tab, selected_year, pending_year):
+def render_content(tab, selected_year, pending_year, selected_months):
     """
-    Renderiza el contenido de cada pesta\u00f1a.
-    - En Resumen, NO se vuelve a construir el layout cuando solo cambia el a\u00f1o aplicado,
-      para no resetear los filtros de meses.
-    - En otras pesta\u00f1as, el a\u00f1o sigue el desplegable (pending-year-store), no solo el
-      a\u00f1o aplicado con \"Aplicar\" en Resumen; as\u00ed Gesti\u00f3n/otras coinciden con el a\u00f1o elegido.
+    Renderiza el contenido de cada pestaña.
+    - En Resumen, no se reconstruye el layout cuando cambian stores aplicados.
+    - En otras pestañas, se usa el periodo global aplicado (año + meses).
     """
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
@@ -467,21 +470,29 @@ def render_content(tab, selected_year, pending_year):
     if tab == 'tab-resumen' and triggered_id == 'pending-year-store':
         return dash.no_update
 
+    if tab == 'tab-resumen' and triggered_id == 'selected-months-store':
+        return dash.no_update
+
     selected_resolved = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     selected_resolved = selected_resolved if selected_resolved in PROCESSOR_BY_YEAR else DEFAULT_YEAR
 
     if tab == 'tab-resumen':
         return render_resumen(selected_resolved)
 
-    pend = str(pending_year) if pending_year is not None else ''
-    year_key = pend if pend in PROCESSOR_BY_YEAR else selected_resolved
+    _ = pending_year  # se conserva para sincronizar el dropdown, sin aplicar fuera de Resumen.
+    meses_filtrados = (
+        [m for m in selected_months if m in MESES]
+        if isinstance(selected_months, list) and selected_months
+        else list(MESES)
+    )
+    year_key = selected_resolved
 
     if tab == 'tab-gestion':
-        return render_gestion(year_key)
+        return render_gestion(year_key, meses_filtrados)
     elif tab == 'tab-especialidades':
-        return render_especialidades(year_key)
+        return render_especialidades(year_key, meses_filtrados)
     elif tab == 'tab-mortalidad':
-        return render_mortalidad(year_key)
+        return render_mortalidad(year_key, meses_filtrados)
     return html.Div([html.H5("Selecciona una pesta\u00f1a", style={'color': '#1e293b'})])
 
 
@@ -575,22 +586,34 @@ def render_resumen(year_key: str):
     return html.Div([filtros, html.Div(id='resumen-content')])
 
 
-def render_gestion(year_key: str):
+def render_gestion(year_key: str, meses_filtrados: list[str] | None = None):
     try:
         _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
         data_year = DATA_BY_YEAR.get(year_key, DATA)
+        meses = [m for m in (meses_filtrados or MESES) if m in MESES]
+        if not meses:
+            meses = list(MESES)
         # region agent log
         _debug_log(
             "pre-fix",
             "H5",
             "dashboard_uci.py:render_gestion:entry",
             "Gestion tab resolved year",
-            {"globalDefaultYear": DEFAULT_YEAR, "resolvedYear": year_key},
+            {
+                "globalDefaultYear": DEFAULT_YEAR,
+                "resolvedYear": year_key,
+                "mesesFiltrados": meses,
+            },
         )
         # endregion
-        kpis = processor.get_kpis_gestion()
-        rango_gestion = processor.etiqueta_rango_periodo(year_key)
+        kpis = processor.get_kpis_gestion(meses)
+        if len(meses) == 1:
+            rango_gestion = f"{MESES_COMPLETOS.get(meses[0], meses[0])} {year_key}"
+        elif len(meses) == len(MESES):
+            rango_gestion = processor.etiqueta_rango_periodo(year_key)
+        else:
+            rango_gestion = f"{', '.join([MESES_COMPLETOS.get(m, m)[:3] for m in meses])} {year_key}"
         kpi_items_g = [
             (float(kpis['total_dias_estancia'] or 0), chart_factory.create_kpi_card("Total D\u00edas Estancia", f"{int(kpis['total_dias_estancia'])}", rango_gestion, "#10b981")),
             (float(kpis['capacidad_uci'] or 0), chart_factory.create_kpi_card("Capacidad UCI", f"{int(kpis['capacidad_uci'])}", "Camas", "#8b5cf6")),
@@ -600,22 +623,22 @@ def render_gestion(year_key: str):
         ]
         kpi_cards_g = [c for _, c in sorted(kpi_items_g, key=lambda x: x[0], reverse=True)]
 
-        datos_estancia = processor.safe_get_row('PROMEDIO ESTANCIA', MESES)
+        datos_estancia = processor.safe_get_row('PROMEDIO ESTANCIA', meses)
         fig_estancia = chart_factory.create_line_chart(datos_estancia, 'Estancia Promedio (D\u00edas)', color='#6366f1', decimals=1)
-        datos_giro = processor.safe_get_row('GIRO CAMA', MESES)
+        datos_giro = processor.safe_get_row('GIRO CAMA', meses)
         fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro cama', color='#3b82f6', decimals=2)
 
         # Grafico de VM - datos mensuales
         datos_vm_mensual = kpis.get('promedio_dias_vm_mensual', [])
-        if not datos_vm_mensual or len(datos_vm_mensual) != len(MESES):
-            datos_vm_mensual = [round(kpis['promedio_dias_vm'], 2) for _ in MESES]
-        vm_text_positions = ['top center'] * len(MESES)
+        if not datos_vm_mensual or len(datos_vm_mensual) != len(meses):
+            datos_vm_mensual = [round(kpis['promedio_dias_vm'], 2) for _ in meses]
+        vm_text_positions = ['top center'] * len(meses)
         if vm_text_positions:
             vm_text_positions[0] = 'top right'
             vm_text_positions[-1] = 'top left'
         fig_vm = go.Figure()
         fig_vm.add_trace(go.Scatter(
-            x=MESES, y=datos_vm_mensual,
+            x=meses, y=datos_vm_mensual,
             mode='lines+markers+text',
             line=dict(color='#06b6d4', width=3.2),
             marker=dict(size=8, color='#06b6d4'),
@@ -636,7 +659,7 @@ def render_gestion(year_key: str):
             xaxis={
                 'tickfont': {'color': '#cbd5e1', 'size': 12},
                 'gridcolor': 'rgba(148, 163, 184, 0.1)',
-                'range': [-0.35, len(MESES) - 0.65]
+                'range': [-0.35, len(meses) - 0.65]
             },
             yaxis={'tickfont': {'color': '#94a3b8', 'size': 12}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
         )
@@ -669,18 +692,29 @@ def render_gestion(year_key: str):
             'DIAS DE VENTILADOR',
         ]
         fig_bacteriemia = chart_factory.create_line_chart(
-            processor.serie_tasa_por_mil_dias(_its_casos_filas, _its_dias_filas, MESES),
+            processor.serie_tasa_por_mil_dias(_its_casos_filas, _its_dias_filas, meses),
             'Tasa de ITS AC (por 1.000 d\u00edas cat\u00e9ter central)', color='#ef4444', decimals=1
         )
         fig_nav = chart_factory.create_line_chart(
-            processor.serie_tasa_por_mil_dias(_nav_casos_filas, _nav_dias_filas, MESES),
+            processor.serie_tasa_por_mil_dias(_nav_casos_filas, _nav_dias_filas, meses),
             'Tasa NAV (por 1.000 d\u00edas VM)', color='#ef4444', decimals=1
         )
 
         # Germenes - Donut
         if not data_year['germenes'].empty:
-            germenes_labels = data_year['germenes']['Germen'].tolist()
-            germenes_values = data_year['germenes']['Cantidad'].tolist()
+            df_germ_det = data_year.get('germenes_detalle')
+            if isinstance(df_germ_det, pd.DataFrame) and not df_germ_det.empty and 'Mes' in df_germ_det.columns:
+                df_germ_det = df_germ_det[df_germ_det['Mes'].isin(meses)]
+                if not df_germ_det.empty and 'Germen' in df_germ_det.columns:
+                    g_counts = df_germ_det['Germen'].value_counts()
+                    germenes_labels = g_counts.index.astype(str).tolist()
+                    germenes_values = g_counts.values.tolist()
+                else:
+                    germenes_labels = []
+                    germenes_values = []
+            else:
+                germenes_labels = data_year['germenes']['Germen'].tolist()
+                germenes_values = data_year['germenes']['Cantidad'].tolist()
             datos_germenes = sorted(zip(germenes_values, germenes_labels), reverse=True)
             germenes_values_sorted = [d[0] for d in datos_germenes]
             germenes_labels_sorted = [d[1] for d in datos_germenes]
@@ -751,8 +785,19 @@ def render_gestion(year_key: str):
             )
 
         # Eventos adversos
-        if not data_year['eventos_adversos'].empty:
-            df_eventos = data_year['eventos_adversos'].sort_values('Cantidad', ascending=False)
+        df_eventos_det = data_year.get('eventos_adversos_detalle', pd.DataFrame())
+        if isinstance(df_eventos_det, pd.DataFrame) and not df_eventos_det.empty and {'Mes', 'Evento'}.issubset(df_eventos_det.columns):
+            df_eventos_base = df_eventos_det[df_eventos_det['Mes'].isin(meses)]
+            eventos_counts = (
+                df_eventos_base['Evento'].value_counts().reset_index(name='Cantidad').rename(columns={'index': 'Evento'})
+                if not df_eventos_base.empty
+                else pd.DataFrame(columns=['Evento', 'Cantidad'])
+            )
+        else:
+            df_eventos_base = df_eventos_det
+            eventos_counts = data_year['eventos_adversos']
+        if not eventos_counts.empty:
+            df_eventos = eventos_counts.sort_values('Cantidad', ascending=False)
             if len(df_eventos) > 12:
                 df_eventos_top = df_eventos.head(12).copy()
                 otros_eventos = int(df_eventos.iloc[12:]['Cantidad'].sum())
@@ -904,7 +949,7 @@ def render_gestion(year_key: str):
             )
 
         # Distribución de pacientes con eventos adversos (1, 2, 3+ eventos)
-        df_det = data_year.get('eventos_adversos_detalle', pd.DataFrame())
+        df_det = df_eventos_base if isinstance(df_eventos_base, pd.DataFrame) else data_year.get('eventos_adversos_detalle', pd.DataFrame())
         if not df_det.empty and 'Nombre' in df_det.columns and 'Evento' in df_det.columns:
             eventos_por_pac = df_det.groupby('Nombre').size()
             uno = int((eventos_por_pac == 1).sum())
@@ -993,15 +1038,17 @@ def render_gestion(year_key: str):
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
-def render_especialidades(year_key: str):
+def render_especialidades(year_key: str, meses_filtrados: list[str] | None = None):
     try:
         _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
-        suma_col = processor.get_suma_column()
-        total_medicina = processor.safe_get_value('MEDICINA INTERNA', suma_col)
-        total_cirugia = processor.safe_get_value('CIRUGIA GENERAL', suma_col)
-        total_neuro = processor.safe_get_value('NEUROCIRUGIA', suma_col)
-        total_neurologia = processor.safe_get_value('NEUROLOGIA', suma_col)
+        meses = [m for m in (meses_filtrados or MESES) if m in MESES]
+        if not meses:
+            meses = list(MESES)
+        total_medicina = float(pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', meses, silent=True), errors='coerce').fillna(0).sum())
+        total_cirugia = float(pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', meses, silent=True), errors='coerce').fillna(0).sum())
+        total_neuro = float(pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', meses, silent=True), errors='coerce').fillna(0).sum())
+        total_neurologia = float(pd.to_numeric(processor.safe_get_row('NEUROLOGIA', meses, silent=True), errors='coerce').fillna(0).sum())
         total = max(total_medicina + total_cirugia + total_neuro + total_neurologia, 1)
 
         kpi_items_esp = [
@@ -1012,12 +1059,12 @@ def render_especialidades(year_key: str):
         ]
         kpi_cards_esp = [c for _, c in sorted(kpi_items_esp, key=lambda x: x[0], reverse=True)]
 
-        series_medicina = pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', MESES), errors='coerce').fillna(0)
-        series_cirugia = pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', MESES), errors='coerce').fillna(0)
-        series_neuro = pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', MESES), errors='coerce').fillna(0)
-        series_neurologia = pd.to_numeric(processor.safe_get_row('NEUROLOGIA', MESES), errors='coerce').fillna(0)
+        series_medicina = pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', meses), errors='coerce').fillna(0)
+        series_cirugia = pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', meses), errors='coerce').fillna(0)
+        series_neuro = pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', meses), errors='coerce').fillna(0)
+        series_neurologia = pd.to_numeric(processor.safe_get_row('NEUROLOGIA', meses), errors='coerce').fillna(0)
         df_especialidades = pd.DataFrame({
-            'Mes': MESES,
+            'Mes': meses,
             'Medicina Interna': series_medicina.values,
             'Cirugía General': series_cirugia.values,
             'Neurocirugía': series_neuro.values,
@@ -1128,28 +1175,28 @@ def render_especialidades(year_key: str):
             else:
                 text_pos_nl.append('inside')
         fig_especialidades_mix.add_trace(go.Bar(
-            x=MESES, y=pct_mi,
+            x=meses, y=pct_mi,
             name='Medicina Interna', marker_color='#3498db',
             text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_mi],
             textposition='inside',
             **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
-            x=MESES, y=pct_cg,
+            x=meses, y=pct_cg,
             name='Cirugía General', marker_color='#e74c3c',
             text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_cg],
             textposition='inside',
             **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
-            x=MESES, y=pct_nc,
+            x=meses, y=pct_nc,
             name='Neurocirugía', marker_color='#9b59b6',
             text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nc],
             textposition='inside',
             **_bar_text_kw,
         ))
         fig_especialidades_mix.add_trace(go.Bar(
-            x=MESES, y=pct_nl,
+            x=meses, y=pct_nl,
             name='Neurología', marker_color='#f39c12',
             text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nl],
             textposition=text_pos_nl,
@@ -1199,13 +1246,21 @@ def render_especialidades(year_key: str):
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
-def render_mortalidad(year_key: str):
+def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None):
     try:
         _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
         data_year = DATA_BY_YEAR.get(year_key, DATA)
-        kpis_mort = processor.get_kpis_mortalidad()
-        rango_mort = processor.etiqueta_rango_periodo(year_key)
+        meses = [m for m in (meses_filtrados or MESES) if m in MESES]
+        if not meses:
+            meses = list(MESES)
+        kpis_mort = processor.get_kpis_mortalidad(meses)
+        if len(meses) == 1:
+            rango_mort = f"{MESES_COMPLETOS.get(meses[0], meses[0])} {year_key}"
+        elif len(meses) == len(MESES):
+            rango_mort = processor.etiqueta_rango_periodo(year_key)
+        else:
+            rango_mort = f"{', '.join([MESES_COMPLETOS.get(m, m)[:3] for m in meses])} {year_key}"
         kpi_items_mort = [
             (float(kpis_mort.get('total_fallecidos') or 0), chart_factory.create_kpi_card("Total Fallecidos", f"{int(kpis_mort['total_fallecidos'])}", rango_mort, "#e74c3c")),
             (float(kpis_mort.get('mortalidad_general') or 0), chart_factory.create_kpi_card("% Mortalidad General", processor.formatear_porcentaje(kpis_mort['mortalidad_general']), rango_mort, "#c0392b")),
@@ -1220,19 +1275,23 @@ def render_mortalidad(year_key: str):
         kpi_cards_estancia_mort = [c for _, c in sorted(kpi_estancia_mort, key=lambda x: x[0], reverse=True)]
 
         fig_mort = chart_factory.create_line_chart(
-            processor.serie_mortalidad_general_mensual(MESES),
+            processor.serie_mortalidad_general_mensual(meses),
             '% Mortalidad General', color='#e74c3c', decimals=1
         )
         fig_trauma = chart_factory.create_grouped_bar_chart(
             ['Pacientes con diagn\u00f3stico de Trauma', 'Pacientes fallecidos por Trauma'],
             ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos',
-            processor=processor, decimals=0
+            processor=processor, meses=meses, decimals=0
         )
-        fig_piramide = chart_factory.create_pyramid_chart(data_year['fallecidos'])
+        df_fallecidos_plot = data_year['fallecidos']
+        if isinstance(df_fallecidos_plot, pd.DataFrame) and not df_fallecidos_plot.empty and 'Mes' in df_fallecidos_plot.columns:
+            meses_full = [MESES_COMPLETOS.get(m, m) for m in meses]
+            df_fallecidos_plot = df_fallecidos_plot[df_fallecidos_plot['Mes'].isin(meses_full)]
+        fig_piramide = chart_factory.create_pyramid_chart(df_fallecidos_plot)
 
-        # Distribución por EPS (año completo): misma suma que Total Fallecidos
+        # Distribución por EPS (periodo filtrado): misma suma que Total Fallecidos
         total_ref_fallecidos = int(kpis_mort.get('total_fallecidos') or 0)
-        eps_labels, eps_values = processor.get_eps_data()
+        eps_labels, eps_values = processor.get_eps_data(meses)
         if total_ref_fallecidos > 0:
             eps_labels, eps_values = DataProcessor.reconcile_fallecidos_distribution(
                 eps_labels,
@@ -1331,12 +1390,11 @@ def render_mortalidad(year_key: str):
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
 
-        # Distribución por especialidad (totales anuales): misma suma que Total Fallecidos
-        suma_col = processor.get_suma_column()
-        total_medicina = processor.safe_get_value('MEDICINA INTERNA', suma_col)
-        total_cirugia = processor.safe_get_value('CIRUGIA GENERAL', suma_col)
-        total_neuro = processor.safe_get_value('NEUROCIRUGIA', suma_col)
-        total_neurologia = processor.safe_get_value('NEUROLOGIA', suma_col)
+        # Distribución por especialidad (periodo filtrado): misma suma que Total Fallecidos
+        total_medicina = float(pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', meses, silent=True), errors='coerce').fillna(0).sum())
+        total_cirugia = float(pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', meses, silent=True), errors='coerce').fillna(0).sum())
+        total_neuro = float(pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', meses, silent=True), errors='coerce').fillna(0).sum())
+        total_neurologia = float(pd.to_numeric(processor.safe_get_row('NEUROLOGIA', meses, silent=True), errors='coerce').fillna(0).sum())
         espec_labels = ['Medicina Interna', 'Cirugía General', 'Neurocirugía', 'Neurología']
         espec_values = [
             float(total_medicina or 0),

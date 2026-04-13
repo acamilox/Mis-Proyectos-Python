@@ -40,6 +40,12 @@ class ChartFactory:
             decimals: Decimales a mostrar
         """
         bar_color = color or self.colors['primary']
+        if isinstance(data, pd.Series):
+            x_values = list(data.index)
+            y_values = data.values
+        else:
+            y_values = data.values if hasattr(data, 'values') else list(data)
+            x_values = self.meses[:len(y_values)]
         
         if decimals == 0:
             hover_format = '<b>%{x}</b><br>Valor: %{y:.0f}<extra></extra>'
@@ -50,13 +56,13 @@ class ChartFactory:
         
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            x=self.meses,
-            y=data.values,
+            x=x_values,
+            y=y_values,
             marker_color=bar_color,
             marker_line_color='rgba(0,0,0,0.1)',
             marker_line_width=1,
             hovertemplate=hover_format,
-            text=data.values,
+            text=y_values,
             texttemplate=text_template,
             textposition='auto',
             textfont=dict(color='white', size=11, family='Roboto', weight=600)
@@ -116,16 +122,22 @@ class ChartFactory:
             decimals: Decimales a mostrar
         """
         line_color = color or self.colors['secondary']
+        if isinstance(data, pd.Series):
+            x_values = list(data.index)
+            y_values = data.values
+        else:
+            y_values = data.values if hasattr(data, 'values') else list(data)
+            x_values = self.meses[:len(y_values)]
         
         if decimals == 0:
-            text_values = [f'{int(v)}' if pd.notna(v) else '' for v in data]
+            text_values = [f'{int(v)}' if pd.notna(v) else '' for v in y_values]
         else:
-            text_values = [f'{v:.{decimals}f}' if pd.notna(v) else '' for v in data]
+            text_values = [f'{v:.{decimals}f}' if pd.notna(v) else '' for v in y_values]
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=self.meses,
-            y=data.values,
+            x=x_values,
+            y=y_values,
             mode='lines+markers+text',
             line=dict(color=line_color, width=2),
             marker=dict(size=8, color=line_color, line=dict(width=2, color=self.colors['bg_secondary'])),
@@ -145,8 +157,11 @@ class ChartFactory:
         
         if isinstance(data, pd.Series):
             max_val = data.max() if not data.empty else 0
-            if pd.notna(max_val) and max_val <= 5:
-                yaxis_config['dtick'] = 1
+        else:
+            serie_y = pd.to_numeric(pd.Series(y_values), errors='coerce')
+            max_val = serie_y.max() if not serie_y.empty else 0
+        if pd.notna(max_val) and max_val <= 5:
+            yaxis_config['dtick'] = 1
         
         fig.update_layout(
             title={
