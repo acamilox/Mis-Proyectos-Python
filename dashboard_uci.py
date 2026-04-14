@@ -1099,19 +1099,23 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
         fig_especialidades_area = go.Figure()
         fig_especialidades_area.add_trace(go.Scatter(
             x=df_especialidades['Mes'], y=df_especialidades['Medicina Interna'],
-            name='Medicina Interna', mode='lines', stackgroup='one', line=dict(width=0.8, color='#3498db')
+            name='Medicina Interna', mode='lines', stackgroup='one', line=dict(width=0.8, color='#3498db'),
+            legendrank=1
         ))
         fig_especialidades_area.add_trace(go.Scatter(
             x=df_especialidades['Mes'], y=df_especialidades['Cirugía General'],
-            name='Cirugía General', mode='lines', stackgroup='one', line=dict(width=0.8, color='#e74c3c')
+            name='Cirugía General', mode='lines', stackgroup='one', line=dict(width=0.8, color='#e74c3c'),
+            legendrank=2
         ))
         fig_especialidades_area.add_trace(go.Scatter(
             x=df_especialidades['Mes'], y=df_especialidades['Neurocirugía'],
-            name='Neurocirugía', mode='lines', stackgroup='one', line=dict(width=0.8, color='#9b59b6')
+            name='Neurocirugía', mode='lines', stackgroup='one', line=dict(width=0.8, color='#9b59b6'),
+            legendrank=3
         ))
         fig_especialidades_area.add_trace(go.Scatter(
             x=df_especialidades['Mes'], y=df_especialidades['Neurología'],
-            name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#f39c12')
+            name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#f39c12'),
+            legendrank=4
         ))
         # Mismo color claro en todas las capas: mejor contraste que el color de la serie sobre el fondo oscuro
         _txt_font_area = dict(
@@ -1146,6 +1150,7 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
             yaxis={'title': 'Pacientes', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             legend=dict(
                 orientation="h", y=-0.18, x=0.5, xanchor="center",
+                traceorder='normal',
                 bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
                 bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
             )
