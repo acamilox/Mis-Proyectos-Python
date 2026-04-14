@@ -1225,3 +1225,57 @@ h5[style*="color: #f1f5f9"]::after {
     color: #a5f3fc !important;
 }
 
+/* Dash 4 Dropdown (clases .dash-dropdown-*) para filtro de meses */
+.filtros-section .uci-dd-dark {
+    --Dash-Fill-Inverse-Strong: #1e293b;
+    --Dash-Stroke-Strong: rgba(139, 92, 246, 0.35);
+    --Dash-Text-Strong: #f1f5f9;
+    --Dash-Text-Weak: #94a3b8;
+    --Dash-Text-Disabled: #64748b;
+    --Dash-Fill-Interactive-Strong: #8b5cf6;
+    --Dash-Fill-Interactive-Weak: rgba(139, 92, 246, 0.25);
+    --Dash-Fill-Disabled: rgba(148, 163, 184, 0.25);
+    --Dash-Shading-Strong: rgba(0, 0, 0, 0.45);
+    --Dash-Shading-Weak: rgba(0, 0, 0, 0.28);
+}
+
+.filtros-section .uci-dd-dark .dash-dropdown,
+.filtros-section .uci-dd-dark .dash-dropdown-content {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+    border: 1px solid rgba(139, 92, 246, 0.35) !important;
+    color: #f1f5f9 !important;
+}
+
+.filtros-section .uci-dd-dark .dash-dropdown-search-container {
+    background: rgba(15, 23, 42, 0.92) !important;
+    border: 1px solid rgba(139, 92, 246, 0.35) !important;
+}
+
+.filtros-section .uci-dd-dark .dash-dropdown-actions {
+    background: rgba(15, 23, 42, 0.9) !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.2) !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2) !important;
+}
+
+.filtros-section .uci-dd-dark .dash-dropdown-option {
+    color: #f1f5f9 !important;
+    background: transparent !important;
+}
+
+.filtros-section .uci-dd-dark .dash-dropdown-option:hover,
+.filtros-section .uci-dd-dark .dash-dropdown-option:has(input:checked) {
+    background: rgba(139, 92, 246, 0.28) !important;
+}
+
+.filtros-section .uci-dd-dark .dash-dropdown-action-button {
+    color: #cbd5e1 !important;
+}
+
+.filtros-section .uci-dd-dark .dash-dropdown-action-button:hover {
+    color: #a5f3fc !important;
+}
+
+.filtros-section .uci-dd-dark .dash-options-list-option-wrapper input[type="checkbox"] {
+    accent-color: #8b5cf6;
+}
+
