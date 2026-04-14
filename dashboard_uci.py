@@ -1182,6 +1182,7 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
         fig_especialidades_mix.add_trace(go.Bar(
             x=meses, y=pct_mi,
             name='Medicina Interna', marker_color='#3498db',
+            legendrank=1,
             text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_mi],
             textposition='inside',
             **_bar_text_kw,
@@ -1189,6 +1190,7 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
         fig_especialidades_mix.add_trace(go.Bar(
             x=meses, y=pct_cg,
             name='Cirugía General', marker_color='#e74c3c',
+            legendrank=2,
             text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_cg],
             textposition='inside',
             **_bar_text_kw,
@@ -1196,6 +1198,7 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
         fig_especialidades_mix.add_trace(go.Bar(
             x=meses, y=pct_nc,
             name='Neurocirugía', marker_color='#9b59b6',
+            legendrank=3,
             text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nc],
             textposition='inside',
             **_bar_text_kw,
@@ -1203,6 +1206,7 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
         fig_especialidades_mix.add_trace(go.Bar(
             x=meses, y=pct_nl,
             name='Neurología', marker_color='#f39c12',
+            legendrank=4,
             text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nl],
             textposition=text_pos_nl,
             cliponaxis=False,
@@ -1231,6 +1235,7 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
             },
             legend=dict(
                 orientation="h", y=-0.18, x=0.5, xanchor="center",
+                traceorder='normal',
                 bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
                 bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
             )
