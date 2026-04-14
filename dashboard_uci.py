@@ -2164,12 +2164,18 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
 
         # Ocupacional
         datos_ocup = processor.safe_get_row('% OCUPACIONAL', meses_filtrados)
+        ocup_values = pd.to_numeric(datos_ocup, errors='coerce').fillna(0.0)
+        ocup_text = [processor.formatear_porcentaje(float(v)) for v in ocup_values.values]
         fig_ocup = go.Figure()
         fig_ocup.add_trace(go.Scatter(
-            x=meses_filtrados, y=datos_ocup.values,
-            mode='lines+markers',
+            x=meses_filtrados, y=ocup_values.values,
+            mode='lines+markers+text',
             line=dict(color='#10b981', width=2),
             marker=dict(size=8, color='#10b981'),
+            text=ocup_text,
+            textposition='top center',
+            textfont=dict(color='#e2e8f0', size=10),
+            cliponaxis=False,
             hovertemplate='<b>%{x}</b><br>Ocupación: %{y:.1f}%<extra></extra>'
         ))
         fig_ocup.update_layout(
