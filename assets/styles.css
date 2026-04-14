@@ -1358,8 +1358,6 @@ h5[style*="color: #f1f5f9"]::after {
 /* Ajuste premium del popup de meses (Dash 4) */
 .dash-dropdown-content {
     border-radius: 12px !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
     backdrop-filter: blur(8px);
 }
 
@@ -1395,9 +1393,9 @@ h5[style*="color: #f1f5f9"]::after {
 }
 
 .dash-dropdown-options {
-    padding: 6px !important;
-    max-height: min(320px, calc(100vh - 260px)) !important;
-    overflow-y: auto !important;
+    padding: 0 !important;
+    max-height: none !important;
+    overflow-y: visible !important;
     overscroll-behavior: contain;
     scrollbar-width: thin;
 }
@@ -1409,8 +1407,7 @@ h5[style*="color: #f1f5f9"]::after {
 }
 
 .dash-dropdown-option {
-    margin: 2px 0 !important;
-    padding: 10px 12px !important;
+    padding: 8px 12px !important;
 }
 
 .dash-options-list-option-wrapper:hover,
