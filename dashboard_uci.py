@@ -535,6 +535,7 @@ app.layout = html.Div([
         dbc.Tab(label='Especialidades', tab_id='tab-especialidades', label_style={'cursor': 'pointer'}),
         dbc.Tab(label='Mortalidad', tab_id='tab-mortalidad', label_style={'cursor': 'pointer'}),
     ]),
+    html.Div(id='global-compare-banner', style={'display': 'none'}),
     html.Div(id='tab-content', className="tab-content"),
     # Footer
     html.Div([
@@ -621,6 +622,72 @@ def render_content(tab, selected_year, pending_year, selected_months, compare_en
     elif tab == 'tab-mortalidad':
         return render_mortalidad(year_key, meses_filtrados, compare_flag)
     return html.Div([html.H5("Selecciona una pesta\u00f1a", style={'color': '#1e293b'})])
+
+
+@app.callback(
+    Output('global-compare-banner', 'children'),
+    Output('global-compare-banner', 'style'),
+    Input('compare-enabled-store', 'data'),
+    Input('selected-year-store', 'data'),
+    Input('selected-months-store', 'data'),
+)
+def render_global_compare_banner(compare_enabled, selected_year, selected_months):
+    """Muestra estado global de comparación en todas las pestañas."""
+    compare_flag = bool(compare_enabled)
+    if not compare_flag:
+        return "", {'display': 'none'}
+
+    year_key = str(selected_year) if selected_year is not None else DEFAULT_YEAR
+    if year_key not in PROCESSOR_BY_YEAR:
+        year_key = DEFAULT_YEAR
+
+    meses_filtrados = (
+        [m for m in selected_months if m in MESES]
+        if isinstance(selected_months, list) and selected_months
+        else list(MESES)
+    )
+    period_label = _build_period_label(meses_filtrados)
+
+    banner = html.Div([
+        html.Span(
+            f"Comparación activa | Año: {year_key} | Periodo: {period_label}",
+            style={'fontWeight': '700', 'fontSize': '13px', 'color': '#f8fafc'}
+        ),
+        dbc.Button(
+            "Desactivar comparación",
+            id='btn-disable-compare',
+            color='secondary',
+            size='sm',
+            className='ms-2',
+            style={'whiteSpace': 'nowrap'}
+        ),
+        html.Span(
+            "La comparación usa filtros globales aplicados en Resumen.",
+            title="La comparación usa filtros globales aplicados en Resumen.",
+            style={'marginLeft': '12px', 'fontSize': '12px', 'color': '#cbd5e1'}
+        ),
+    ], style={
+        'display': 'flex',
+        'flexWrap': 'wrap',
+        'alignItems': 'center',
+        'gap': '8px',
+        'padding': '10px 16px',
+        'margin': '10px 14px 0 14px',
+        'background': 'rgba(15, 23, 42, 0.92)',
+        'border': '1px solid rgba(148, 163, 184, 0.35)',
+        'borderRadius': '10px',
+    })
+    return banner, {'display': 'block'}
+
+
+@app.callback(
+    Output('compare-enabled-store', 'data', allow_duplicate=True),
+    Input('btn-disable-compare', 'n_clicks'),
+    prevent_initial_call=True,
+)
+def disable_compare_global(_n_clicks):
+    """Botón global para apagar comparación rápidamente."""
+    return False
 
 
 def render_resumen(year_key: str, compare_enabled: bool = False):
