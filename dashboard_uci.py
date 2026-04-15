@@ -242,6 +242,127 @@ def _build_compare_rows(meses_filtrados: list[str]) -> list[dict[str, Any]]:
         })
     return rows
 
+
+def _build_period_label(meses_filtrados: list[str]) -> str:
+    """Etiqueta legible para el periodo aplicado según meses seleccionados."""
+    if len(meses_filtrados) == 1:
+        return MESES_COMPLETOS.get(meses_filtrados[0], meses_filtrados[0])
+    if len(meses_filtrados) == len(MESES):
+        return "Año completo"
+    return ", ".join([MESES_COMPLETOS.get(m, m)[:3] for m in meses_filtrados])
+
+
+def _render_compare_module_block(module_key: str, meses_filtrados: list[str], enabled: bool) -> html.Div | None:
+    """
+    Resumen comparativo compacto (2025 vs 2026) para módulos no-resumen.
+    Se alimenta del mismo periodo global (meses aplicados en Resumen).
+    """
+    if not enabled:
+        return None
+
+    available_years = sorted(PROCESSOR_BY_YEAR.keys())
+    if len(available_years) < 2:
+        return None
+
+    compare_rows = _build_compare_rows(meses_filtrados)
+    if not compare_rows:
+        return None
+
+    period_label = _build_period_label(meses_filtrados)
+    metric_map: dict[str, list[tuple[str, str, str]]] = {
+        "gestion": [
+            ("Total días estancia", "total_dias", "{:.0f}"),
+            ("% Ocupación", "ocupacion", "{:.1f}%"),
+            ("Giro cama", "giro_cama", "{:.2f}"),
+            ("Eventos adversos", "total_eventos", "{}"),
+            ("Gérmenes aislados", "total_germenes", "{}"),
+        ],
+        "especialidades": [
+            ("Total ingresos", "ingresos", "{}"),
+            ("Estancia promedio", "estancia", "{:.2f}"),
+            ("Casos morbilidad", "total_diag", "{}"),
+            ("% Ocupación", "ocupacion", "{:.1f}%"),
+            ("% Mortalidad", "mortalidad", "{:.1f}%"),
+        ],
+        "mortalidad": [
+            ("Total fallecidos", "fallecidos", "{}"),
+            ("% Mortalidad general", "mortalidad", "{:.1f}%"),
+            ("% Mortalidad UCI", "mort_ucI", "{:.1f}%"),
+            ("Estancia promedio", "estancia", "{:.2f}"),
+            ("Total egresos proxy", "ingresos", "{}"),
+        ],
+    }
+    specs = metric_map.get(module_key, [])
+    if not specs:
+        return None
+
+    cards: list[dbc.Col] = []
+    for row in compare_rows:
+        lines = []
+        for label, key, fmt in specs:
+            value = row.get(key, 0)
+            if "{}" in fmt:
+                try:
+                    rendered = fmt.format(int(round(float(value))))
+                except Exception:
+                    rendered = str(value)
+            else:
+                try:
+                    rendered = fmt.format(float(value))
+                except Exception:
+                    rendered = str(value)
+            lines.append(
+                html.Div(
+                    [
+                        html.Span(label, style={'color': '#94a3b8', 'fontSize': '12px'}),
+                        html.Span(rendered, style={'color': '#e2e8f0', 'fontSize': '12px', 'fontWeight': '600'}),
+                    ],
+                    style={'display': 'flex', 'justifyContent': 'space-between', 'gap': '10px', 'marginBottom': '6px'}
+                )
+            )
+
+        cards.append(
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.Div(
+                                f"Año {row.get('year', '-')}",
+                                style={'color': '#f8fafc', 'fontWeight': '700', 'marginBottom': '8px'}
+                            ),
+                            *lines,
+                        ]
+                    ),
+                    style={
+                        'background': 'rgba(15, 23, 42, 0.92)',
+                        'border': '1px solid rgba(148, 163, 184, 0.25)',
+                    }
+                ),
+                xs=12,
+                md=6,
+            )
+        )
+
+    return html.Div(
+        [
+            html.H6("Comparación 2025 vs 2026 (filtros globales)", style={
+                'color': '#f8fafc', 'fontWeight': '700', 'fontSize': '15px', 'marginBottom': '4px'
+            }),
+            html.P(
+                f"Periodo aplicado: {period_label}",
+                style={'color': '#cbd5e1', 'fontSize': '12px', 'marginBottom': '10px'}
+            ),
+            dbc.Row(cards, className="g-3"),
+        ],
+        style={
+            'background': 'rgba(15, 23, 42, 0.88)',
+            'border': '1px solid rgba(148, 163, 184, 0.35)',
+            'borderRadius': '10px',
+            'padding': '12px',
+            'marginBottom': '14px',
+        }
+    )
+
 # ==============================================================================
 # INICIALIZACION DE LA APLICACION
 # ==============================================================================
@@ -375,6 +496,7 @@ app.layout = html.Div([
     dcc.Store(id='selected-year-store', data=DEFAULT_YEAR),
     dcc.Store(id='pending-year-store', data=DEFAULT_YEAR),
     dcc.Store(id='selected-months-store', data=MESES),
+    dcc.Store(id='compare-enabled-store', data=False),
     # Header
     html.Div([
         html.Div([
@@ -451,9 +573,10 @@ app.layout = html.Div([
         Input('selected-year-store', 'data'),
         Input('pending-year-store', 'data'),
         Input('selected-months-store', 'data'),
+        Input('compare-enabled-store', 'data'),
     ]
 )
-def render_content(tab, selected_year, pending_year, selected_months):
+def render_content(tab, selected_year, pending_year, selected_months, compare_enabled):
     """
     Renderiza el contenido de cada pestaña.
     - En Resumen, no se reconstruye el layout cuando cambian stores aplicados.
@@ -473,11 +596,15 @@ def render_content(tab, selected_year, pending_year, selected_months):
     if tab == 'tab-resumen' and triggered_id == 'selected-months-store':
         return dash.no_update
 
+    if tab == 'tab-resumen' and triggered_id == 'compare-enabled-store':
+        return dash.no_update
+
     selected_resolved = str(selected_year) if selected_year is not None else DEFAULT_YEAR
     selected_resolved = selected_resolved if selected_resolved in PROCESSOR_BY_YEAR else DEFAULT_YEAR
+    compare_flag = bool(compare_enabled)
 
     if tab == 'tab-resumen':
-        return render_resumen(selected_resolved)
+        return render_resumen(selected_resolved, compare_flag)
 
     _ = pending_year  # se conserva para sincronizar el dropdown, sin aplicar fuera de Resumen.
     meses_filtrados = (
@@ -488,15 +615,15 @@ def render_content(tab, selected_year, pending_year, selected_months):
     year_key = selected_resolved
 
     if tab == 'tab-gestion':
-        return render_gestion(year_key, meses_filtrados)
+        return render_gestion(year_key, meses_filtrados, compare_flag)
     elif tab == 'tab-especialidades':
-        return render_especialidades(year_key, meses_filtrados)
+        return render_especialidades(year_key, meses_filtrados, compare_flag)
     elif tab == 'tab-mortalidad':
-        return render_mortalidad(year_key, meses_filtrados)
+        return render_mortalidad(year_key, meses_filtrados, compare_flag)
     return html.Div([html.H5("Selecciona una pesta\u00f1a", style={'color': '#1e293b'})])
 
 
-def render_resumen(year_key: str):
+def render_resumen(year_key: str, compare_enabled: bool = False):
     filtros = html.Div([
         html.Div([
             html.Span("Per\u00edodo de an\u00e1lisis", style={
@@ -554,7 +681,7 @@ def render_resumen(year_key: str):
                 dcc.Checklist(
                     id='comparar-anios',
                     options=[{'label': 'Comparar 2025 vs 2026', 'value': 'compare'}],
-                    value=[],
+                    value=['compare'] if compare_enabled else [],
                     inputStyle={'marginRight': '6px'},
                     labelStyle={'color': '#e5e7eb', 'fontSize': '12px', 'fontWeight': '500'}
                 ),
@@ -586,7 +713,7 @@ def render_resumen(year_key: str):
     return html.Div([filtros, html.Div(id='resumen-content')])
 
 
-def render_gestion(year_key: str, meses_filtrados: list[str] | None = None):
+def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, compare_enabled: bool = False):
     try:
         _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
@@ -996,7 +1123,9 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None):
         else:
             fig_esp_ea = None
 
+        compare_module_block = _render_compare_module_block('gestion', meses, compare_enabled)
         return html.Div([
+            compare_module_block if compare_module_block is not None else html.Div(),
             html.H5("Indicadores de Gesti\u00f3n", style={'color': '#f1f5f9', 'fontWeight': '600'}, className="mb-3"),
             dbc.Row([
                 *[dbc.Col(k, xs=12, md=True) for k in kpi_cards_g]
@@ -1038,7 +1167,7 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None):
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
-def render_especialidades(year_key: str, meses_filtrados: list[str] | None = None):
+def render_especialidades(year_key: str, meses_filtrados: list[str] | None = None, compare_enabled: bool = False):
     try:
         _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
@@ -1241,7 +1370,9 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
             )
         )
 
+        compare_module_block = _render_compare_module_block('especialidades', meses, compare_enabled)
         return html.Div([
+            compare_module_block if compare_module_block is not None else html.Div(),
             html.H5("Principales Especialidades", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '12px'}),
             dbc.Row([dbc.Col(k, xs=12, md=3) for k in kpi_cards_esp], className="mb-3 g-3"),
             dbc.Row([
@@ -1256,7 +1387,7 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
 
 
-def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None):
+def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None, compare_enabled: bool = False):
     try:
         _ensure_year_data_fresh(year_key)
         processor = PROCESSOR_BY_YEAR.get(year_key, PROCESSOR)
@@ -1447,7 +1578,9 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None):
                 font=dict(size=14, color='#e2e8f0', family='Roboto')
             )
 
+        compare_module_block = _render_compare_module_block('mortalidad', meses, compare_enabled)
         return html.Div([
+            compare_module_block if compare_module_block is not None else html.Div(),
             dbc.Row([dbc.Col(k, xs=12, md=3) for k in kpi_cards_mort], className="mb-3 g-3"),
             html.H6("D\u00edas de Estancia - Fallecidos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '10px', 'marginTop': '8px'}),
             dbc.Row([dbc.Col(k, xs=12, md=6) for k in kpi_cards_estancia_mort], className="mb-3 g-3"),
@@ -1478,18 +1611,19 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None):
     [Output('filtro-mes-inicio', 'value'),
      Output('resumen-content', 'children'),
      Output('selected-months-store', 'data'),
-     Output('selected-year-store', 'data')],
+     Output('selected-year-store', 'data'),
+     Output('compare-enabled-store', 'data')],
     [Input('btn-todos-meses', 'n_clicks'),
      Input('btn-aplicar-filtros', 'n_clicks'),
-     Input('tabs', 'active_tab')],
+     Input('tabs', 'active_tab'),
+     Input('comparar-anios', 'value')],
     [State('filtro-anio', 'value'),
-     State('filtro-mes-inicio', 'value'),
-     State('comparar-anios', 'value')]
+     State('filtro-mes-inicio', 'value')]
 )
-def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, meses_seleccionados, comparar_anios):
+def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, comparar_anios, anio_seleccionado, meses_seleccionados):
     # Solo procesar cuando estamos en Resumen (evita actualizar componente inexistente)
     if active_tab != 'tab-resumen':
-        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
     ctx = dash.callback_context
     triggered_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
@@ -1507,6 +1641,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
     )
     # endregion
     meses_output_value = dash.no_update
+    compare_enabled = isinstance(comparar_anios, list) and 'compare' in comparar_anios
     if triggered_id == 'btn-todos-meses':
         # Selecciona explícitamente todos los meses en el dropdown
         meses_seleccionados = MESES.copy()
@@ -1679,7 +1814,6 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             )
 
         # Bloque opcional de comparación entre años (tabla simple)
-        compare_enabled = isinstance(comparar_anios, list) and 'compare' in comparar_anios
         compare_block = []
         if compare_enabled:
             available_years = sorted(PROCESSOR_BY_YEAR.keys())
@@ -2170,7 +2304,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         compare_block,
                         style={'padding': '4px 0 8px', 'marginBottom': '14px'}
                     )
-                ]), meses_filtrados, year_store_output
+                ]), meses_filtrados, year_store_output, compare_enabled
 
         # Ocupacional
         datos_ocup = processor.safe_get_row('% OCUPACIONAL', meses_filtrados)
@@ -2380,10 +2514,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_morb_gen, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")
             ], className="mb-2 g-3")
-        ]), meses_filtrados, year_store_output
+        ]), meses_filtrados, year_store_output, compare_enabled
     except Exception as e:
         logger.error(f"Error en actualizar_resumen: {e}")
-        return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#dc2626'})]), dash.no_update, dash.no_update
+        return dash.no_update, html.Div([html.H3(f"Error: {str(e)}", style={'color': '#dc2626'})]), dash.no_update, dash.no_update, dash.no_update
 
 
 @app.callback(
