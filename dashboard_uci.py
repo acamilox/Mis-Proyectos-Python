@@ -1682,12 +1682,12 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None, c
      Output('compare-enabled-store', 'data')],
     [Input('btn-todos-meses', 'n_clicks'),
      Input('btn-aplicar-filtros', 'n_clicks'),
-     Input('tabs', 'active_tab'),
-     Input('comparar-anios', 'value')],
+     Input('tabs', 'active_tab')],
     [State('filtro-anio', 'value'),
-     State('filtro-mes-inicio', 'value')]
+     State('filtro-mes-inicio', 'value'),
+     State('comparar-anios', 'value')]
 )
-def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, comparar_anios, anio_seleccionado, meses_seleccionados):
+def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, meses_seleccionados, comparar_anios):
     # Solo procesar cuando estamos en Resumen (evita actualizar componente inexistente)
     if active_tab != 'tab-resumen':
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
