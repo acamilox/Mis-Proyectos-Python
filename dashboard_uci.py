@@ -605,7 +605,7 @@ def render_content(tab, selected_year, pending_year, selected_months, compare_en
     compare_flag = bool(compare_enabled)
 
     if tab == 'tab-resumen':
-        return render_resumen(selected_resolved, compare_flag)
+        return render_resumen(selected_resolved, compare_flag, selected_months)
 
     _ = pending_year  # se conserva para sincronizar el dropdown, sin aplicar fuera de Resumen.
     meses_filtrados = (
@@ -690,7 +690,12 @@ def disable_compare_global(_n_clicks):
     return False
 
 
-def render_resumen(year_key: str, compare_enabled: bool = False):
+def render_resumen(year_key: str, compare_enabled: bool = False, meses_seleccionados: list[str] | None = None):
+    meses_value = (
+        [m for m in meses_seleccionados if m in MESES]
+        if isinstance(meses_seleccionados, list) and meses_seleccionados
+        else list(MESES)
+    )
     filtros = html.Div([
         html.Div([
             html.Span("Per\u00edodo de an\u00e1lisis", style={
@@ -727,7 +732,7 @@ def render_resumen(year_key: str, compare_enabled: bool = False):
                 dcc.Dropdown(
                     id='filtro-mes-inicio',
                     options=[{'label': MESES_COMPLETOS[mes], 'value': mes} for mes in MESES],
-                    value=MESES,
+                    value=meses_value,
                     multi=True,
                     placeholder="Seleccionar meses",
                     className='uci-dd-dark',
