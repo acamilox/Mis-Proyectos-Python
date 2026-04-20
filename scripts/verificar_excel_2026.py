@@ -102,10 +102,33 @@ def main():
         df_iaas = pd.read_excel(EXCEL_2026, sheet_name="IAAS", header=None)
         if 5 in df_iaas.columns:
             n_germenes = df_iaas[5].dropna().astype(str).str.strip()
-            n_germenes = n_germenes[n_germenes != ""]
-            print(f"  Filas con gérmenes: {len(n_germenes)}")
+            n_germenes = n_germenes[(n_germenes != "") & (n_germenes.str.lower() != "nan")]
+            print(f"  Filas con gérmenes (formato clásico): {len(n_germenes)}")
+        elif 4 in df_iaas.columns:
+            filas_iaas = 0
+            categorias = set()
+            for _, row in df_iaas.iterrows():
+                c0 = row[0] if 0 in df_iaas.columns else None
+                c1 = row[1] if 1 in df_iaas.columns else None
+                c4 = row[4]
+                if pd.isna(c0) or not str(c0).strip():
+                    continue
+                # Saltar separadores de mes
+                if str(c0).strip().upper() in MESES_SHEET:
+                    continue
+                if pd.isna(pd.to_numeric(c1, errors='coerce')):
+                    continue
+                if pd.isna(c4) or not str(c4).strip():
+                    continue
+                val = str(c4).strip()
+                if val.lower() == "nan":
+                    continue
+                filas_iaas += 1
+                categorias.add(val)
+            print(f"  Filas IAAS (formato nuevo): {filas_iaas}")
+            print(f"  Categorías IAAS únicas: {len(categorias)}")
         else:
-            print("  Sin columna 5")
+            print("  IAAS: formato no reconocido (sin col 4 ni col 5)")
     except Exception as e:
         print(f"  Error: {e}")
 
@@ -144,7 +167,7 @@ def main():
         print(f"  % Mortalidad: {kpis['mortalidad']:.1f}%")
         print(f"  Fallecidos (hoja MORTALIDAD): {len(data['fallecidos'])}")
         print(f"  Eventos adversos: {data['eventos_adversos']['Cantidad'].sum() if not data['eventos_adversos'].empty else 0}")
-        print(f"  Gérmenes total: {data['germenes']['Cantidad'].sum() if not data['germenes'].empty else 0}")
+        print(f"  IAAS total: {data['germenes']['Cantidad'].sum() if not data['germenes'].empty else 0}")
     except ImportError as e:
         print("  (Omitido: módulo dashboard_uci no disponible)")
 

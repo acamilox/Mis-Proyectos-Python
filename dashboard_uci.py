@@ -275,7 +275,7 @@ def _render_compare_module_block(module_key: str, meses_filtrados: list[str], en
             ("% Ocupación", "ocupacion", "{:.1f}%"),
             ("Giro cama", "giro_cama", "{:.2f}"),
             ("Eventos adversos", "total_eventos", "{}"),
-            ("Gérmenes aislados", "total_germenes", "{}"),
+            ("IAAS registradas", "total_germenes", "{}"),
         ],
         "especialidades": [
             ("Total ingresos", "ingresos", "{}"),
@@ -899,6 +899,13 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
             'Tasa NAV (por 1.000 d\u00edas VM)', color='#ef4444', decimals=1
         )
 
+        iaas_mode = str((data_year.get('germenes', pd.DataFrame()).attrs or {}).get('iaas_mode', 'germenes')).lower()
+        iaas_is_types = iaas_mode == 'tipos_iaas'
+        iaas_chart_title = 'IAAS registradas por tipo' if iaas_is_types else 'Gérmenes Aislados (IAAS)'
+        iaas_section_title = 'IAAS y Eventos Adversos' if iaas_is_types else 'Gérmenes Aislados y Eventos Adversos'
+        iaas_center_caption = 'Registros' if iaas_is_types else 'Aislados'
+        iaas_empty_label = 'IAAS' if iaas_is_types else 'gérmenes'
+
         # Germenes - Donut
         if not data_year['germenes'].empty:
             df_germ_det = data_year.get('germenes_detalle')
@@ -935,13 +942,13 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
                 pull=[0.03 if i == 0 else 0 for i in range(n_g)]
             )])
             fig_germenes.add_annotation(
-                text=f"<b style='font-size:22px'>{int(total_germenes)}</b><br><span style='color:#94a3b8'>Aislados</span>",
+                text=f"<b style='font-size:22px'>{int(total_germenes)}</b><br><span style='color:#94a3b8'>{iaas_center_caption}</span>",
                 x=0.5, y=0.5,
                 font=dict(size=14, color='#f1f5f9', family='Roboto'),
                 showarrow=False
             )
             fig_germenes.update_layout(
-                title={'text': 'G\u00e9rmenes Aislados (IAAS)', 'font': {'size': 13, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': iaas_chart_title, 'font': {'size': 13, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 autosize=True, height=420,
@@ -966,7 +973,7 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
         else:
             fig_germenes = go.Figure()
             fig_germenes.update_layout(
-                title={'text': 'Gérmenes Aislados (IAAS)', 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': iaas_chart_title, 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 plot_bgcolor='#1e293b',
                 paper_bgcolor='#1e293b',
                 height=520,
@@ -976,7 +983,7 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
                 showlegend=False
             )
             fig_germenes.add_annotation(
-                text="<b>Sin datos de gérmenes</b><br><span style='color:#94a3b8'>Carga IAAS para visualizar este gráfico</span>",
+                text=f"<b>Sin datos de {iaas_empty_label}</b><br><span style='color:#94a3b8'>Carga IAAS para visualizar este gráfico</span>",
                 x=0.5, y=0.5, xref='paper', yref='paper',
                 showarrow=False,
                 font=dict(size=14, color='#e2e8f0', family='Roboto'),
@@ -1220,7 +1227,7 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, className="plotly-chart plotly-chart--sm")
             ], className="mb-3 g-3"),
-            html.H5("G\u00e9rmenes Aislados y Eventos Adversos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
+            html.H5(iaas_section_title, style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
                 dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG_IAAS, style={'height': '520px'}), xs=12, md=8, className="plotly-chart plotly-chart--xl"),
@@ -1936,7 +1943,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             html.Th("Total días estancia", style=header_style),
                             html.Th("Total fallecidos", style=header_style),
                             html.Th("Eventos adversos", style=header_style),
-                            html.Th("Gérmenes aislados", style=dict(header_style, minWidth='110px')),
+                            html.Th("IAAS registradas", style=dict(header_style, minWidth='110px')),
                             html.Th("Casos morbilidad", style=dict(header_style, minWidth='115px')),
                         ])),
                         html.Tbody([
@@ -1979,7 +1986,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         ("Total días estancia", f"{row['total_dias']:.0f}"),
                         ("Total fallecidos", str(row["fallecidos"])),
                         ("Eventos adversos", str(row["total_eventos"])),
-                        ("Gérmenes aislados", str(row["total_germenes"])),
+                        ("IAAS registradas", str(row["total_germenes"])),
                         ("Casos morbilidad", str(row["total_diag"])),
                     ]
 
@@ -2114,7 +2121,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         ("ingresos", "Ingresos"),
                         ("fallecidos", "Fallecidos"),
                         ("total_eventos", "Eventos adv."),
-                        ("total_germenes", "Gérmenes"),
+                        ("total_germenes", "IAAS"),
                         ("ocupacion", "% Ocupación"),
                         ("mortalidad", "% Mortalidad"),
                         ("estancia", "Estancia (d)"),
@@ -2237,7 +2244,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                     ("ingresos", "Total ingresos"),
                     ("fallecidos", "Total fallecidos"),
                     ("total_eventos", "Eventos adversos"),
-                    ("total_germenes", "Gérmenes aislados (anual)"),
+                    ("total_germenes", "IAAS registradas"),
                 ]
                 fig_compare_vol_hi = _fig_compare_bars_vol(
                     "Comparación visual - Volúmenes altos (días estancia / morbilidad)",
@@ -2299,7 +2306,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                         style={'color': '#e2e8f0', 'fontSize': '13px', 'margin': '4px 0 0 0', 'fontWeight': '500'}
                     ),
                     html.P(
-                        "Nota: Gérmenes y morbilidad ahora también siguen el filtro de meses cuando la hoja trae separadores mensuales.",
+                        "Nota: IAAS (incluyendo formato por tipo de infección) y morbilidad siguen el filtro de meses.",
                         style={'color': '#cbd5e1', 'fontSize': '12px', 'margin': '6px 0 0 0'}
                     ),
                     html.P(
@@ -2345,7 +2352,7 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                                 ('ingresos', 'Ingresos'),
                                 ('fallecidos', 'Fallecidos'),
                                 ('total_eventos', 'Eventos'),
-                                ('total_germenes', 'Gérmenes'),
+                                ('total_germenes', 'IAAS'),
                                 ('ocupacion', '% Ocupación'),
                                 ('mortalidad', '% Mortalidad'),
                                 ('estancia', 'Estancia prom.'),
@@ -2725,7 +2732,7 @@ def export_compare_excel(n_clicks, selected_months):
         "fallecidos": "Total fallecidos",
         "mort_ucI": "% Mortalidad UCI",
         "total_eventos": "Eventos adversos",
-        "total_germenes": "Gérmenes aislados",
+        "total_germenes": "IAAS registradas",
         "total_diag": "Casos morbilidad",
     }
     ordered_columns = [c for c in column_map if c in df.columns]
@@ -2758,7 +2765,7 @@ def export_compare_excel(n_clicks, selected_months):
         two_decimal_columns = {"Estancia prom. (días)", "Giro cama prom."}
         int_columns = {
             "Total ingresos", "Total días estancia", "Total fallecidos",
-            "Eventos adversos", "Gérmenes aislados", "Casos morbilidad",
+            "Eventos adversos", "IAAS registradas", "Casos morbilidad",
         }
 
         for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=ws.max_column):

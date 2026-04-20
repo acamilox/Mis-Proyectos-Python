@@ -197,7 +197,7 @@ class DataLoader:
         return diag
     
     def _load_germenes(self) -> None:
-        """Carga datos de gérmenes aislados (IAAS)"""
+        """Carga datos IAAS (gérmenes o tipos de infección según formato)."""
         try:
             sh_iaas = _find_sheet_name(self.excel_path, ("IAAS", "I.A.A.S."))
             if not sh_iaas:

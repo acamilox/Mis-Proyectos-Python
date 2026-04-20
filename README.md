@@ -8,7 +8,7 @@ Sistema de monitoreo y análisis de indicadores para la Unidad de Cuidados Inten
 
 ## Descripción
 
-Dashboard interactivo desarrollado en Python con Dash y Plotly que permite visualizar y analizar los principales indicadores de gestión, calidad y mortalidad de la UCI. Los datos se cargan desde un archivo Excel (`datos_iaas.xlsx`) con múltiples hojas de información.
+Dashboard interactivo desarrollado en Python con Dash y Plotly que permite visualizar y analizar los principales indicadores de gestión, calidad y mortalidad de la UCI. Los datos se cargan desde un archivo Excel (`data/Estadistica 2026.xlsx`) con múltiples hojas de información.
 
 ## Características
 
@@ -34,7 +34,7 @@ Dashboard interactivo desarrollado en Python con Dash y Plotly que permite visua
 - Indicadores de estancia y giro de cama
 - Promedio de días de ventilación mecánica
 - Tasas de infecciones (ITS AC, NAV, ISTU AC, LPP)
-- Gérmenes aislados (IAAS)
+- IAAS (gérmenes aislados o tipos de infección)
 - Eventos adversos
 
 ### Especialidades y EPS
@@ -79,7 +79,7 @@ venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 ```
 
-4. Asegurarse de tener el archivo `datos_iaas.xlsx` en el directorio raíz.
+4. Asegurarse de tener el archivo `data/Estadistica 2026.xlsx` en la carpeta `data/`.
 
 ## Uso
 
@@ -101,7 +101,8 @@ dashboard-uci-adultos-2025/
 ├── assets/
 │   └── Logo.png
 ├── dashboard_uci.py      # Aplicación principal
-├── datos_iaas.xlsx       # Datos fuente
+├── data/
+│   └── Estadistica 2026.xlsx  # Datos fuente
 ├── requirements.txt      # Dependencias
 ├── render.yaml           # Configuración de despliegue
 └── README.md
@@ -109,13 +110,13 @@ dashboard-uci-adultos-2025/
 
 ## Estructura del Excel
 
-El archivo `datos_iaas.xlsx` debe contener las siguientes hojas:
+El archivo `data/Estadistica 2026.xlsx` debe contener las siguientes hojas:
 
 | Hoja | Descripción |
 |------|-------------|
 | ESTADISTICA | Indicadores mensuales principales |
 | MORBILIDAD | Diagnósticos por sexo |
-| IAAS | Infecciones y gérmenes aislados |
+| IAAS | Infecciones IAAS (gérmenes o tipo de infección según formato) |
 | MORTALIDAD | Detalle de pacientes fallecidos |
 | EVENTOS ADVERSOS | Registro de eventos |
 
