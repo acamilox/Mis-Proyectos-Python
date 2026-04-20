@@ -209,39 +209,118 @@ class DataLoader:
                 self.df_germenes_detalle = pd.DataFrame()
                 return
             df_iaas = pd.read_excel(self.excel_path, sheet_name=sh_iaas, header=None)
-
-            # Algunos archivos (p.ej. 2026 parcial) no incluyen la columna esperada.
-            # En ese caso devolvemos dataset vacio sin romper el flujo del dashboard.
-            if 5 not in df_iaas.columns:
-                logger.warning(
-                    "Hoja IAAS sin columna de germenes (columna 5). Se carga vacio."
-                )
+            if df_iaas.empty:
                 self.df_germenes = pd.DataFrame(columns=['Germen', 'Cantidad'])
                 self.df_germenes_detalle = pd.DataFrame(columns=['Mes', 'Germen'])
+                logger.warning("Hoja IAAS vacía. Se carga dataset vacío.")
                 return
+
+            columnas_num = sorted([c for c in df_iaas.columns if isinstance(c, int)])
+            # Formato histórico: columna >=5 contiene germen.
+            germ_cols = [c for c in columnas_num if c >= 5]
+            # Formato nuevo 2026: suele venir con 5 columnas (0..4) y col4 es tipo de IAAS.
+            fallback_col = 4 if 4 in columnas_num else (columnas_num[-1] if columnas_num else None)
+            iaas_mode = 'germenes' if germ_cols else 'tipos_iaas'
+
+            def _resolve_mes(value) -> Optional[str]:
+                if pd.isna(value):
+                    return None
+                token = str(value).strip()
+                if not token:
+                    return None
+                token_norm = self._normalizar_texto(token)
+                if token_norm in MESES_MAP_GRAM:
+                    return MESES_MAP_GRAM[token_norm]
+                token_up = token.upper()
+                if token_up in MESES_SHEET_ENERO:
+                    return MESES_MAP_GRAM.get(token_norm)
+                for raw_mes, mes_short in MESES_MAP_GRAM.items():
+                    if token_norm.startswith(raw_mes[:3]):
+                        return mes_short
+                return None
+
+            def _is_data_row_with_age(row) -> bool:
+                c0 = row[0] if 0 in df_iaas.columns else None
+                if pd.isna(c0) or not str(c0).strip():
+                    return False
+                c1 = row[1] if 1 in df_iaas.columns else None
+                return pd.notna(pd.to_numeric(c1, errors='coerce'))
 
             filas_detalle: List[Dict[str, str]] = []
             mes_actual: Optional[str] = None
-            for _, row in df_iaas.iterrows():
-                col0 = row[0] if 0 in df_iaas.columns else None
-                col5 = row[5]
-                if pd.notna(col0):
-                    nombre_raw = str(col0).strip().lower()
-                    if nombre_raw in MESES_MAP_GRAM:
-                        mes_actual = MESES_MAP_GRAM[nombre_raw]
-                        continue
-                if pd.isna(col5) or not str(col5).strip():
-                    continue
-                germen_norm = self._normalize_germen(str(col5).strip())
-                if germen_norm and str(germen_norm).upper() != "NAN":
-                    filas_detalle.append({"Mes": mes_actual or "N/A", "Germen": germen_norm})
+            header_tokens = {
+                'germen', 'germenes', 'microorganismo', 'microorganismos',
+                'tipo de germen', 'tipo microorganismo'
+            }
 
-            self.df_germenes_detalle = pd.DataFrame(filas_detalle) if filas_detalle else pd.DataFrame(columns=['Mes', 'Germen'])
-            germenes_norm = self.df_germenes_detalle['Germen'] if not self.df_germenes_detalle.empty else pd.Series(dtype=str)
-            self.df_germenes = germenes_norm.value_counts().reset_index()
-            self.df_germenes.columns = ['Germen', 'Cantidad']
-            
-            logger.info(f"Datos IAAS cargados: {len(self.df_germenes)} tipos de gérmenes")
+            for _, row in df_iaas.iterrows():
+                mes_detectado = _resolve_mes(row[0] if 0 in df_iaas.columns else None)
+                if mes_detectado:
+                    mes_actual = mes_detectado
+                    continue
+
+                valor_fuente: Optional[str] = None
+                if germ_cols:
+                    # Tomar columna más a la derecha con valor (suele ser germen más específico).
+                    for c in sorted(germ_cols, reverse=True):
+                        v = row[c] if c in df_iaas.columns else None
+                        if pd.notna(v) and str(v).strip():
+                            valor_fuente = str(v).strip()
+                            break
+                elif fallback_col is not None and _is_data_row_with_age(row):
+                    v = row[fallback_col] if fallback_col in df_iaas.columns else None
+                    if pd.notna(v) and str(v).strip():
+                        valor_fuente = str(v).strip()
+
+                if not valor_fuente:
+                    continue
+
+                fuente_norm = self._normalizar_texto(valor_fuente)
+                if not fuente_norm or fuente_norm in ('nan', 'none'):
+                    continue
+                if fuente_norm in header_tokens:
+                    continue
+
+                germen_norm = self._normalize_germen(valor_fuente)
+                if germen_norm and str(germen_norm).upper() != "NAN":
+                    filas_detalle.append({"Mes": mes_actual or "N/A", "Germen": str(germen_norm).strip()})
+
+            # Fallback final: si no salió nada en modo nuevo, intentar lectura plana de la columna fallback.
+            if not filas_detalle and not germ_cols and fallback_col is not None:
+                mes_actual = None
+                for _, row in df_iaas.iterrows():
+                    mes_detectado = _resolve_mes(row[0] if 0 in df_iaas.columns else None)
+                    if mes_detectado:
+                        mes_actual = mes_detectado
+                        continue
+                    v = row[fallback_col] if fallback_col in df_iaas.columns else None
+                    if pd.isna(v) or not str(v).strip():
+                        continue
+                    raw = str(v).strip()
+                    raw_norm = self._normalizar_texto(raw)
+                    if raw_norm in ('nan', 'none') or raw_norm in header_tokens:
+                        continue
+                    filas_detalle.append({"Mes": mes_actual or "N/A", "Germen": raw})
+
+            self.df_germenes_detalle = (
+                pd.DataFrame(filas_detalle)
+                if filas_detalle else
+                pd.DataFrame(columns=['Mes', 'Germen'])
+            )
+            if not self.df_germenes_detalle.empty:
+                germenes_norm = self.df_germenes_detalle['Germen'].astype(str).str.strip()
+                germenes_norm = germenes_norm[germenes_norm != ""]
+                self.df_germenes = germenes_norm.value_counts().reset_index()
+                self.df_germenes.columns = ['Germen', 'Cantidad']
+            else:
+                self.df_germenes = pd.DataFrame(columns=['Germen', 'Cantidad'])
+
+            self.df_germenes.attrs['iaas_mode'] = iaas_mode
+            self.df_germenes_detalle.attrs['iaas_mode'] = iaas_mode
+            if iaas_mode == 'tipos_iaas':
+                logger.info("Datos IAAS cargados (modo tipos): %s categorías", len(self.df_germenes))
+            else:
+                logger.info("Datos IAAS cargados: %s tipos de gérmenes", len(self.df_germenes))
         except Exception as e:
             logger.error(f"Error cargando IAAS: {e}")
             self.df_germenes = pd.DataFrame()
@@ -250,21 +329,23 @@ class DataLoader:
     def _normalize_germen(self, g: str) -> str:
         """Normaliza nombres de gérmenes"""
         g = str(g).strip()
+        g_lower = g.lower()
         
         germenes_map = {
-            'K. pneumoniae': ['K. pneumoniae', 'K.pneumoniae'],
-            'K. pneumoniae KPC': ['carbapenemasa'],
-            'A. baumannii': ['Acinetobacter'],
-            'E. coli': ['E. coli'],
-            'P. aeruginosa': ['Pseudomona'],
-            'S. hominis': ['S. hominis'],
-            'S. aureus': ['S. aureus'],
-            'Candida spp.': ['Candida']
+            'K. pneumoniae': ['k. pneumoniae', 'k.pneumoniae', 'klebsiella pneumoniae'],
+            'K. pneumoniae KPC': ['carbapenemasa', 'kpc'],
+            'A. baumannii': ['acinetobacter', 'a. baumannii'],
+            'E. coli': ['e. coli', 'escherichia coli'],
+            'P. aeruginosa': ['pseudomona', 'p. aeruginosa'],
+            'S. hominis': ['s. hominis', 'staphylococcus hominis'],
+            'S. aureus': ['s. aureus', 'staphylococcus aureus'],
+            'Candida spp.': ['candida'],
+            'C. difficile': ['clostridium difficile', 'c. difficile'],
         }
         
         for normalized, variants in germenes_map.items():
-            if any(v in g for v in variants):
-                if normalized == 'K. pneumoniae' and 'carbapenemasa' in g.lower():
+            if any(v in g_lower for v in variants):
+                if normalized == 'K. pneumoniae' and ('carbapenemasa' in g_lower or 'kpc' in g_lower):
                     return 'K. pneumoniae KPC'
                 return normalized
         
