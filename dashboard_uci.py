@@ -1691,188 +1691,301 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None, c
                 processor.serie_mortalidad_general_mensual(meses),
                 '% Mortalidad General', color='#e74c3c', decimals=1
             )
-        fig_trauma = chart_factory.create_grouped_bar_chart(
-            ['Pacientes con diagn\u00f3stico de Trauma', 'Pacientes fallecidos por Trauma'],
-            ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos',
-            processor=processor, meses=meses, decimals=0
-        )
-        df_fallecidos_plot = data_year['fallecidos']
-        if isinstance(df_fallecidos_plot, pd.DataFrame) and not df_fallecidos_plot.empty and 'Mes' in df_fallecidos_plot.columns:
-            meses_full = [MESES_COMPLETOS.get(m, m) for m in meses]
-            df_fallecidos_plot = df_fallecidos_plot[df_fallecidos_plot['Mes'].isin(meses_full)]
-        fig_piramide = chart_factory.create_pyramid_chart(df_fallecidos_plot)
 
-        # Distribución por EPS (periodo filtrado): misma suma que Total Fallecidos
-        total_ref_fallecidos = int(kpis_mort.get('total_fallecidos') or 0)
-        eps_labels, eps_values = processor.get_eps_data(meses)
-        if total_ref_fallecidos > 0:
-            eps_labels, eps_values = DataProcessor.reconcile_fallecidos_distribution(
-                eps_labels,
-                list(eps_values) if eps_values else [],
-                total_ref_fallecidos,
-                residual_label="Sin clasificar EPS",
-            )
-        if eps_values:
-            eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
-            eps_df = eps_df.sort_values('Cantidad', ascending=False)
+        _can_cmp_mort = compare_enabled and len(PROCESSOR_BY_YEAR) >= 2
+        _avail_yrs_mort = sorted(PROCESSOR_BY_YEAR.keys())
 
-            def _short_eps_label(name: str) -> str:
-                normalized = str(name).strip().upper()
-                label_map = {
-                    'ADMINISTRADORA DE RECURSOS SGSS': 'ADRES',
-                    'FIDUSUARIA LA PREVISORA': 'FIDUPREVISORA',
-                    'NUEVA  EPS': 'NUEVA EPS',
-                    'CAPITAL SALUD': 'CAPITAL SALUD',
-                }
-                shortened = label_map.get(normalized, normalized)
-                return shortened if len(shortened) <= 18 else f"{shortened[:17]}…"
-
-            eps_df['EPS_DISPLAY'] = eps_df['EPS'].apply(_short_eps_label)
-            total_eps = int(sum(eps_values))
-            eps_color_map = {
-                'FAMISANAR': '#2563eb',
-                'COMPENSAR': '#ef4444',
-                'SALUD TOTAL': '#10b981',
-                'NUEVA EPS': '#f59e0b',
-                'NUEVA  EPS': '#f59e0b',
-                'FIDUSUARIA LA PREVISORA': '#8b5cf6',
-                'CAPITAL SALUD': '#06b6d4',
-                'CAPITAL SALUD ': '#06b6d4',
-                'SANITAS': '#ec4899',
-                'SURA': '#84cc16',
-                'ALIANSALUD': '#f97316',
-                'EMCOSALUD': '#14b8a6',
-                'EMSSANAR': '#eab308',
-                'SOAT': '#64748b',
-                'PARTICULAR': '#22c55e',
-                'ADRES': '#7c3aed',
-                'ADMINISTRADORA DE RECURSOS SGSS': '#7c3aed',
-                'OTRA': '#94a3b8',
-                'OTRAS EPS': '#475569',
-                'SIN CLASIFICAR EPS': '#64748b',
+        def _short_eps_label(name: str) -> str:
+            normalized = str(name).strip().upper()
+            label_map = {
+                'ADMINISTRADORA DE RECURSOS SGSS': 'ADRES',
+                'FIDUSUARIA LA PREVISORA': 'FIDUPREVISORA',
+                'NUEVA  EPS': 'NUEVA EPS',
+                'CAPITAL SALUD': 'CAPITAL SALUD',
             }
-            fallback_colors = ['#0ea5e9', '#f43f5e', '#a855f7', '#f97316', '#14b8a6', '#65a30d']
-            resolved_eps_colors = []
-            for i, original_name in enumerate(eps_df['EPS'].tolist()):
-                key = str(original_name).strip().upper()
-                resolved_eps_colors.append(eps_color_map.get(key, fallback_colors[i % len(fallback_colors)]))
-            eps_df['Color'] = resolved_eps_colors
-            eps_df['Porcentaje'] = (eps_df['Cantidad'] / max(total_eps, 1)) * 100
-            fig_eps_mort = go.Figure(data=[go.Bar(
-                y=eps_df['EPS_DISPLAY'],
-                x=eps_df['Cantidad'],
-                orientation='h',
-                marker=dict(color=eps_df['Color'], line=dict(color='#0f172a', width=1.5)),
-                customdata=eps_df[['EPS', 'Porcentaje']],
-                text=[f"{int(v)} ({p:.1f}%)" for v, p in zip(eps_df['Cantidad'], eps_df['Porcentaje'])],
-                textposition='auto',
-                textfont=dict(size=10, color='white', family='Roboto'),
-                hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{x:.0f}<br>Porcentaje: %{customdata[1]:.1f}%<extra></extra>'
-            )])
-            fig_eps_mort.update_layout(
-                title={'text': f'Distribución de fallecidos por EPS (año {year_key})', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
-                transition={'duration': 0},
-                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-                font={'color': '#f1f5f9'},
-                autosize=True, height=360, margin=dict(l=120, r=28, t=50, b=32),
-                showlegend=False,
-                xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-                yaxis={
-                    'tickfont': {'color': '#cbd5e1', 'size': 10},
-                    'automargin': True,
-                    'ticklabelstandoff': 8,
-                    'categoryorder': 'total ascending'
-                }
-            )
+            shortened = label_map.get(normalized, normalized)
+            return shortened if len(shortened) <= 18 else f"{shortened[:17]}\u2026"
+
+        # ── Trauma ─────────────────────────────────────────────────────────────
+        _trauma_row_map = [
+            ('Pacientes Trauma', 'Pacientes con diagn\u00f3stico de Trauma'),
+            ('Fallecidos Trauma', 'Pacientes fallecidos por Trauma'),
+        ]
+        if _can_cmp_mort:
+            _trauma_yr_colors = [
+                {'Pacientes Trauma': '#818cf8', 'Fallecidos Trauma': '#6d28d9'},
+                {'Pacientes Trauma': '#fb923c', 'Fallecidos Trauma': '#b45309'},
+            ]
+            fig_trauma = go.Figure()
+            for i, yr in enumerate(_avail_yrs_mort[:2]):
+                proc_y = PROCESSOR_BY_YEAR[yr]
+                yr_pal = _trauma_yr_colors[i % 2]
+                for label, row in _trauma_row_map:
+                    raw = proc_y.safe_get_row(row, meses, silent=True)
+                    vals = pd.to_numeric(
+                        raw if isinstance(raw, pd.Series) else pd.Series([0.0] * len(meses)),
+                        errors='coerce',
+                    ).fillna(0.0).tolist()
+                    if len(vals) != len(meses):
+                        vals = [0.0] * len(meses)
+                    fig_trauma.add_trace(go.Bar(
+                        x=meses, y=vals,
+                        name=f'{label} {yr}',
+                        marker_color=yr_pal[label],
+                        text=[str(int(v)) if v > 0 else '' for v in vals],
+                        textposition='outside',
+                        textfont=dict(color=yr_pal[label], size=9),
+                        cliponaxis=False,
+                        hovertemplate=f'<b>{yr} \u2013 %{{x}}</b><br>{label}: %{{y:.0f}}<extra></extra>',
+                    ))
+            _cmp_fig_layout(fig_trauma, 'Trauma: Pacientes vs Fallecidos (2025 vs 2026)', height=380)
+            fig_trauma.update_layout(barmode='group')
         else:
-            fig_eps_mort = go.Figure()
-            fig_eps_mort.update_layout(
-                title={'text': 'Distribución de fallecidos por EPS', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
-                plot_bgcolor='#1e293b',
-                paper_bgcolor='#1e293b',
-                height=380,
-                margin=dict(l=20, r=20, t=60, b=20),
-                xaxis={'visible': False},
-                yaxis={'visible': False},
-                showlegend=False
-            )
-            fig_eps_mort.add_annotation(
-                text="<b>Sin datos de EPS</b>",
-                x=0.5, y=0.5, xref='paper', yref='paper',
-                showarrow=False,
-                font=dict(size=14, color='#e2e8f0', family='Roboto')
+            fig_trauma = chart_factory.create_grouped_bar_chart(
+                ['Pacientes con diagn\u00f3stico de Trauma', 'Pacientes fallecidos por Trauma'],
+                ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos',
+                processor=processor, meses=meses, decimals=0
             )
 
-        # Distribución por especialidad (periodo filtrado): misma suma que Total Fallecidos
-        total_medicina = float(pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', meses, silent=True), errors='coerce').fillna(0).sum())
-        total_cirugia = float(pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', meses, silent=True), errors='coerce').fillna(0).sum())
-        total_neuro = float(pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', meses, silent=True), errors='coerce').fillna(0).sum())
-        total_neurologia = float(pd.to_numeric(processor.safe_get_row('NEUROLOGIA', meses, silent=True), errors='coerce').fillna(0).sum())
-        espec_labels = ['Medicina Interna', 'Cirugía General', 'Neurocirugía', 'Neurología']
-        espec_values = [
-            float(total_medicina or 0),
-            float(total_cirugia or 0),
-            float(total_neuro or 0),
-            float(total_neurologia or 0),
-        ]
-        if total_ref_fallecidos > 0:
-            espec_labels, espec_values = DataProcessor.reconcile_fallecidos_distribution(
-                espec_labels,
-                espec_values,
-                total_ref_fallecidos,
-                residual_label="Otras especialidades",
+        # ── Pir\u00e1mide ────────────────────────────────────────────────────────────
+        meses_full_mort = [MESES_COMPLETOS.get(m, m) for m in meses]
+        if _can_cmp_mort:
+            _pir_figs = []
+            for yr in _avail_yrs_mort[:2]:
+                data_y = DATA_BY_YEAR.get(yr, {})
+                df_fall_y = data_y.get('fallecidos', pd.DataFrame())
+                if isinstance(df_fall_y, pd.DataFrame) and not df_fall_y.empty and 'Mes' in df_fall_y.columns:
+                    df_fall_y = df_fall_y[df_fall_y['Mes'].isin(meses_full_mort)]
+                fig_pir_y = chart_factory.create_pyramid_chart(df_fall_y)
+                fig_pir_y.update_layout(
+                    title={'text': f'Pir\u00e1mide Edad/Sexo \u2013 {yr}', 'font': {'size': 12, 'color': '#f1f5f9'}, 'x': 0.5},
+                    height=400,
+                )
+                _pir_figs.append(fig_pir_y)
+            fig_piramide = _pir_figs[0]
+            fig_piramide_2 = _pir_figs[1] if len(_pir_figs) > 1 else None
+        else:
+            fig_piramide_2 = None
+            df_fallecidos_plot = data_year['fallecidos']
+            if isinstance(df_fallecidos_plot, pd.DataFrame) and not df_fallecidos_plot.empty and 'Mes' in df_fallecidos_plot.columns:
+                df_fallecidos_plot = df_fallecidos_plot[df_fallecidos_plot['Mes'].isin(meses_full_mort)]
+            fig_piramide = chart_factory.create_pyramid_chart(df_fallecidos_plot)
+
+        # ── Distribuci\u00f3n EPS ───────────────────────────────────────────────────
+        total_ref_fallecidos = int(kpis_mort.get('total_fallecidos') or 0)
+        eps_color_map = {
+            'FAMISANAR': '#2563eb', 'COMPENSAR': '#ef4444', 'SALUD TOTAL': '#10b981',
+            'NUEVA EPS': '#f59e0b', 'NUEVA  EPS': '#f59e0b',
+            'FIDUSUARIA LA PREVISORA': '#8b5cf6', 'CAPITAL SALUD': '#06b6d4',
+            'CAPITAL SALUD ': '#06b6d4', 'SANITAS': '#ec4899', 'SURA': '#84cc16',
+            'ALIANSALUD': '#f97316', 'EMCOSALUD': '#14b8a6', 'EMSSANAR': '#eab308',
+            'SOAT': '#64748b', 'PARTICULAR': '#22c55e', 'ADRES': '#7c3aed',
+            'ADMINISTRADORA DE RECURSOS SGSS': '#7c3aed', 'OTRA': '#94a3b8',
+            'OTRAS EPS': '#475569', 'SIN CLASIFICAR EPS': '#64748b',
+        }
+        fallback_colors = ['#0ea5e9', '#f43f5e', '#a855f7', '#f97316', '#14b8a6', '#65a30d']
+
+        if _can_cmp_mort:
+            eps_data_by_yr: dict = {}
+            all_eps_set: set = set()
+            for yr in _avail_yrs_mort[:2]:
+                proc_y = PROCESSOR_BY_YEAR[yr]
+                kpis_y = proc_y.get_kpis_mortalidad(meses)
+                total_fall_y = int(kpis_y.get('total_fallecidos') or 0)
+                lbl_y, val_y = proc_y.get_eps_data(meses)
+                if total_fall_y > 0 and lbl_y:
+                    lbl_y, val_y = DataProcessor.reconcile_fallecidos_distribution(
+                        lbl_y, list(val_y) if val_y else [], total_fall_y,
+                        residual_label='Sin clasificar EPS',
+                    )
+                eps_data_by_yr[yr] = dict(zip(lbl_y or [], val_y or []))
+                all_eps_set.update(lbl_y or [])
+            all_eps_ord = sorted(
+                all_eps_set,
+                key=lambda e: max(eps_data_by_yr[yr].get(e, 0) for yr in _avail_yrs_mort[:2]),
+                reverse=False,
             )
-        if total_ref_fallecidos > 0 and espec_values and any(v > 0 for v in espec_values):
-            espec_colors = ['#3498db', '#e74c3c', '#9b59b6', '#f39c12', '#64748b']
-            fig_espec_mort = chart_factory.create_donut_chart(
-                labels=espec_labels,
-                values=espec_values,
-                title=f'Distribución de fallecidos por Especialidad (año {year_key})',
-                colors=espec_colors[: len(espec_labels)],
-                auto_sort=True
+            fig_eps_mort = go.Figure()
+            for i, yr in enumerate(_avail_yrs_mort[:2]):
+                color = _CMP_YEAR_COLORS[i % 2]
+                yr_vals = [eps_data_by_yr[yr].get(e, 0) for e in all_eps_ord]
+                fig_eps_mort.add_trace(go.Bar(
+                    y=[_short_eps_label(e) for e in all_eps_ord],
+                    x=yr_vals,
+                    name=yr,
+                    orientation='h',
+                    marker_color=color,
+                    text=[str(int(v)) if v > 0 else '' for v in yr_vals],
+                    textposition='outside',
+                    textfont=dict(color=color, size=9),
+                    cliponaxis=False,
+                    hovertemplate=f'<b>{yr} \u2013 %{{y}}</b><br>Fallecidos: %{{x:.0f}}<extra></extra>',
+                ))
+            _cmp_fig_layout(fig_eps_mort, 'Fallecidos por EPS (2025 vs 2026)', height=360)
+            fig_eps_mort.update_layout(
+                barmode='group',
+                margin=dict(l=140, r=28, t=52, b=65),
+                xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'tickfont': {'color': '#cbd5e1', 'size': 10}, 'automargin': True},
             )
         else:
+            eps_labels, eps_values = processor.get_eps_data(meses)
+            if total_ref_fallecidos > 0:
+                eps_labels, eps_values = DataProcessor.reconcile_fallecidos_distribution(
+                    eps_labels, list(eps_values) if eps_values else [],
+                    total_ref_fallecidos, residual_label='Sin clasificar EPS',
+                )
+            if eps_values:
+                eps_df = pd.DataFrame({'EPS': eps_labels, 'Cantidad': eps_values})
+                eps_df = eps_df.sort_values('Cantidad', ascending=False)
+                eps_df['EPS_DISPLAY'] = eps_df['EPS'].apply(_short_eps_label)
+                total_eps = int(sum(eps_values))
+                resolved_eps_colors = []
+                for i, original_name in enumerate(eps_df['EPS'].tolist()):
+                    key = str(original_name).strip().upper()
+                    resolved_eps_colors.append(eps_color_map.get(key, fallback_colors[i % len(fallback_colors)]))
+                eps_df['Color'] = resolved_eps_colors
+                eps_df['Porcentaje'] = (eps_df['Cantidad'] / max(total_eps, 1)) * 100
+                fig_eps_mort = go.Figure(data=[go.Bar(
+                    y=eps_df['EPS_DISPLAY'], x=eps_df['Cantidad'], orientation='h',
+                    marker=dict(color=eps_df['Color'], line=dict(color='#0f172a', width=1.5)),
+                    customdata=eps_df[['EPS', 'Porcentaje']],
+                    text=[f"{int(v)} ({p:.1f}%)" for v, p in zip(eps_df['Cantidad'], eps_df['Porcentaje'])],
+                    textposition='auto',
+                    textfont=dict(size=10, color='white', family='Roboto'),
+                    hovertemplate='<b>%{customdata[0]}</b><br>Cantidad: %{x:.0f}<br>Porcentaje: %{customdata[1]:.1f}%<extra></extra>',
+                )])
+                fig_eps_mort.update_layout(
+                    title={'text': f'Distribuci\u00f3n de fallecidos por EPS (a\u00f1o {year_key})', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
+                    transition={'duration': 0},
+                    plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                    font={'color': '#f1f5f9'},
+                    autosize=True, height=360, margin=dict(l=120, r=28, t=50, b=32),
+                    showlegend=False,
+                    xaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                    yaxis={
+                        'tickfont': {'color': '#cbd5e1', 'size': 10}, 'automargin': True,
+                        'ticklabelstandoff': 8, 'categoryorder': 'total ascending',
+                    },
+                )
+            else:
+                fig_eps_mort = go.Figure()
+                fig_eps_mort.update_layout(
+                    title={'text': 'Distribuci\u00f3n de fallecidos por EPS', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                    plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                    height=380, margin=dict(l=20, r=20, t=60, b=20),
+                    xaxis={'visible': False}, yaxis={'visible': False}, showlegend=False,
+                )
+                fig_eps_mort.add_annotation(
+                    text='<b>Sin datos de EPS</b>', x=0.5, y=0.5, xref='paper', yref='paper',
+                    showarrow=False, font=dict(size=14, color='#e2e8f0', family='Roboto'),
+                )
+
+        # ── Distribuci\u00f3n por Especialidad ─────────────────────────────────────
+        _espec_rows_mort = ['MEDICINA INTERNA', 'CIRUGIA GENERAL', 'NEUROCIRUGIA', 'NEUROLOGIA']
+        _espec_names_mort = ['Medicina Interna', 'Cirug\u00eda General', 'Neurocirug\u00eda', 'Neurolog\u00eda']
+        _espec_colors_mort = ['#3498db', '#e74c3c', '#9b59b6', '#f39c12', '#64748b']
+
+        if _can_cmp_mort:
             fig_espec_mort = go.Figure()
-            fig_espec_mort.update_layout(
-                title={'text': 'Distribución de fallecidos por Especialidad', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
-                plot_bgcolor='#1e293b',
-                paper_bgcolor='#1e293b',
-                height=380,
-                margin=dict(l=20, r=20, t=60, b=20),
-                xaxis={'visible': False},
-                yaxis={'visible': False},
-                showlegend=False
-            )
-            fig_espec_mort.add_annotation(
-                text="<b>Sin datos por especialidad</b>",
-                x=0.5, y=0.5, xref='paper', yref='paper',
-                showarrow=False,
-                font=dict(size=14, color='#e2e8f0', family='Roboto')
-            )
+            for i, yr in enumerate(_avail_yrs_mort[:2]):
+                proc_y = PROCESSOR_BY_YEAR[yr]
+                kpis_y = proc_y.get_kpis_mortalidad(meses)
+                total_fall_y = int(kpis_y.get('total_fallecidos') or 0)
+                yr_totals = []
+                for row in _espec_rows_mort:
+                    raw = proc_y.safe_get_row(row, meses, silent=True)
+                    total = float(pd.to_numeric(
+                        raw if isinstance(raw, pd.Series) else pd.Series(dtype=float),
+                        errors='coerce',
+                    ).fillna(0).sum())
+                    yr_totals.append(total)
+                espec_l = _espec_names_mort.copy()
+                espec_v = yr_totals.copy()
+                if total_fall_y > 0:
+                    espec_l, espec_v = DataProcessor.reconcile_fallecidos_distribution(
+                        espec_l, espec_v, total_fall_y, residual_label='Otras especialidades',
+                    )
+                color = _CMP_YEAR_COLORS[i % 2]
+                fig_espec_mort.add_trace(go.Bar(
+                    x=espec_l, y=espec_v, name=yr,
+                    marker_color=color,
+                    text=[str(int(v)) if v > 0 else '' for v in espec_v],
+                    textposition='outside',
+                    textfont=dict(color=color, size=10),
+                    cliponaxis=False,
+                    hovertemplate=f'<b>{yr} \u2013 %{{x}}</b><br>Fallecidos: %{{y:.0f}}<extra></extra>',
+                ))
+            _cmp_fig_layout(fig_espec_mort, 'Fallecidos por Especialidad (2025 vs 2026)', height=360)
+            fig_espec_mort.update_layout(barmode='group')
+        else:
+            total_medicina = float(pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', meses, silent=True), errors='coerce').fillna(0).sum())
+            total_cirugia = float(pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', meses, silent=True), errors='coerce').fillna(0).sum())
+            total_neuro = float(pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', meses, silent=True), errors='coerce').fillna(0).sum())
+            total_neurologia = float(pd.to_numeric(processor.safe_get_row('NEUROLOGIA', meses, silent=True), errors='coerce').fillna(0).sum())
+            espec_labels = _espec_names_mort.copy()
+            espec_values = [float(total_medicina or 0), float(total_cirugia or 0), float(total_neuro or 0), float(total_neurologia or 0)]
+            if total_ref_fallecidos > 0:
+                espec_labels, espec_values = DataProcessor.reconcile_fallecidos_distribution(
+                    espec_labels, espec_values, total_ref_fallecidos, residual_label='Otras especialidades',
+                )
+            if total_ref_fallecidos > 0 and espec_values and any(v > 0 for v in espec_values):
+                fig_espec_mort = chart_factory.create_donut_chart(
+                    labels=espec_labels, values=espec_values,
+                    title=f'Distribuci\u00f3n de fallecidos por Especialidad (a\u00f1o {year_key})',
+                    colors=_espec_colors_mort[:len(espec_labels)],
+                    auto_sort=True,
+                )
+            else:
+                fig_espec_mort = go.Figure()
+                fig_espec_mort.update_layout(
+                    title={'text': 'Distribuci\u00f3n de fallecidos por Especialidad', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                    plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                    height=380, margin=dict(l=20, r=20, t=60, b=20),
+                    xaxis={'visible': False}, yaxis={'visible': False}, showlegend=False,
+                )
+                fig_espec_mort.add_annotation(
+                    text='<b>Sin datos por especialidad</b>', x=0.5, y=0.5, xref='paper', yref='paper',
+                    showarrow=False, font=dict(size=14, color='#e2e8f0', family='Roboto'),
+                )
 
         compare_module_block = _render_compare_module_block('mortalidad', meses, compare_enabled)
+        _pyramid_row = dbc.Row([
+            dbc.Col(
+                dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG, style={'height': '400px'}),
+                xs=12, md=6 if _can_cmp_mort and fig_piramide_2 else 12,
+                className='plotly-chart plotly-chart--lg',
+            ),
+            *(
+                [dbc.Col(
+                    dcc.Graph(figure=fig_piramide_2, config=_GRAPH_CFG, style={'height': '400px'}),
+                    xs=12, md=6,
+                    className='plotly-chart plotly-chart--lg',
+                )]
+                if _can_cmp_mort and fig_piramide_2 else []
+            ),
+        ], className='g-3')
         return html.Div([
             compare_module_block if compare_module_block is not None else html.Div(),
-            dbc.Row([dbc.Col(k, xs=12, md=3) for k in kpi_cards_mort], className="mb-3 g-3"),
-            html.H6("D\u00edas de Estancia - Fallecidos", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '10px', 'marginTop': '8px'}),
-            dbc.Row([dbc.Col(k, xs=12, md=6) for k in kpi_cards_estancia_mort], className="mb-3 g-3"),
+            dbc.Row([dbc.Col(k, xs=12, md=3) for k in kpi_cards_mort], className='mb-3 g-3'),
+            html.H6('D\u00edas de Estancia - Fallecidos', style={'color': '#f1f5f9', 'fontWeight': '600', 'marginBottom': '10px', 'marginTop': '8px'}),
+            dbc.Row([dbc.Col(k, xs=12, md=6) for k in kpi_cards_estancia_mort], className='mb-3 g-3'),
             dbc.Row([
                 dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_mort, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, md=8, className="plotly-chart plotly-chart--sm"),
-                dbc.Col(xs=12, md=2)
-            ], className="mb-3", justify="center"),
+                dbc.Col(dcc.Graph(figure=fig_mort, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, md=8, className='plotly-chart plotly-chart--sm'),
+                dbc.Col(xs=12, md=2),
+            ], className='mb-3', justify='center'),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className="plotly-chart plotly-chart--md")
-            ], className="mb-4 g-3"),
+                dbc.Col(dcc.Graph(figure=fig_trauma, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, className='plotly-chart plotly-chart--md'),
+            ], className='mb-4 g-3'),
+            _pyramid_row,
+            html.H5('Distribuci\u00f3n de fallecidos por EPS y Especialidad', style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '18px', 'marginBottom': '12px', 'textAlign': 'center'}),
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_piramide, config=_GRAPH_CFG, style={'height': '400px'}), xs=12, className="plotly-chart plotly-chart--lg")
-            ], className="g-3"),
-            html.H5("Distribución de fallecidos por EPS y Especialidad", style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '18px', 'marginBottom': '12px', 'textAlign': 'center'}),
-            dbc.Row([
-                dbc.Col(dcc.Graph(figure=fig_eps_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=7, className="plotly-chart plotly-chart--md"),
-                dbc.Col(dcc.Graph(figure=fig_espec_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=5, className="plotly-chart plotly-chart--md"),
-            ], className="mb-4 g-3")
+                dbc.Col(dcc.Graph(figure=fig_eps_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=7, className='plotly-chart plotly-chart--md'),
+                dbc.Col(dcc.Graph(figure=fig_espec_mort, config=_GRAPH_CFG, style={'height': '380px'}), xs=12, md=5, className='plotly-chart plotly-chart--md'),
+            ], className='mb-4 g-3'),
         ])
+
     except Exception as e:
         logger.error(f"Error en render_mortalidad: {e}")
         return html.Div([html.H3(f"Error: {str(e)}", style={'color': '#e74c3c'})])
