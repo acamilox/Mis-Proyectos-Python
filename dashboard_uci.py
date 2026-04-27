@@ -685,8 +685,10 @@ def render_global_compare_banner(compare_enabled, selected_year, selected_months
     Input('btn-disable-compare', 'n_clicks'),
     prevent_initial_call=True,
 )
-def disable_compare_global(_n_clicks):
+def disable_compare_global(n_clicks):
     """Botón global para apagar comparación rápidamente."""
+    if not n_clicks:
+        return dash.no_update
     return False
 
 
