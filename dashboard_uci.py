@@ -363,6 +363,102 @@ def _render_compare_module_block(module_key: str, meses_filtrados: list[str], en
         }
     )
 
+# ─── Paleta y helpers para gráficos comparativos 2025 vs 2026 ────────────────
+_CMP_YEAR_COLORS: tuple[str, str] = ('#818cf8', '#fb923c')  # índigo / ámbar
+_CMP_YEAR_DASHES: tuple[str, str] = ('solid', 'dot')
+
+
+def _cmp_fig_layout(fig: Any, title: str, height: int = 350) -> None:
+    """Aplica layout oscuro estándar a figuras comparativas."""
+    fig.update_layout(
+        title={'text': title, 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
+        transition={'duration': 0},
+        plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+        height=height, margin=dict(l=50, r=30, t=52, b=65),
+        hovermode='x unified',
+        xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+        yaxis={'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+        legend=dict(
+            orientation='h', y=-0.22, x=0.5, xanchor='center',
+            bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+            bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1,
+        ),
+    )
+
+
+def _compare_series_line_fig(
+    title: str,
+    meses: list,
+    getter: Any,
+    decimals: int = 1,
+    height: int = 350,
+    y_suffix: str = '',
+) -> Any:
+    """Gráfico de líneas comparativo (2 años) usando getter(DataProcessor) -> Series|list."""
+    available_years = sorted(PROCESSOR_BY_YEAR.keys())
+    fig = go.Figure()
+    for i, yr in enumerate(available_years[:2]):
+        proc_y = PROCESSOR_BY_YEAR[yr]
+        raw = getter(proc_y)
+        if isinstance(raw, pd.Series):
+            vals = pd.to_numeric(raw, errors='coerce').fillna(0.0).tolist()
+        elif isinstance(raw, (list, tuple)):
+            vals = [float(v) if v is not None else 0.0 for v in raw]
+        else:
+            vals = [0.0] * len(meses)
+        if len(vals) != len(meses):
+            vals = [0.0] * len(meses)
+        color = _CMP_YEAR_COLORS[i % 2]
+        dash = _CMP_YEAR_DASHES[i % 2]
+        fig.add_trace(go.Scatter(
+            x=meses, y=vals, name=yr,
+            mode='lines+markers+text',
+            line=dict(color=color, width=2.5, dash=dash),
+            marker=dict(size=7, color=color),
+            text=[f'{v:.{decimals}f}{y_suffix}' if v > 0 else '' for v in vals],
+            textposition='top center',
+            textfont=dict(color=color, size=10),
+            cliponaxis=False,
+            hovertemplate=f'<b>{yr} - %{{x}}</b><br>{title}: %{{y:.{decimals}f}}{y_suffix}<extra></extra>',
+        ))
+    _cmp_fig_layout(fig, title, height)
+    return fig
+
+
+def _compare_row_bar_fig(
+    title: str,
+    meses: list,
+    row_name: str,
+    decimals: int = 2,
+    height: int = 350,
+) -> Any:
+    """Gráfico de barras agrupadas comparativo (2 años) por nombre de fila Excel."""
+    available_years = sorted(PROCESSOR_BY_YEAR.keys())
+    fig = go.Figure()
+    for i, yr in enumerate(available_years[:2]):
+        proc_y = PROCESSOR_BY_YEAR[yr]
+        raw = proc_y.safe_get_row(row_name, meses, silent=True)
+        vals = pd.to_numeric(
+            raw if isinstance(raw, pd.Series) else pd.Series([0.0] * len(meses)),
+            errors='coerce',
+        ).fillna(0.0).tolist()
+        if len(vals) != len(meses):
+            vals = [0.0] * len(meses)
+        color = _CMP_YEAR_COLORS[i % 2]
+        fig.add_trace(go.Bar(
+            x=meses, y=vals, name=yr,
+            marker_color=color,
+            text=[f'{v:.{decimals}f}' if v > 0 else '' for v in vals],
+            textposition='outside',
+            textfont=dict(color=color, size=9),
+            cliponaxis=False,
+            hovertemplate=f'<b>{yr} - %{{x}}</b><br>{title}: %{{y:.{decimals}f}}<extra></extra>',
+        ))
+    _cmp_fig_layout(fig, title, height)
+    fig.update_layout(barmode='group')
+    return fig
+
+
 # ==============================================================================
 # INICIALIZACION DE LA APLICACION
 # ==============================================================================
@@ -824,46 +920,68 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
         ]
         kpi_cards_g = [c for _, c in sorted(kpi_items_g, key=lambda x: x[0], reverse=True)]
 
-        datos_estancia = processor.safe_get_row('PROMEDIO ESTANCIA', meses)
-        fig_estancia = chart_factory.create_line_chart(datos_estancia, 'Estancia Promedio (D\u00edas)', color='#6366f1', decimals=1)
-        datos_giro = processor.safe_get_row('GIRO CAMA', meses)
-        fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro cama', color='#3b82f6', decimals=2)
+        _can_cmp = compare_enabled and len(PROCESSOR_BY_YEAR) >= 2
+
+        if _can_cmp:
+            fig_estancia = _compare_series_line_fig(
+                'Estancia Promedio (Días)', meses,
+                lambda p: p.safe_get_row('PROMEDIO ESTANCIA', meses, silent=True),
+                decimals=1,
+            )
+            fig_giro = _compare_row_bar_fig('Giro cama', meses, 'GIRO CAMA', decimals=2)
+        else:
+            datos_estancia = processor.safe_get_row('PROMEDIO ESTANCIA', meses)
+            fig_estancia = chart_factory.create_line_chart(datos_estancia, 'Estancia Promedio (Días)', color='#6366f1', decimals=1)
+            datos_giro = processor.safe_get_row('GIRO CAMA', meses)
+            fig_giro = chart_factory.create_bar_chart(datos_giro, 'Giro cama', color='#3b82f6', decimals=2)
 
         # Grafico de VM - datos mensuales
-        datos_vm_mensual = kpis.get('promedio_dias_vm_mensual', [])
-        if not datos_vm_mensual or len(datos_vm_mensual) != len(meses):
-            datos_vm_mensual = [round(kpis['promedio_dias_vm'], 2) for _ in meses]
-        vm_text_positions = ['top center'] * len(meses)
-        if vm_text_positions:
-            vm_text_positions[0] = 'top right'
-            vm_text_positions[-1] = 'top left'
-        fig_vm = go.Figure()
-        fig_vm.add_trace(go.Scatter(
-            x=meses, y=datos_vm_mensual,
-            mode='lines+markers+text',
-            line=dict(color='#06b6d4', width=3.2),
-            marker=dict(size=8, color='#06b6d4'),
-            cliponaxis=False,
-            fill='tozeroy',
-            fillcolor='rgba(6, 182, 212, 0.18)',
-            text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
-            textposition=vm_text_positions,
-            textfont=dict(color='#f1f5f9', size=12),
-            hovertemplate='<b>%{x}</b><br>Promedio VM: %{y:.1f}<extra></extra>'
-        ))
-        fig_vm.update_layout(
-            title={'text': 'Promedio de D\u00edas de VM (Tendencia)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
-            transition={'duration': 0},
-            plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            height=470, margin=dict(l=50, r=30, t=50, b=60),
-            hovermode='x unified',
-            xaxis={
-                'tickfont': {'color': '#cbd5e1', 'size': 12},
-                'gridcolor': 'rgba(148, 163, 184, 0.1)',
-                'range': [-0.35, len(meses) - 0.65]
-            },
-            yaxis={'tickfont': {'color': '#94a3b8', 'size': 12}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
-        )
+        if _can_cmp:
+            def _vm_getter(p: Any) -> list:
+                k = p.get_kpis_gestion(meses)
+                vm = k.get('promedio_dias_vm_mensual') or []
+                if len(vm) != len(meses):
+                    vm = [round(k.get('promedio_dias_vm', 0) or 0, 2)] * len(meses)
+                return vm
+            fig_vm = _compare_series_line_fig(
+                'Promedio de Días de VM (Comparación)', meses,
+                _vm_getter, decimals=1, height=470,
+            )
+        else:
+            datos_vm_mensual = kpis.get('promedio_dias_vm_mensual', [])
+            if not datos_vm_mensual or len(datos_vm_mensual) != len(meses):
+                datos_vm_mensual = [round(kpis['promedio_dias_vm'], 2) for _ in meses]
+            vm_text_positions = ['top center'] * len(meses)
+            if vm_text_positions:
+                vm_text_positions[0] = 'top right'
+                vm_text_positions[-1] = 'top left'
+            fig_vm = go.Figure()
+            fig_vm.add_trace(go.Scatter(
+                x=meses, y=datos_vm_mensual,
+                mode='lines+markers+text',
+                line=dict(color='#06b6d4', width=3.2),
+                marker=dict(size=8, color='#06b6d4'),
+                cliponaxis=False,
+                fill='tozeroy',
+                fillcolor='rgba(6, 182, 212, 0.18)',
+                text=[f'{v:.1f}' if v > 0 else '' for v in datos_vm_mensual],
+                textposition=vm_text_positions,
+                textfont=dict(color='#f1f5f9', size=12),
+                hovertemplate='<b>%{x}</b><br>Promedio VM: %{y:.1f}<extra></extra>'
+            ))
+            fig_vm.update_layout(
+                title={'text': 'Promedio de Días de VM (Tendencia)', 'font': {'size': 14, 'color': '#f1f5f9'}, 'x': 0.5},
+                transition={'duration': 0},
+                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                height=470, margin=dict(l=50, r=30, t=50, b=60),
+                hovermode='x unified',
+                xaxis={
+                    'tickfont': {'color': '#cbd5e1', 'size': 12},
+                    'gridcolor': 'rgba(148, 163, 184, 0.1)',
+                    'range': [-0.35, len(meses) - 0.65]
+                },
+                yaxis={'tickfont': {'color': '#94a3b8', 'size': 12}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'}
+            )
 
         # Variantes de nombre de fila en ESTADISTICA (Excel 2025/2026 pueden diferir en espacios / DE / tildes)
         _its_casos_filas = [
@@ -892,14 +1010,26 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
             'D\u00cdAS VENTILADOR',
             'DIAS DE VENTILADOR',
         ]
-        fig_bacteriemia = chart_factory.create_line_chart(
-            processor.serie_tasa_por_mil_dias(_its_casos_filas, _its_dias_filas, meses),
-            'Tasa de ITS AC (por 1.000 d\u00edas cat\u00e9ter central)', color='#ef4444', decimals=1
-        )
-        fig_nav = chart_factory.create_line_chart(
-            processor.serie_tasa_por_mil_dias(_nav_casos_filas, _nav_dias_filas, meses),
-            'Tasa NAV (por 1.000 d\u00edas VM)', color='#ef4444', decimals=1
-        )
+        if _can_cmp:
+            fig_bacteriemia = _compare_series_line_fig(
+                'Tasa de ITS AC (por 1.000 días catéter central)', meses,
+                lambda p: p.serie_tasa_por_mil_dias(_its_casos_filas, _its_dias_filas, meses),
+                decimals=1,
+            )
+            fig_nav = _compare_series_line_fig(
+                'Tasa NAV (por 1.000 días VM)', meses,
+                lambda p: p.serie_tasa_por_mil_dias(_nav_casos_filas, _nav_dias_filas, meses),
+                decimals=1,
+            )
+        else:
+            fig_bacteriemia = chart_factory.create_line_chart(
+                processor.serie_tasa_por_mil_dias(_its_casos_filas, _its_dias_filas, meses),
+                'Tasa de ITS AC (por 1.000 días catéter central)', color='#ef4444', decimals=1
+            )
+            fig_nav = chart_factory.create_line_chart(
+                processor.serie_tasa_por_mil_dias(_nav_casos_filas, _nav_dias_filas, meses),
+                'Tasa NAV (por 1.000 días VM)', color='#ef4444', decimals=1
+            )
 
         iaas_mode = str((data_year.get('germenes', pd.DataFrame()).attrs or {}).get('iaas_mode', 'germenes')).lower()
         iaas_is_types = iaas_mode == 'tipos_iaas'
@@ -1306,150 +1436,204 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
         y_mid_nc = m_vol + c_vol + n_vol / 2
         y_mid_nl = m_vol + c_vol + n_vol + l_vol / 2
 
-        fig_especialidades_area = go.Figure()
-        fig_especialidades_area.add_trace(go.Scatter(
-            x=df_especialidades['Mes'], y=df_especialidades['Medicina Interna'],
-            name='Medicina Interna', mode='lines', stackgroup='one', line=dict(width=0.8, color='#3498db'),
-            legendrank=1
-        ))
-        fig_especialidades_area.add_trace(go.Scatter(
-            x=df_especialidades['Mes'], y=df_especialidades['Cirugía General'],
-            name='Cirugía General', mode='lines', stackgroup='one', line=dict(width=0.8, color='#e74c3c'),
-            legendrank=2
-        ))
-        fig_especialidades_area.add_trace(go.Scatter(
-            x=df_especialidades['Mes'], y=df_especialidades['Neurocirugía'],
-            name='Neurocirugía', mode='lines', stackgroup='one', line=dict(width=0.8, color='#9b59b6'),
-            legendrank=3
-        ))
-        fig_especialidades_area.add_trace(go.Scatter(
-            x=df_especialidades['Mes'], y=df_especialidades['Neurología'],
-            name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#f39c12'),
-            legendrank=4
-        ))
-        # Mismo color claro en todas las capas: mejor contraste que el color de la serie sobre el fondo oscuro
-        _txt_font_area = dict(
-            size=12,
-            color='#e2e8f0',
-            family='Arial',
-        )
-        for y_mid, series_vol in (
-            (y_mid_mi, m_vol),
-            (y_mid_cg, c_vol),
-            (y_mid_nc, n_vol),
-            (y_mid_nl, l_vol),
-        ):
-            fig_especialidades_area.add_trace(go.Scatter(
-                x=df_especialidades['Mes'],
-                y=y_mid,
-                mode='text',
-                text=[_esp_label_vol(v) for v in series_vol],
-                textposition='middle center',
-                textfont=_txt_font_area,
-                showlegend=False,
-                hoverinfo='skip',
-                cliponaxis=False,
-            ))
-        fig_especialidades_area.update_layout(
-            title={'text': 'Volumen Mensual por Especialidad (Área Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
-            transition={'duration': 0},
-            plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            autosize=True, height=360, margin=dict(l=48, r=24, t=50, b=55),
-            hovermode='x unified',
-            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-            yaxis={'title': 'Pacientes', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-            legend=dict(
-                orientation="h", y=-0.18, x=0.5, xanchor="center",
-                traceorder='normal',
-                bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
-                bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
-            )
-        )
+        _esp_rows = ['MEDICINA INTERNA', 'CIRUGIA GENERAL', 'NEUROCIRUGIA', 'NEUROLOGIA']
+        _esp_display = ['Medicina Interna', 'Cirugía General', 'Neurocirugía', 'Neurología']
 
-        fig_especialidades_mix = go.Figure()
-        # Tipografía normal (sin negrilla): evita aspecto de “resaltador” de Arial Black
-        _txt_mix = dict(color='#e2e8f0', size=11, family='Arial')
-        _bar_text_kw = dict(
-            insidetextanchor='middle',
-            textangle=0,
-            textfont=_txt_mix,
-            constraintext='none',
-        )
-        pct_mi = (df_especialidades['Medicina Interna'] / df_especialidades['Total']) * 100
-        pct_cg = (df_especialidades['Cirugía General'] / df_especialidades['Total']) * 100
-        pct_nc = (df_especialidades['Neurocirugía'] / df_especialidades['Total']) * 100
-        # Franja superior (Neurología): si el % es bajo, el texto dentro se rota o recorta → fuera de la barra
-        pct_nl = (df_especialidades['Neurología'] / df_especialidades['Total']) * 100
-        nl_vals = df_especialidades['Neurología'].astype(float)
-        text_pos_nl: list[str] = []
-        for p, v in zip(pct_nl, nl_vals):
-            if float(v) <= 0:
-                text_pos_nl.append('none')
-            elif float(p) < 14.0:
-                text_pos_nl.append('outside')
-            else:
-                text_pos_nl.append('inside')
-        fig_especialidades_mix.add_trace(go.Bar(
-            x=meses, y=pct_mi,
-            name='Medicina Interna', marker_color='#3498db',
-            legendrank=1,
-            text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_mi],
-            textposition='inside',
-            **_bar_text_kw,
-        ))
-        fig_especialidades_mix.add_trace(go.Bar(
-            x=meses, y=pct_cg,
-            name='Cirugía General', marker_color='#e74c3c',
-            legendrank=2,
-            text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_cg],
-            textposition='inside',
-            **_bar_text_kw,
-        ))
-        fig_especialidades_mix.add_trace(go.Bar(
-            x=meses, y=pct_nc,
-            name='Neurocirugía', marker_color='#9b59b6',
-            legendrank=3,
-            text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nc],
-            textposition='inside',
-            **_bar_text_kw,
-        ))
-        fig_especialidades_mix.add_trace(go.Bar(
-            x=meses, y=pct_nl,
-            name='Neurología', marker_color='#f39c12',
-            legendrank=4,
-            text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nl],
-            textposition=text_pos_nl,
-            cliponaxis=False,
-            **_bar_text_kw,
-            insidetextfont=_txt_mix,
-            outsidetextfont=_txt_mix,
-        ))
-        fig_especialidades_mix.update_layout(
-            title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
-            transition={'duration': 0},
-            barmode='stack',
-            plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
-            autosize=True, height=360, margin=dict(l=48, r=24, t=72, b=55),
-            hovermode='x unified',
-            xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
-            yaxis={
-                'title': '% del total mensual',
-                'tickfont': {'color': '#94a3b8'},
-                'ticksuffix': '%',
-                # Rango >100% para que las etiquetas "outside" del trazo superior no se recorten (p. ej. el 4 en Ene)
-                'range': [0, 118],
-                'tickmode': 'linear',
-                'tick0': 0,
-                'dtick': 20,
-                'gridcolor': 'rgba(148, 163, 184, 0.1)',
-            },
-            legend=dict(
-                orientation="h", y=-0.18, x=0.5, xanchor="center",
-                traceorder='normal',
-                bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
-                bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+        if compare_enabled and len(PROCESSOR_BY_YEAR) >= 2:
+            # Modo comparativo: barras agrupadas con total por especialidad por año
+            available_years_esp = sorted(PROCESSOR_BY_YEAR.keys())
+            fig_especialidades_area = go.Figure()
+            for i, yr in enumerate(available_years_esp[:2]):
+                proc_y = PROCESSOR_BY_YEAR[yr]
+                yr_totals = []
+                for row in _esp_rows:
+                    raw = proc_y.safe_get_row(row, meses, silent=True)
+                    total = float(
+                        pd.to_numeric(
+                            raw if isinstance(raw, pd.Series) else pd.Series(dtype=float),
+                            errors='coerce',
+                        ).fillna(0).sum()
+                    )
+                    yr_totals.append(total)
+                color = _CMP_YEAR_COLORS[i % 2]
+                fig_especialidades_area.add_trace(go.Bar(
+                    x=_esp_display, y=yr_totals, name=yr,
+                    marker_color=color,
+                    text=[str(int(v)) if v > 0 else '' for v in yr_totals],
+                    textposition='outside',
+                    textfont=dict(color=color, size=11),
+                    cliponaxis=False,
+                    hovertemplate=f'<b>{yr} - %{{x}}</b><br>Pacientes: %{{y:.0f}}<extra></extra>',
+                ))
+            _cmp_fig_layout(fig_especialidades_area, 'Total Ingresos por Especialidad (2025 vs 2026)', height=360)
+            fig_especialidades_area.update_layout(
+                barmode='group',
+                margin=dict(l=48, r=24, t=52, b=65),
+                yaxis={'title': 'Pacientes', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
             )
-        )
+        else:
+            fig_especialidades_area = go.Figure()
+            fig_especialidades_area.add_trace(go.Scatter(
+                x=df_especialidades['Mes'], y=df_especialidades['Medicina Interna'],
+                name='Medicina Interna', mode='lines', stackgroup='one', line=dict(width=0.8, color='#3498db'),
+                legendrank=1
+            ))
+            fig_especialidades_area.add_trace(go.Scatter(
+                x=df_especialidades['Mes'], y=df_especialidades['Cirugía General'],
+                name='Cirugía General', mode='lines', stackgroup='one', line=dict(width=0.8, color='#e74c3c'),
+                legendrank=2
+            ))
+            fig_especialidades_area.add_trace(go.Scatter(
+                x=df_especialidades['Mes'], y=df_especialidades['Neurocirugía'],
+                name='Neurocirugía', mode='lines', stackgroup='one', line=dict(width=0.8, color='#9b59b6'),
+                legendrank=3
+            ))
+            fig_especialidades_area.add_trace(go.Scatter(
+                x=df_especialidades['Mes'], y=df_especialidades['Neurología'],
+                name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#f39c12'),
+                legendrank=4
+            ))
+            _txt_font_area = dict(size=12, color='#e2e8f0', family='Arial')
+            for y_mid, series_vol in (
+                (y_mid_mi, m_vol),
+                (y_mid_cg, c_vol),
+                (y_mid_nc, n_vol),
+                (y_mid_nl, l_vol),
+            ):
+                fig_especialidades_area.add_trace(go.Scatter(
+                    x=df_especialidades['Mes'],
+                    y=y_mid,
+                    mode='text',
+                    text=[_esp_label_vol(v) for v in series_vol],
+                    textposition='middle center',
+                    textfont=_txt_font_area,
+                    showlegend=False,
+                    hoverinfo='skip',
+                    cliponaxis=False,
+                ))
+            fig_especialidades_area.update_layout(
+                title={'text': 'Volumen Mensual por Especialidad (Área Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
+                transition={'duration': 0},
+                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                autosize=True, height=360, margin=dict(l=48, r=24, t=50, b=55),
+                hovermode='x unified',
+                xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={'title': 'Pacientes', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                legend=dict(
+                    orientation="h", y=-0.18, x=0.5, xanchor="center",
+                    traceorder='normal',
+                    bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                    bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+                )
+            )
+
+        if compare_enabled and len(PROCESSOR_BY_YEAR) >= 2:
+            def _total_ingresos_getter(p: Any) -> list:
+                import numpy as np
+                series_list = []
+                for row in _esp_rows:
+                    raw = p.safe_get_row(row, meses, silent=True)
+                    s = pd.to_numeric(
+                        raw if isinstance(raw, pd.Series) else pd.Series([0.0] * len(meses)),
+                        errors='coerce',
+                    ).fillna(0.0)
+                    if len(s) != len(meses):
+                        s = pd.Series([0.0] * len(meses))
+                    series_list.append(s.values)
+                return list(np.sum(series_list, axis=0))
+            fig_especialidades_mix = _compare_series_line_fig(
+                'Total Ingresos Mensuales (2025 vs 2026)', meses,
+                _total_ingresos_getter,
+                decimals=0, height=360,
+            )
+            fig_especialidades_mix.update_layout(
+                yaxis={'title': 'Pacientes', 'tickfont': {'color': '#94a3b8'}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                margin=dict(l=48, r=24, t=52, b=65),
+            )
+        else:
+            fig_especialidades_mix = go.Figure()
+            # Tipografía normal (sin negrilla): evita aspecto de "resaltador" de Arial Black
+            _txt_mix = dict(color='#e2e8f0', size=11, family='Arial')
+            _bar_text_kw = dict(
+                insidetextanchor='middle',
+                textangle=0,
+                textfont=_txt_mix,
+                constraintext='none',
+            )
+            pct_mi = (df_especialidades['Medicina Interna'] / df_especialidades['Total']) * 100
+            pct_cg = (df_especialidades['Cirugía General'] / df_especialidades['Total']) * 100
+            pct_nc = (df_especialidades['Neurocirugía'] / df_especialidades['Total']) * 100
+            pct_nl = (df_especialidades['Neurología'] / df_especialidades['Total']) * 100
+            nl_vals = df_especialidades['Neurología'].astype(float)
+            text_pos_nl: list[str] = []
+            for p, v in zip(pct_nl, nl_vals):
+                if float(v) <= 0:
+                    text_pos_nl.append('none')
+                elif float(p) < 14.0:
+                    text_pos_nl.append('outside')
+                else:
+                    text_pos_nl.append('inside')
+            fig_especialidades_mix.add_trace(go.Bar(
+                x=meses, y=pct_mi,
+                name='Medicina Interna', marker_color='#3498db',
+                legendrank=1,
+                text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_mi],
+                textposition='inside',
+                **_bar_text_kw,
+            ))
+            fig_especialidades_mix.add_trace(go.Bar(
+                x=meses, y=pct_cg,
+                name='Cirugía General', marker_color='#e74c3c',
+                legendrank=2,
+                text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_cg],
+                textposition='inside',
+                **_bar_text_kw,
+            ))
+            fig_especialidades_mix.add_trace(go.Bar(
+                x=meses, y=pct_nc,
+                name='Neurocirugía', marker_color='#9b59b6',
+                legendrank=3,
+                text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nc],
+                textposition='inside',
+                **_bar_text_kw,
+            ))
+            fig_especialidades_mix.add_trace(go.Bar(
+                x=meses, y=pct_nl,
+                name='Neurología', marker_color='#f39c12',
+                legendrank=4,
+                text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nl],
+                textposition=text_pos_nl,
+                cliponaxis=False,
+                **_bar_text_kw,
+                insidetextfont=_txt_mix,
+                outsidetextfont=_txt_mix,
+            ))
+            fig_especialidades_mix.update_layout(
+                title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
+                transition={'duration': 0},
+                barmode='stack',
+                plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                autosize=True, height=360, margin=dict(l=48, r=24, t=72, b=55),
+                hovermode='x unified',
+                xaxis={'tickfont': {'color': '#cbd5e1', 'size': 11}, 'gridcolor': 'rgba(148, 163, 184, 0.1)'},
+                yaxis={
+                    'title': '% del total mensual',
+                    'tickfont': {'color': '#94a3b8'},
+                    'ticksuffix': '%',
+                    'range': [0, 118],
+                    'tickmode': 'linear',
+                    'tick0': 0,
+                    'dtick': 20,
+                    'gridcolor': 'rgba(148, 163, 184, 0.1)',
+                },
+                legend=dict(
+                    orientation="h", y=-0.18, x=0.5, xanchor="center",
+                    traceorder='normal',
+                    bgcolor='rgba(30, 41, 59, 0.8)', font={'color': '#f1f5f9', 'size': 11},
+                    bordercolor='rgba(148, 163, 184, 0.3)', borderwidth=1
+                )
+            )
+
 
         compare_module_block = _render_compare_module_block('especialidades', meses, compare_enabled)
         return html.Div([
@@ -1496,10 +1680,17 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None, c
         ]
         kpi_cards_estancia_mort = [c for _, c in sorted(kpi_estancia_mort, key=lambda x: x[0], reverse=True)]
 
-        fig_mort = chart_factory.create_line_chart(
-            processor.serie_mortalidad_general_mensual(meses),
-            '% Mortalidad General', color='#e74c3c', decimals=1
-        )
+        if compare_enabled and len(PROCESSOR_BY_YEAR) >= 2:
+            fig_mort = _compare_series_line_fig(
+                '% Mortalidad General (2025 vs 2026)', meses,
+                lambda p: p.serie_mortalidad_general_mensual(meses),
+                decimals=1, y_suffix='%',
+            )
+        else:
+            fig_mort = chart_factory.create_line_chart(
+                processor.serie_mortalidad_general_mensual(meses),
+                '% Mortalidad General', color='#e74c3c', decimals=1
+            )
         fig_trauma = chart_factory.create_grouped_bar_chart(
             ['Pacientes con diagn\u00f3stico de Trauma', 'Pacientes fallecidos por Trauma'],
             ['Pacientes Trauma', 'Fallecidos Trauma'], 'Trauma: Pacientes vs Fallecidos',
