@@ -1,0 +1,15 @@
+====================================
+
+GUARDAR CAMBIOS LOCAL + DESPLIEGUE MÁQUINA REMOTA
+
+====================================
+
+MÁQUINA LOCAL
+1. git add .
+2. git commit -m 'Mensaje'
+3. git push origin main
+
+MÁQUINA REMOTA (DESPLIEGUE)
+1. git pull origin main
+2. docker compose restart
+3. sudo systemctl restart dashboard-uci
