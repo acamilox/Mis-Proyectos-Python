@@ -250,7 +250,9 @@ class DataLoader:
             mes_actual: Optional[str] = None
             header_tokens = {
                 'germen', 'germenes', 'microorganismo', 'microorganismos',
-                'tipo de germen', 'tipo microorganismo'
+                'tipo de germen', 'tipo microorganismo',
+                'tipo de iaas', 'edad', 'dias estancia', 'dias de estancia',
+                'diagnostico', 'diagnóstico',
             }
 
             for _, row in df_iaas.iterrows():
@@ -267,6 +269,18 @@ class DataLoader:
                         if pd.notna(v) and str(v).strip():
                             valor_fuente = str(v).strip()
                             break
+                    # Excel 2026+: "Germen" vacío pero "tipo de IAAS" relleno → usar tipo como categoría
+                    if (
+                        not valor_fuente
+                        and _is_data_row_with_age(row)
+                        and 4 in df_iaas.columns
+                    ):
+                        v4 = row[4]
+                        if pd.notna(v4) and str(v4).strip():
+                            raw4 = str(v4).strip()
+                            n4 = self._normalizar_texto(raw4)
+                            if n4 not in ('nan', 'none') and n4 not in header_tokens:
+                                valor_fuente = raw4
                 elif fallback_col is not None and _is_data_row_with_age(row):
                     v = row[fallback_col] if fallback_col in df_iaas.columns else None
                     if pd.notna(v) and str(v).strip():
@@ -560,7 +574,18 @@ class DataLoader:
     def _load_gram_sot(self) -> None:
         """Carga datos de GRAM - SOT (Donaciones/Trasplantes)"""
         try:
-            df_gram_raw = pd.read_excel(self.excel_path, sheet_name='GRAM - SOT', header=None)
+            sh_gram = _find_sheet_name(
+                self.excel_path,
+                ("GRAM - SOT", "GRAM-SOT", "GRAM SOT", "GRAMSOT", "GRAM -SOT"),
+            )
+            if not sh_gram:
+                logger.warning(
+                    "Hoja GRAM - SOT no encontrada en %s (hojas: sin equivalente). Se carga vacío.",
+                    self.excel_path.name,
+                )
+                self.df_gram_sot = pd.DataFrame()
+                return
+            df_gram_raw = pd.read_excel(self.excel_path, sheet_name=sh_gram, header=None)
             
             gram_data = {}
             for _, row in df_gram_raw.iterrows():
@@ -575,7 +600,7 @@ class DataLoader:
             
             logger.info(f"Datos GRAM-SOT cargados: {self.df_gram_sot.values.sum()} total")
         except ValueError:
-            logger.warning("Hoja GRAM - SOT no disponible en el archivo. Se carga vacio.")
+            logger.warning("Hoja GRAM - SOT no disponible en el archivo. Se carga vacío.")
             self.df_gram_sot = pd.DataFrame()
         except Exception as e:
             logger.error(f"Error cargando GRAM - SOT: {e}")
