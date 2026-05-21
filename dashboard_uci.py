@@ -1790,9 +1790,18 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None, c
             all_eps_set: set = set()
             for yr in _avail_yrs_mort[:2]:
                 proc_y = PROCESSOR_BY_YEAR[yr]
+                data_y = DATA_BY_YEAR.get(yr, DATA)
                 kpis_y = proc_y.get_kpis_mortalidad(meses)
                 total_fall_y = int(kpis_y.get('total_fallecidos') or 0)
-                lbl_y, val_y = proc_y.get_eps_data(meses)
+                df_fall_y = data_y.get('fallecidos', pd.DataFrame())
+                if isinstance(df_fall_y, pd.DataFrame) and not df_fall_y.empty and 'Mes' in df_fall_y.columns:
+                    df_fall_y = df_fall_y[df_fall_y['Mes'].isin(meses_full_mort)]
+                if isinstance(df_fall_y, pd.DataFrame) and not df_fall_y.empty and 'EPS' in df_fall_y.columns:
+                    _eps_cnts = df_fall_y['EPS'].value_counts()
+                    lbl_y: list = _eps_cnts.index.tolist()
+                    val_y: list = _eps_cnts.values.tolist()
+                else:
+                    lbl_y, val_y = proc_y.get_eps_data(meses)
                 if total_fall_y > 0 and lbl_y:
                     lbl_y, val_y = DataProcessor.reconcile_fallecidos_distribution(
                         lbl_y, list(val_y) if val_y else [], total_fall_y,
@@ -1829,8 +1838,16 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None, c
                 yaxis={'tickfont': {'color': '#cbd5e1', 'size': 10}, 'automargin': True},
             )
         else:
-            eps_labels, eps_values = processor.get_eps_data(meses)
-            if total_ref_fallecidos > 0:
+            df_fall_filt = data_year.get('fallecidos', pd.DataFrame())
+            if isinstance(df_fall_filt, pd.DataFrame) and not df_fall_filt.empty and 'Mes' in df_fall_filt.columns:
+                df_fall_filt = df_fall_filt[df_fall_filt['Mes'].isin(meses_full_mort)]
+            if isinstance(df_fall_filt, pd.DataFrame) and not df_fall_filt.empty and 'EPS' in df_fall_filt.columns:
+                _eps_cnts = df_fall_filt['EPS'].value_counts()
+                eps_labels = _eps_cnts.index.tolist()
+                eps_values = _eps_cnts.values.tolist()
+            else:
+                eps_labels, eps_values = processor.get_eps_data(meses)
+            if total_ref_fallecidos > 0 and eps_labels:
                 eps_labels, eps_values = DataProcessor.reconcile_fallecidos_distribution(
                     eps_labels, list(eps_values) if eps_values else [],
                     total_ref_fallecidos, residual_label='Sin clasificar EPS',
@@ -1890,19 +1907,27 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None, c
             fig_espec_mort = go.Figure()
             for i, yr in enumerate(_avail_yrs_mort[:2]):
                 proc_y = PROCESSOR_BY_YEAR[yr]
+                data_y = DATA_BY_YEAR.get(yr, DATA)
                 kpis_y = proc_y.get_kpis_mortalidad(meses)
                 total_fall_y = int(kpis_y.get('total_fallecidos') or 0)
-                yr_totals = []
-                for row in _espec_rows_mort:
-                    raw = proc_y.safe_get_row(row, meses, silent=True)
-                    total = float(pd.to_numeric(
-                        raw if isinstance(raw, pd.Series) else pd.Series(dtype=float),
-                        errors='coerce',
-                    ).fillna(0).sum())
-                    yr_totals.append(total)
-                espec_l = _espec_names_mort.copy()
-                espec_v = yr_totals.copy()
-                if total_fall_y > 0:
+                df_fall_y_es = data_y.get('fallecidos', pd.DataFrame())
+                if isinstance(df_fall_y_es, pd.DataFrame) and not df_fall_y_es.empty and 'Mes' in df_fall_y_es.columns:
+                    df_fall_y_es = df_fall_y_es[df_fall_y_es['Mes'].isin(meses_full_mort)]
+                if isinstance(df_fall_y_es, pd.DataFrame) and not df_fall_y_es.empty and 'Especialidad' in df_fall_y_es.columns:
+                    _es_cnts = df_fall_y_es['Especialidad'].value_counts()
+                    espec_l: list = _es_cnts.index.tolist()
+                    espec_v: list = _es_cnts.values.tolist()
+                else:
+                    yr_totals = []
+                    for row_n in _espec_rows_mort:
+                        raw = proc_y.safe_get_row(row_n, meses, silent=True)
+                        yr_totals.append(float(pd.to_numeric(
+                            raw if isinstance(raw, pd.Series) else pd.Series(dtype=float),
+                            errors='coerce',
+                        ).fillna(0).sum()))
+                    espec_l = _espec_names_mort.copy()
+                    espec_v = yr_totals.copy()
+                if total_fall_y > 0 and espec_l:
                     espec_l, espec_v = DataProcessor.reconcile_fallecidos_distribution(
                         espec_l, espec_v, total_fall_y, residual_label='Otras especialidades',
                     )
@@ -1919,21 +1944,30 @@ def render_mortalidad(year_key: str, meses_filtrados: list[str] | None = None, c
             _cmp_fig_layout(fig_espec_mort, 'Fallecidos por Especialidad (2025 vs 2026)', height=360)
             fig_espec_mort.update_layout(barmode='group')
         else:
-            total_medicina = float(pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', meses, silent=True), errors='coerce').fillna(0).sum())
-            total_cirugia = float(pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', meses, silent=True), errors='coerce').fillna(0).sum())
-            total_neuro = float(pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', meses, silent=True), errors='coerce').fillna(0).sum())
-            total_neurologia = float(pd.to_numeric(processor.safe_get_row('NEUROLOGIA', meses, silent=True), errors='coerce').fillna(0).sum())
-            espec_labels = _espec_names_mort.copy()
-            espec_values = [float(total_medicina or 0), float(total_cirugia or 0), float(total_neuro or 0), float(total_neurologia or 0)]
-            if total_ref_fallecidos > 0:
+            df_fall_espec = data_year.get('fallecidos', pd.DataFrame())
+            if isinstance(df_fall_espec, pd.DataFrame) and not df_fall_espec.empty and 'Mes' in df_fall_espec.columns:
+                df_fall_espec = df_fall_espec[df_fall_espec['Mes'].isin(meses_full_mort)]
+            if isinstance(df_fall_espec, pd.DataFrame) and not df_fall_espec.empty and 'Especialidad' in df_fall_espec.columns:
+                _es_cnts = df_fall_espec['Especialidad'].value_counts()
+                espec_labels: list = _es_cnts.index.tolist()
+                espec_values: list = _es_cnts.values.tolist()
+            else:
+                total_medicina = float(pd.to_numeric(processor.safe_get_row('MEDICINA INTERNA', meses, silent=True), errors='coerce').fillna(0).sum())
+                total_cirugia = float(pd.to_numeric(processor.safe_get_row('CIRUGIA GENERAL', meses, silent=True), errors='coerce').fillna(0).sum())
+                total_neuro = float(pd.to_numeric(processor.safe_get_row('NEUROCIRUGIA', meses, silent=True), errors='coerce').fillna(0).sum())
+                total_neurologia = float(pd.to_numeric(processor.safe_get_row('NEUROLOGIA', meses, silent=True), errors='coerce').fillna(0).sum())
+                espec_labels = _espec_names_mort.copy()
+                espec_values = [float(total_medicina or 0), float(total_cirugia or 0), float(total_neuro or 0), float(total_neurologia or 0)]
+            if total_ref_fallecidos > 0 and espec_labels:
                 espec_labels, espec_values = DataProcessor.reconcile_fallecidos_distribution(
                     espec_labels, espec_values, total_ref_fallecidos, residual_label='Otras especialidades',
                 )
+            _colors_espec = (_espec_colors_mort * ((len(espec_labels) // len(_espec_colors_mort)) + 1))[:len(espec_labels)]
             if total_ref_fallecidos > 0 and espec_values and any(v > 0 for v in espec_values):
                 fig_espec_mort = chart_factory.create_donut_chart(
                     labels=espec_labels, values=espec_values,
                     title=f'Distribuci\u00f3n de fallecidos por Especialidad (a\u00f1o {year_key})',
-                    colors=_espec_colors_mort[:len(espec_labels)],
+                    colors=_colors_espec,
                     auto_sort=True,
                 )
             else:

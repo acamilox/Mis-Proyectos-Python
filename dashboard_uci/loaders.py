@@ -398,12 +398,20 @@ class DataLoader:
                     continue
                 
                 sexo = 'Mujer' if self._es_nombre_femenino(nombre) else 'Hombre'
+                diagnostico = str(row[3]).strip() if pd.notna(row[3]) else ''
+                eps_raw = str(row[4]).strip() if pd.notna(row[4]) else ''
+                especialidad_raw = str(row[5]).strip() if pd.notna(row[5]) else ''
+                eps_val = eps_raw if eps_raw and eps_raw.upper() not in ('NAN', 'NONE', '') else 'Sin especificar'
+                espec_val = especialidad_raw if especialidad_raw and especialidad_raw.upper() not in ('NAN', 'NONE', '') else 'Sin especificar'
                 fallecidos_data.append({
                     'Nombre': nombre,
                     'Edad': int(edad),
                     'Sexo': sexo,
                     'Dias_Estancia': dias_estancia,
-                    'Mes': mes_actual
+                    'Mes': mes_actual,
+                    'Diagnostico': diagnostico,
+                    'EPS': eps_val,
+                    'Especialidad': espec_val,
                 })
             
             self.df_fallecidos = pd.DataFrame(fallecidos_data)
