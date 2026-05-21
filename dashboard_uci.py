@@ -1566,50 +1566,45 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
             pct_cg = (df_especialidades['Cirugía General'] / df_especialidades['Total']) * 100
             pct_nc = (df_especialidades['Neurocirugía'] / df_especialidades['Total']) * 100
             pct_nl = (df_especialidades['Neurología'] / df_especialidades['Total']) * 100
-            nl_vals = df_especialidades['Neurología'].astype(float)
-            text_pos_nl: list[str] = []
-            for p, v in zip(pct_nl, nl_vals):
-                if float(v) <= 0:
-                    text_pos_nl.append('none')
-                elif float(p) < 14.0:
-                    text_pos_nl.append('outside')
+            # Sort traces by mean descending: largest segment at bottom, smallest at top
+            _traces_mix = sorted([
+                ('Medicina Interna', pct_mi, '#3498db'),
+                ('Cirugía General',  pct_cg, '#e74c3c'),
+                ('Neurocirugía',     pct_nc, '#9b59b6'),
+                ('Neurología',       pct_nl, '#f39c12'),
+            ], key=lambda t: t[1].mean(), reverse=True)
+            for _rank, (_name, _pct, _color) in enumerate(_traces_mix, start=1):
+                _is_top = (_rank == len(_traces_mix))
+                if _is_top:
+                    _raw_vals = df_especialidades[_name].astype(float) if _name in df_especialidades.columns else _pct
+                    _text_pos: list[str] = []
+                    for _p, _v in zip(_pct, _raw_vals):
+                        if float(_v) <= 0:
+                            _text_pos.append('none')
+                        elif float(_p) < 14.0:
+                            _text_pos.append('outside')
+                        else:
+                            _text_pos.append('inside')
+                    fig_especialidades_mix.add_trace(go.Bar(
+                        x=meses, y=_pct,
+                        name=_name, marker_color=_color,
+                        legendrank=_rank,
+                        text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in _pct],
+                        textposition=_text_pos,
+                        cliponaxis=False,
+                        **_bar_text_kw,
+                        insidetextfont=_txt_mix,
+                        outsidetextfont=_txt_mix,
+                    ))
                 else:
-                    text_pos_nl.append('inside')
-            fig_especialidades_mix.add_trace(go.Bar(
-                x=meses, y=pct_mi,
-                name='Medicina Interna', marker_color='#3498db',
-                legendrank=1,
-                text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_mi],
-                textposition='inside',
-                **_bar_text_kw,
-            ))
-            fig_especialidades_mix.add_trace(go.Bar(
-                x=meses, y=pct_cg,
-                name='Cirugía General', marker_color='#e74c3c',
-                legendrank=2,
-                text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_cg],
-                textposition='inside',
-                **_bar_text_kw,
-            ))
-            fig_especialidades_mix.add_trace(go.Bar(
-                x=meses, y=pct_nc,
-                name='Neurocirugía', marker_color='#9b59b6',
-                legendrank=3,
-                text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nc],
-                textposition='inside',
-                **_bar_text_kw,
-            ))
-            fig_especialidades_mix.add_trace(go.Bar(
-                x=meses, y=pct_nl,
-                name='Neurología', marker_color='#f39c12',
-                legendrank=4,
-                text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in pct_nl],
-                textposition=text_pos_nl,
-                cliponaxis=False,
-                **_bar_text_kw,
-                insidetextfont=_txt_mix,
-                outsidetextfont=_txt_mix,
-            ))
+                    fig_especialidades_mix.add_trace(go.Bar(
+                        x=meses, y=_pct,
+                        name=_name, marker_color=_color,
+                        legendrank=_rank,
+                        text=[f"{float(v):.1f}%" if float(v) > 0 else '' for v in _pct],
+                        textposition='inside',
+                        **_bar_text_kw,
+                    ))
             fig_especialidades_mix.update_layout(
                 title={'text': 'Composición % por Mes (100% Apilada)', 'font': {'size': 13, 'color': '#f1f5f9'}, 'x': 0.5},
                 transition={'duration': 0},
