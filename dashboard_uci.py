@@ -484,6 +484,7 @@ def _empty_data() -> dict[str, pd.DataFrame]:
         'morbilidad': pd.DataFrame(),
         'germenes': pd.DataFrame(),
         'germenes_detalle': pd.DataFrame(),
+        'tipos_iaas': pd.DataFrame(),
         'fallecidos': pd.DataFrame(),
         'eventos_adversos': pd.DataFrame(),
         'eventos_adversos_detalle': pd.DataFrame(),
@@ -1031,96 +1032,98 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
                 'Tasa NAV (por 1.000 días VM)', color='#ef4444', decimals=1
             )
 
-        iaas_mode = str((data_year.get('germenes', pd.DataFrame()).attrs or {}).get('iaas_mode', 'germenes')).lower()
-        iaas_is_types = iaas_mode == 'tipos_iaas'
-        iaas_chart_title = 'IAAS registradas por tipo' if iaas_is_types else 'Gérmenes Aislados (IAAS)'
-        iaas_section_title = 'IAAS y Eventos Adversos' if iaas_is_types else 'Gérmenes Aislados y Eventos Adversos'
-        iaas_center_caption = 'Registros' if iaas_is_types else 'Aislados'
-        iaas_empty_label = 'IAAS' if iaas_is_types else 'gérmenes'
-
-        # Germenes - Donut
-        if not data_year['germenes'].empty:
-            df_germ_det = data_year.get('germenes_detalle')
-            if isinstance(df_germ_det, pd.DataFrame) and not df_germ_det.empty and 'Mes' in df_germ_det.columns:
-                df_germ_det = df_germ_det[df_germ_det['Mes'].isin(meses)]
-                if not df_germ_det.empty and 'Germen' in df_germ_det.columns:
-                    g_counts = df_germ_det['Germen'].value_counts()
-                    germenes_labels = g_counts.index.astype(str).tolist()
-                    germenes_values = g_counts.values.tolist()
-                else:
-                    germenes_labels = []
-                    germenes_values = []
-            else:
-                germenes_labels = data_year['germenes']['Germen'].tolist()
-                germenes_values = data_year['germenes']['Cantidad'].tolist()
-            datos_germenes = sorted(zip(germenes_values, germenes_labels), reverse=True)
-            germenes_values_sorted = [d[0] for d in datos_germenes]
-            germenes_labels_sorted = [d[1] for d in datos_germenes]
-            total_germenes = sum(germenes_values)
-            n_g = len(germenes_labels_sorted)
-            colors_germenes = _palette_iaas_n(n_g)
-            fig_germenes = go.Figure(data=[go.Pie(
-                labels=germenes_labels_sorted,
-                values=germenes_values_sorted,
-                hole=0.55,
-                marker=dict(colors=colors_germenes, line=dict(color='#0f172a', width=2)),
-                textinfo='percent',
-                textposition='inside',
-                textfont=dict(size=12, color='white', family='Roboto'),
-                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
-                direction='clockwise',
-                sort=False,
-                rotation=90,
-                pull=[0.03 if i == 0 else 0 for i in range(n_g)]
+        def _build_donut(labels: list, values: list, title: str, center_text: str) -> go.Figure:
+            """Donut IAAS estándar reutilizable."""
+            if not labels or not any(v > 0 for v in values):
+                fig_empty = go.Figure()
+                fig_empty.update_layout(
+                    title={'text': title, 'font': {'size': 14, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                    plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
+                    height=420, margin=dict(l=20, r=20, t=55, b=30),
+                    xaxis={'visible': False}, yaxis={'visible': False}, showlegend=False,
+                )
+                fig_empty.add_annotation(
+                    text=f"<b>Sin datos</b><br><span style='color:#94a3b8'>No hay registros para el período</span>",
+                    x=0.5, y=0.5, xref='paper', yref='paper',
+                    showarrow=False, font=dict(size=13, color='#e2e8f0', family='Roboto'), align='center',
+                )
+                return fig_empty
+            paired = sorted(zip(values, labels), reverse=True)
+            vals_s = [p[0] for p in paired]
+            lbls_s = [p[1] for p in paired]
+            n = len(lbls_s)
+            colors = _palette_iaas_n(n)
+            fig_d = go.Figure(data=[go.Pie(
+                labels=lbls_s, values=vals_s, hole=0.55,
+                marker=dict(colors=colors, line=dict(color='#0f172a', width=2)),
+                textinfo='percent', textposition='inside',
+                textfont=dict(size=11, color='white', family='Roboto'),
+                hovertemplate='<b>%{label}</b><br>Cantidad: %{value}<br>%{percent}<extra></extra>',
+                direction='clockwise', sort=False, rotation=90,
+                pull=[0.03 if i == 0 else 0 for i in range(n)],
             )])
-            fig_germenes.add_annotation(
-                text=f"<b style='font-size:22px'>{int(total_germenes)}</b><br><span style='color:#94a3b8'>{iaas_center_caption}</span>",
-                x=0.5, y=0.5,
-                font=dict(size=14, color='#f1f5f9', family='Roboto'),
-                showarrow=False
+            fig_d.add_annotation(
+                text=f"<b style='font-size:20px'>{int(sum(vals_s))}</b><br><span style='color:#94a3b8'>{center_text}</span>",
+                x=0.5, y=0.5, font=dict(size=13, color='#f1f5f9', family='Roboto'), showarrow=False,
             )
-            fig_germenes.update_layout(
-                title={'text': iaas_chart_title, 'font': {'size': 13, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+            fig_d.update_layout(
+                title={'text': title, 'font': {'size': 13, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 autosize=True, height=420,
-                margin=dict(l=20, r=230, t=50, b=70),
+                margin=dict(l=20, r=200, t=50, b=60),
                 legend=dict(
-                    orientation='v',
-                    xref='paper',
-                    yref='paper',
-                    x=1.01,
-                    xanchor='left',
-                    y=1,
-                    yanchor='top',
+                    orientation='v', xref='paper', yref='paper',
+                    x=1.01, xanchor='left', y=1, yanchor='top',
                     bgcolor='rgba(15, 23, 42, 0.92)',
                     font=dict(color='#e2e8f0', size=10, family='Roboto'),
-                    bordercolor='rgba(148, 163, 184, 0.35)',
-                    borderwidth=1,
-                    itemsizing='constant',
-                    traceorder='normal',
+                    bordercolor='rgba(148, 163, 184, 0.35)', borderwidth=1,
+                    itemsizing='constant', traceorder='normal',
                 ),
-                showlegend=True
+                showlegend=True,
             )
+            return fig_d
+
+        # ── Donut: Tipos de infección (IAAS) ────────────────────────────────
+        df_det_iaas = data_year.get('germenes_detalle', pd.DataFrame())
+        if isinstance(df_det_iaas, pd.DataFrame) and not df_det_iaas.empty and 'Mes' in df_det_iaas.columns:
+            df_det_iaas_f = df_det_iaas[df_det_iaas['Mes'].isin(meses)]
         else:
-            fig_germenes = go.Figure()
-            fig_germenes.update_layout(
-                title={'text': iaas_chart_title, 'font': {'size': 16, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
-                plot_bgcolor='#1e293b',
-                paper_bgcolor='#1e293b',
-                height=520,
-                margin=dict(l=30, r=30, t=60, b=30),
-                xaxis={'visible': False},
-                yaxis={'visible': False},
-                showlegend=False
-            )
-            fig_germenes.add_annotation(
-                text=f"<b>Sin datos de {iaas_empty_label}</b><br><span style='color:#94a3b8'>Carga IAAS para visualizar este gráfico</span>",
-                x=0.5, y=0.5, xref='paper', yref='paper',
-                showarrow=False,
-                font=dict(size=14, color='#e2e8f0', family='Roboto'),
-                align='center'
-            )
+            df_det_iaas_f = df_det_iaas
+        if isinstance(df_det_iaas_f, pd.DataFrame) and not df_det_iaas_f.empty and 'TipoIAAS' in df_det_iaas_f.columns:
+            _ti_ser = df_det_iaas_f['TipoIAAS'].astype(str).str.strip()
+            _ti_ser = _ti_ser[_ti_ser != '']
+            ti_cnts = _ti_ser.value_counts()
+            tipos_labels = ti_cnts.index.tolist()
+            tipos_values = ti_cnts.values.tolist()
+        else:
+            df_ti = data_year.get('tipos_iaas', pd.DataFrame())
+            if isinstance(df_ti, pd.DataFrame) and not df_ti.empty and 'TipoIAAS' in df_ti.columns:
+                tipos_labels = df_ti['TipoIAAS'].tolist()
+                tipos_values = df_ti['Cantidad'].tolist()
+            else:
+                tipos_labels, tipos_values = [], []
+        fig_tipos_iaas = _build_donut(tipos_labels, tipos_values, 'Infecciones Asociadas a la Atención (IAAS)', 'Registros')
+
+        # ── Donut: Gérmenes aislados ─────────────────────────────────────────
+        if isinstance(df_det_iaas, pd.DataFrame) and not df_det_iaas.empty and 'Mes' in df_det_iaas.columns:
+            df_det_germ_f = df_det_iaas[df_det_iaas['Mes'].isin(meses)]
+        else:
+            df_det_germ_f = df_det_iaas
+        if isinstance(df_det_germ_f, pd.DataFrame) and not df_det_germ_f.empty and 'Germen' in df_det_germ_f.columns:
+            _g_ser = df_det_germ_f['Germen'].astype(str).str.strip()
+            _g_ser = _g_ser[_g_ser != '']
+            g_cnts = _g_ser.value_counts()
+            germenes_labels_sorted = g_cnts.index.tolist()
+            germenes_values_sorted = g_cnts.values.tolist()
+        else:
+            df_germ = data_year.get('germenes', pd.DataFrame())
+            if isinstance(df_germ, pd.DataFrame) and not df_germ.empty and 'Germen' in df_germ.columns:
+                germenes_labels_sorted = df_germ['Germen'].tolist()
+                germenes_values_sorted = df_germ['Cantidad'].tolist()
+            else:
+                germenes_labels_sorted, germenes_values_sorted = [], []
+        fig_germenes = _build_donut(germenes_labels_sorted, germenes_values_sorted, 'Gérmenes Aislados (IAAS)', 'Aislados')
 
         # Eventos adversos
         df_eventos_det = data_year.get('eventos_adversos_detalle', pd.DataFrame())
@@ -1359,12 +1362,11 @@ def render_gestion(year_key: str, meses_filtrados: list[str] | None = None, comp
             dbc.Row([
                 dbc.Col(dcc.Graph(figure=fig_nav, config=_GRAPH_CFG, style={'height': '350px'}), xs=12, className="plotly-chart plotly-chart--sm")
             ], className="mb-3 g-3"),
-            html.H5(iaas_section_title, style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
+            html.H5('IAAS y Gérmenes Aislados', style={'color': '#f1f5f9', 'fontWeight': '600', 'marginTop': '16px', 'marginBottom': '16px', 'textAlign': 'center'}),
             dbc.Row([
-                dbc.Col(xs=12, md=2),
-                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG_IAAS, style={'height': '520px'}), xs=12, md=8, className="plotly-chart plotly-chart--xl"),
-                dbc.Col(xs=12, md=2)
-            ], className="mb-4", justify="center"),
+                dbc.Col(dcc.Graph(figure=fig_tipos_iaas, config=_GRAPH_CFG_IAAS, style={'height': '450px'}), xs=12, md=6, className="plotly-chart plotly-chart--xl"),
+                dbc.Col(dcc.Graph(figure=fig_germenes, config=_GRAPH_CFG_IAAS, style={'height': '450px'}), xs=12, md=6, className="plotly-chart plotly-chart--xl"),
+            ], className="mb-4 g-3"),
             dbc.Row([dbc.Col(dcc.Graph(figure=fig_eventos, config=_GRAPH_CFG, style={'height': '640px'}), xs=12, className="plotly-chart plotly-chart--xxl")], className="mb-4 g-3"),
         ] + ([dbc.Row(
             [dbc.Col(dcc.Graph(figure=fig_dist_pac, config=_GRAPH_CFG, style={'height': '320px'}), xs=12, md=6, className="plotly-chart plotly-chart--sm"),

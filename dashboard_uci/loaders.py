@@ -95,6 +95,7 @@ class DataLoader:
         self.df_morbilidad = pd.DataFrame()
         self.df_germenes = pd.DataFrame()
         self.df_germenes_detalle = pd.DataFrame()
+        self.df_tipos_iaas = pd.DataFrame()
         self.df_fallecidos = pd.DataFrame()
         self.df_eventos_adversos = pd.DataFrame()
         self.df_eventos_detalle = pd.DataFrame()
@@ -114,6 +115,7 @@ class DataLoader:
             'morbilidad': self.df_morbilidad,
             'germenes': self.df_germenes,
             'germenes_detalle': self.df_germenes_detalle,
+            'tipos_iaas': self.df_tipos_iaas,
             'fallecidos': self.df_fallecidos,
             'eventos_adversos': self.df_eventos_adversos,
             'eventos_adversos_detalle': self.df_eventos_detalle,
@@ -246,6 +248,7 @@ class DataLoader:
                 c1 = row[1] if 1 in df_iaas.columns else None
                 return pd.notna(pd.to_numeric(c1, errors='coerce'))
 
+            col_tipo = 4 if 4 in columnas_num else None
             filas_detalle: List[Dict[str, str]] = []
             mes_actual: Optional[str] = None
             header_tokens = {
@@ -261,84 +264,97 @@ class DataLoader:
                     mes_actual = mes_detectado
                     continue
 
-                valor_fuente: Optional[str] = None
+                if not _is_data_row_with_age(row):
+                    continue
+
+                # Extraer tipo de infección (col 4) de forma independiente
+                tipo_iaas_val = ''
+                if col_tipo is not None:
+                    v4 = row[col_tipo]
+                    if pd.notna(v4) and str(v4).strip():
+                        raw4 = str(v4).strip()
+                        n4 = self._normalizar_texto(raw4)
+                        if n4 not in ('nan', 'none') and n4 not in header_tokens:
+                            tipo_iaas_val = raw4
+
+                # Extraer germen (cols >= 5) de forma independiente
+                germen_val = ''
                 if germ_cols:
-                    # Tomar columna más a la derecha con valor (suele ser germen más específico).
                     for c in sorted(germ_cols, reverse=True):
                         v = row[c] if c in df_iaas.columns else None
                         if pd.notna(v) and str(v).strip():
-                            valor_fuente = str(v).strip()
-                            break
-                    # Excel 2026+: "Germen" vacío pero "tipo de IAAS" relleno → usar tipo como categoría
-                    if (
-                        not valor_fuente
-                        and _is_data_row_with_age(row)
-                        and 4 in df_iaas.columns
-                    ):
-                        v4 = row[4]
-                        if pd.notna(v4) and str(v4).strip():
-                            raw4 = str(v4).strip()
-                            n4 = self._normalizar_texto(raw4)
-                            if n4 not in ('nan', 'none') and n4 not in header_tokens:
-                                valor_fuente = raw4
-                elif fallback_col is not None and _is_data_row_with_age(row):
-                    v = row[fallback_col] if fallback_col in df_iaas.columns else None
-                    if pd.notna(v) and str(v).strip():
-                        valor_fuente = str(v).strip()
+                            raw_g = str(v).strip()
+                            g_norm = self._normalizar_texto(raw_g)
+                            if g_norm not in ('nan', 'none') and g_norm not in header_tokens:
+                                germen_val = self._normalize_germen(raw_g)
+                                break
 
-                if not valor_fuente:
+                if not tipo_iaas_val and not germen_val:
                     continue
 
-                fuente_norm = self._normalizar_texto(valor_fuente)
-                if not fuente_norm or fuente_norm in ('nan', 'none'):
-                    continue
-                if fuente_norm in header_tokens:
-                    continue
+                filas_detalle.append({
+                    "Mes": mes_actual or "N/A",
+                    "Germen": germen_val,
+                    "TipoIAAS": tipo_iaas_val,
+                })
 
-                germen_norm = self._normalize_germen(valor_fuente)
-                if germen_norm and str(germen_norm).upper() != "NAN":
-                    filas_detalle.append({"Mes": mes_actual or "N/A", "Germen": str(germen_norm).strip()})
-
-            # Fallback final: si no salió nada en modo nuevo, intentar lectura plana de la columna fallback.
-            if not filas_detalle and not germ_cols and fallback_col is not None:
+            # Fallback: si no salió nada y no hay germ_cols, leer col_tipo plana
+            if not filas_detalle and col_tipo is not None:
                 mes_actual = None
                 for _, row in df_iaas.iterrows():
                     mes_detectado = _resolve_mes(row[0] if 0 in df_iaas.columns else None)
                     if mes_detectado:
                         mes_actual = mes_detectado
                         continue
-                    v = row[fallback_col] if fallback_col in df_iaas.columns else None
+                    v = row[col_tipo]
                     if pd.isna(v) or not str(v).strip():
                         continue
                     raw = str(v).strip()
                     raw_norm = self._normalizar_texto(raw)
                     if raw_norm in ('nan', 'none') or raw_norm in header_tokens:
                         continue
-                    filas_detalle.append({"Mes": mes_actual or "N/A", "Germen": raw})
+                    filas_detalle.append({"Mes": mes_actual or "N/A", "Germen": '', "TipoIAAS": raw})
 
+            cols_det = ['Mes', 'Germen', 'TipoIAAS']
             self.df_germenes_detalle = (
-                pd.DataFrame(filas_detalle)
+                pd.DataFrame(filas_detalle, columns=cols_det)
                 if filas_detalle else
-                pd.DataFrame(columns=['Mes', 'Germen'])
+                pd.DataFrame(columns=cols_det)
             )
+
+            # df_germenes: agrupado por Germen (no vacío)
             if not self.df_germenes_detalle.empty:
-                germenes_norm = self.df_germenes_detalle['Germen'].astype(str).str.strip()
-                germenes_norm = germenes_norm[germenes_norm != ""]
-                self.df_germenes = germenes_norm.value_counts().reset_index()
-                self.df_germenes.columns = ['Germen', 'Cantidad']
+                g_ser = self.df_germenes_detalle['Germen'].astype(str).str.strip()
+                g_ser = g_ser[g_ser != '']
+                if not g_ser.empty:
+                    self.df_germenes = g_ser.value_counts().reset_index()
+                    self.df_germenes.columns = ['Germen', 'Cantidad']
+                else:
+                    self.df_germenes = pd.DataFrame(columns=['Germen', 'Cantidad'])
             else:
                 self.df_germenes = pd.DataFrame(columns=['Germen', 'Cantidad'])
 
-            self.df_germenes.attrs['iaas_mode'] = iaas_mode
-            self.df_germenes_detalle.attrs['iaas_mode'] = iaas_mode
-            if iaas_mode == 'tipos_iaas':
-                logger.info("Datos IAAS cargados (modo tipos): %s categorías", len(self.df_germenes))
+            # df_tipos_iaas: agrupado por TipoIAAS (no vacío)
+            if not self.df_germenes_detalle.empty:
+                t_ser = self.df_germenes_detalle['TipoIAAS'].astype(str).str.strip()
+                t_ser = t_ser[t_ser != '']
+                if not t_ser.empty:
+                    self.df_tipos_iaas = t_ser.value_counts().reset_index()
+                    self.df_tipos_iaas.columns = ['TipoIAAS', 'Cantidad']
+                else:
+                    self.df_tipos_iaas = pd.DataFrame(columns=['TipoIAAS', 'Cantidad'])
             else:
-                logger.info("Datos IAAS cargados: %s tipos de gérmenes", len(self.df_germenes))
+                self.df_tipos_iaas = pd.DataFrame(columns=['TipoIAAS', 'Cantidad'])
+
+            logger.info(
+                "IAAS cargado: %s tipos de infección, %s gérmenes aislados",
+                len(self.df_tipos_iaas), len(self.df_germenes),
+            )
         except Exception as e:
             logger.error(f"Error cargando IAAS: {e}")
             self.df_germenes = pd.DataFrame()
             self.df_germenes_detalle = pd.DataFrame()
+            self.df_tipos_iaas = pd.DataFrame()
     
     def _normalize_germen(self, g: str) -> str:
         """Normaliza nombres de gérmenes"""
