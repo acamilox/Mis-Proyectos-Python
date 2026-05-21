@@ -1432,11 +1432,19 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
         c_vol = df_especialidades['Cirugía General'].astype(float)
         n_vol = df_especialidades['Neurocirugía'].astype(float)
         l_vol = df_especialidades['Neurología'].astype(float)
-        # Centro vertical de cada franja apilada (para etiquetar el número por especialidad/mes)
-        y_mid_mi = m_vol / 2
-        y_mid_cg = m_vol + c_vol / 2
-        y_mid_nc = m_vol + c_vol + n_vol / 2
-        y_mid_nl = m_vol + c_vol + n_vol + l_vol / 2
+        # Ordenar de mayor a menor total para apilar de abajo (mayor) a arriba (menor)
+        _area_traces = sorted([
+            ('Medicina Interna', m_vol, '#3498db'),
+            ('Cirugía General',  c_vol, '#e74c3c'),
+            ('Neurocirugía',     n_vol, '#9b59b6'),
+            ('Neurología',       l_vol, '#f39c12'),
+        ], key=lambda t: float(t[1].sum()), reverse=True)
+        # Centro vertical de cada franja según el orden dinámico
+        _cumsum_area = pd.Series([0.0] * len(meses), dtype=float)
+        _area_ymids = []
+        for _, _s, _ in _area_traces:
+            _area_ymids.append(_cumsum_area + _s.values / 2)
+            _cumsum_area = _cumsum_area + _s.values
 
         _esp_rows = ['MEDICINA INTERNA', 'CIRUGIA GENERAL', 'NEUROCIRUGIA', 'NEUROLOGIA']
         _esp_display = ['Medicina Interna', 'Cirugía General', 'Neurocirugía', 'Neurología']
@@ -1475,38 +1483,19 @@ def render_especialidades(year_key: str, meses_filtrados: list[str] | None = Non
             )
         else:
             fig_especialidades_area = go.Figure()
-            fig_especialidades_area.add_trace(go.Scatter(
-                x=df_especialidades['Mes'], y=df_especialidades['Medicina Interna'],
-                name='Medicina Interna', mode='lines', stackgroup='one', line=dict(width=0.8, color='#3498db'),
-                legendrank=1
-            ))
-            fig_especialidades_area.add_trace(go.Scatter(
-                x=df_especialidades['Mes'], y=df_especialidades['Cirugía General'],
-                name='Cirugía General', mode='lines', stackgroup='one', line=dict(width=0.8, color='#e74c3c'),
-                legendrank=2
-            ))
-            fig_especialidades_area.add_trace(go.Scatter(
-                x=df_especialidades['Mes'], y=df_especialidades['Neurocirugía'],
-                name='Neurocirugía', mode='lines', stackgroup='one', line=dict(width=0.8, color='#9b59b6'),
-                legendrank=3
-            ))
-            fig_especialidades_area.add_trace(go.Scatter(
-                x=df_especialidades['Mes'], y=df_especialidades['Neurología'],
-                name='Neurología', mode='lines', stackgroup='one', line=dict(width=0.8, color='#f39c12'),
-                legendrank=4
-            ))
+            for _rank, (_name, _series, _color) in enumerate(_area_traces, start=1):
+                fig_especialidades_area.add_trace(go.Scatter(
+                    x=df_especialidades['Mes'], y=_series,
+                    name=_name, mode='lines', stackgroup='one', line=dict(width=0.8, color=_color),
+                    legendrank=_rank
+                ))
             _txt_font_area = dict(size=12, color='#e2e8f0', family='Arial')
-            for y_mid, series_vol in (
-                (y_mid_mi, m_vol),
-                (y_mid_cg, c_vol),
-                (y_mid_nc, n_vol),
-                (y_mid_nl, l_vol),
-            ):
+            for (_name, _series, _color), _y_mid in zip(_area_traces, _area_ymids):
                 fig_especialidades_area.add_trace(go.Scatter(
                     x=df_especialidades['Mes'],
-                    y=y_mid,
+                    y=_y_mid,
                     mode='text',
-                    text=[_esp_label_vol(v) for v in series_vol],
+                    text=[_esp_label_vol(v) for v in _series],
                     textposition='middle center',
                     textfont=_txt_font_area,
                     showlegend=False,
