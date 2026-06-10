@@ -2772,11 +2772,13 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
             if abs(detail_morb - total_morb) > 1e-6:
                 df_morb = _morbilidad_escalada_al_total_oficial(df_morb, total_morb)
                 df_morb = df_morb.sort_values('Total', ascending=False)
-            df_morb_top = df_morb.head(8).copy()
+            colors_morb = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
+            _morb_max = len(colors_morb)
+            df_morb_top = df_morb.head(_morb_max).copy()
             # No usar el índice 'OTROS': choca con el grupo diagnóstico homónimo del Excel y
             # sobrescribe su valor; la suma del treemap quedaba por debajo del total oficial.
-            if len(df_morb) > 8:
-                tail = df_morb.iloc[8:]
+            if len(df_morb) > _morb_max:
+                tail = df_morb.iloc[_morb_max:]
                 otros_total = float(pd.to_numeric(tail['Total'], errors='coerce').fillna(0).sum())
                 if otros_total > 0:
                     h_rest = int(pd.to_numeric(tail['Hombre'], errors='coerce').fillna(0).sum())
@@ -2786,11 +2788,10 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             df_morb_top,
                             pd.DataFrame(
                                 [{'Hombre': h_rest, 'Mujer': m_rest, 'Total': otros_total}],
-                                index=['Resto (demás grupos)'],
+                                index=['RESTO'],
                             ),
                         ]
                     )
-            colors_morb = ['#6366f1', '#3b82f6', '#10b981', '#8b5cf6', '#06b6d4', '#f43f5e', '#14b8a6', '#f59e0b', '#84cc16', '#ec4899', '#0ea5e9', '#fb923c']
             fig_morb = go.Figure(data=[go.Treemap(
                 labels=[str(idx) for idx in df_morb_top.index],
                 parents=[''] * len(df_morb_top),
