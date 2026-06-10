@@ -2792,26 +2792,40 @@ def actualizar_resumen(_btn_todos, _btn_aplicar, active_tab, anio_seleccionado, 
                             ),
                         ]
                     )
-            fig_morb = go.Figure(data=[go.Treemap(
-                labels=[str(idx) for idx in df_morb_top.index],
-                parents=[''] * len(df_morb_top),
-                values=[float(v) for v in df_morb_top['Total'].values],
+            _morb_labels = [str(idx) for idx in df_morb_top.index]
+            _morb_values = [float(v) for v in df_morb_top['Total'].values]
+            _morb_colors_pie = [colors_morb[i % len(colors_morb)] for i in range(len(df_morb_top))]
+            total_treemap = int(pd.to_numeric(df_morb_top['Total'], errors='coerce').fillna(0).sum())
+            fig_morb = go.Figure(data=[go.Pie(
+                labels=_morb_labels,
+                values=_morb_values,
+                hole=0.42,
                 marker=dict(
-                    colors=[colors_morb[i % len(colors_morb)] for i in range(len(df_morb_top))],
+                    colors=_morb_colors_pie,
                     line=dict(color='#0f172a', width=2)
                 ),
                 texttemplate='<b>%{label}</b><br>%{value:.0f}',
                 textfont=dict(size=11, color='white', family='Roboto'),
-                hovertemplate='<b>%{label}</b><br>Total: %{value:.0f}<br>Participación: %{percentRoot:.1%}<extra></extra>'
+                textposition='inside',
+                insidetextorientation='radial',
+                hovertemplate='<b>%{label}</b><br>Total: %{value:.0f}<br>Participación: %{percent}<extra></extra>',
+                sort=False,
             )])
-            total_treemap = int(pd.to_numeric(df_morb_top['Total'], errors='coerce').fillna(0).sum())
             fig_morb.update_layout(
-                title={'text': f'Morbilidad por Grupo Diagnóstico (Top, Total: {total_treemap})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
+                title={'text': f'Morbilidad por Grupo Diagnóstico (Total: {total_treemap})', 'font': {'size': 15, 'color': '#f1f5f9', 'family': 'Roboto'}, 'x': 0.5},
                 transition={'duration': 0},
                 plot_bgcolor='#1e293b', paper_bgcolor='#1e293b',
                 height=380, margin=dict(l=20, r=20, t=50, b=20),
-                showlegend=False,
-                uniformtext=dict(minsize=10, mode='hide')
+                showlegend=True,
+                legend=dict(
+                    font=dict(color='#cbd5e1', size=11, family='Roboto'),
+                    bgcolor='rgba(30, 41, 59, 0.75)',
+                    bordercolor='rgba(148, 163, 184, 0.25)',
+                    borderwidth=1,
+                    orientation='v',
+                    x=1.02, y=0.5, xanchor='left', yanchor='middle',
+                ),
+                uniformtext=dict(minsize=9, mode='hide'),
             )
 
             # Morbilidad por Sexo - Barras normales
