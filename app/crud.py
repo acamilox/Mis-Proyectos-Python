@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from . import models, schemas
+from app import models, schemas
 
 # Función para OBTENER todas las tareas
 def get_tasks(db: Session, skip: int = 0, limit: int = 100):

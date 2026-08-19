@@ -1,12 +1,16 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from . import crud, schemas
-from .database import SessionLocal, engine, create_db_and_tables
+from app import crud, schemas
+from app.database import SessionLocal, engine, create_db_and_tables
 from typing import List
 
 create_db_and_tables()
 
 app = FastAPI(title="Task Manager API")
+
+@app.get("/")
+def root():
+    return {"message": "Task Manager API", "docs": "/docs"}
 
 # Dependencia para obtener la sesión de la base de datos
 def get_db():
@@ -42,3 +46,7 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     if db_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return db_task
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
