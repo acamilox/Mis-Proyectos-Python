@@ -9,6 +9,12 @@ class TaskBase(BaseModel):
 class TaskCreate(TaskBase):
     pass
 
+# Schema para actualizar una tarea (todos los campos opcionales)
+class TaskUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    completed: bool | None = None
+
 # Schema para leer/devolver una tarea (incluye campos de la DB)
 class Task(TaskBase):
     id: int

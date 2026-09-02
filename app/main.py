@@ -39,6 +39,14 @@ def read_task(task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Task not found")
     return db_task
 
+# Endpoint para ACTUALIZAR una tarea
+@app.put("/tasks/{task_id}", response_model=schemas.Task)
+def update_existing_task(task_id: int, task: schemas.TaskUpdate, db: Session = Depends(get_db)):
+    db_task = crud.update_task(db, task_id=task_id, task=task)
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return db_task
+
 # Endpoint para BORRAR una tarea
 @app.delete("/tasks/{task_id}", response_model=schemas.Task)
 def delete_task(task_id: int, db: Session = Depends(get_db)):
