@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "visual-check",
+  "evidenceKind": "automated-browser",
+  "status": "fail",
+  "visualReview": "pending",
+  "artifact": {
+    "path": "/mnt/c/Proyectos/API de Autenticación con JWT/docs/auth-api-architecture.html",
+    "sha256": "5074153b492fe797802f525395be38cf25e0a960fbe76c8be8bec5da609123ee",
+    "bytes": 703536
+  },
+  "state": {
+    "detail": "read",
+    "motion": "still"
+  },
+  "chrome": {
+    "status": "available",
+    "executable": "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+  },
+  "diagnostics": [
+    {
+      "code": "viewer/visual-check-runtime",
+      "severity": "error",
+      "message": "visual-check could not complete its Chrome inspection.",
+      "subject": {
+        "artifact": "/mnt/c/Proyectos/API de Autenticación con JWT/docs/auth-api-architecture.html"
+      },
+      "evidence": {
+        "reason": "Chrome DevTools write pipe failed: read ECONNRESET [ECONNRESET]\nChrome process: still running.\nChrome stderr:\n[0902/163126.996:ERROR:chrome\\app\\chrome_main_delegate.cc:1113] Remote debugging pipe file descriptors are not open."
+      },
+      "supportedFixes": [
+        "resolve the reported Chrome inspection error, then rerun visual-check"
+      ]
+    }
+  ],
+  "containment": {
+    "status": "fail",
+    "viewports": []
+  },
+  "readability": {
+    "status": "fail",
+    "minimumProjectedNodeTextPx": 6,
+    "viewports": []
+  },
+  "viewerChrome": {
+    "status": "fail",
+    "viewports": []
+  },
+  "captures": {
+    "status": "fail",
+    "screenshots": [],
+    "contactSheet": null
+  },
+  "sidecars": {
+    "receipt": "auth-api-architecture.visual-check.json",
+    "contactSheet": "auth-api-architecture.visual-check.html"
+  },
+  "error": "Chrome DevTools write pipe failed: read ECONNRESET [ECONNRESET]\nChrome process: still running.\nChrome stderr:\n[0902/163126.996:ERROR:chrome\\app\\chrome_main_delegate.cc:1113] Remote debugging pipe file descriptors are not open."
+}
