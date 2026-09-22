@@ -1,0 +1,25 @@
+{
+    "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+    "python.typeCheckingMode": "basic",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.autoComplete.addBrackets": true,
+    "python.languageServer": "None",
+    "editor.formatOnSave": false,
+    "python.formatting.provider": "none",
+    "files.associations": {
+        "*.css": "css"
+    },
+    "cursorpyright.analysis.autoImportCompletions": true,
+    "cursorpyright.analysis.diagnosticMode": "openFilesOnly",
+    "cursorpyright.analysis.typeCheckingMode": "basic",
+    "python.analysis.exclude": [
+        "**/.venv/**",
+        "**/__pycache__/**"
+    ],
+    "cursorpyright.analysis.exclude": [
+        "**/.venv/**",
+        "**/__pycache__/**"
+    ]
+}
