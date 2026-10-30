@@ -1,9 +1,0 @@
-name: dashboard-uci-adultos
-
-services:
-  dashboard-uci:
-    build: .
-    image: dashboard-uci-adultos:latest
-    ports:
-      - "8050:8050"
-    container_name: dashboard-uci-adultos
